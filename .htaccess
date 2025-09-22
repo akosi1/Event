@@ -1,5 +1,4 @@
 <IfModule mod_rewrite.c>
   RewriteEngine On
-  # REMOVE or COMMENT OUT this line:
-  # RewriteRule ^(.*)$ public/$1 [L]
+  RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>
