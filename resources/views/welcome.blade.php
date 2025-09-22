@@ -125,7 +125,7 @@
 
                 
                 <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-4 sm:mb-6 leading-tight mobile-text">
-                    MCC Event & Portfolio
+                    MCC Event & Portfolio tzy
                     <span class="bg-gradient-to-r from-yellow-400 to-pink-400 bg-clip-text text-transparent block sm:inline">
                         Organizer
                     </span>
