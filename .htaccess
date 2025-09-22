@@ -1,13 +1,12 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
     
-    # Handle Angular or other frontend routes (if needed)
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_URI} !^/public/
-    RewriteRule ^(.*)$ public/$1 [L,QSA]
-    
-    # Redirect /public/ URLs to clean URLs
+    # Redirect /public/ URLs to clean URLs (remove /public from URL)
     RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/+public/([^\s]*) [NC]
     RewriteRule ^ /%1? [R=301,L]
+    
+    # Internal rewrite - send all requests to public folder without showing in URL
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ public/$1 [L,QSA]
 </IfModule>
