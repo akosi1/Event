@@ -115,17 +115,16 @@ class PruneCommand extends Command
      */
     protected function models()
     {
-        $models = $this->option('model');
-        $except = $this->option('except');
-
-        if ($models && $except) {
-            throw new InvalidArgumentException('The --models and --except options cannot be combined.');
+        if (! empty($models = $this->option('model'))) {
+            return (new Collection($models))->filter(function ($model) {
+                return class_exists($model);
+            })->values();
         }
 
-        if ($models) {
-            return (new Collection($models))
-                ->filter(static fn (string $model) => class_exists($model))
-                ->values();
+        $except = $this->option('except');
+
+        if (! empty($models) && ! empty($except)) {
+            throw new InvalidArgumentException('The --models and --except options cannot be combined.');
         }
 
         return (new Collection(Finder::create()->in($this->getPath())->files()->name('*.php')))

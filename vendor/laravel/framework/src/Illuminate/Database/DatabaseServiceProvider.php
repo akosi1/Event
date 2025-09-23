@@ -4,8 +4,6 @@ namespace Illuminate\Database;
 
 use Faker\Factory as FakerFactory;
 use Faker\Generator as FakerGenerator;
-use Illuminate\Contracts\Database\ConcurrencyErrorDetector as ConcurrencyErrorDetectorContract;
-use Illuminate\Contracts\Database\LostConnectionDetector as LostConnectionDetectorContract;
 use Illuminate\Contracts\Queue\EntityResolver;
 use Illuminate\Database\Connectors\ConnectionFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -78,14 +76,6 @@ class DatabaseServiceProvider extends ServiceProvider
 
         $this->app->singleton('db.transactions', function ($app) {
             return new DatabaseTransactionsManager;
-        });
-
-        $this->app->singleton(ConcurrencyErrorDetectorContract::class, function ($app) {
-            return new ConcurrencyErrorDetector;
-        });
-
-        $this->app->singleton(LostConnectionDetectorContract::class, function ($app) {
-            return new LostConnectionDetector;
         });
     }
 

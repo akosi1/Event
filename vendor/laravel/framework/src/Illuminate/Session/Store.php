@@ -494,7 +494,7 @@ class Store implements Session
     /**
      * Reflash a subset of the current flash data.
      *
-     * @param  mixed  $keys
+     * @param  array|mixed  $keys
      * @return void
      */
     public function keep($keys = null)

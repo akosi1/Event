@@ -2,7 +2,6 @@
 
 namespace Illuminate\Database\Eloquent;
 
-use Closure;
 use Illuminate\Contracts\Queue\QueueableCollection;
 use Illuminate\Contracts\Queue\QueueableEntity;
 use Illuminate\Contracts\Support\Arrayable;
@@ -240,7 +239,7 @@ class Collection extends BaseCollection implements QueueableCollection
             }
 
             if (is_callable($value)) {
-                $path[count($segments) - 1][array_last($segments)] = $value;
+                $path[count($segments) - 1][end($segments)] = $value;
             }
 
             $this->loadMissingRelation($this, $path);
@@ -706,8 +705,8 @@ class Collection extends BaseCollection implements QueueableCollection
      * Partition the collection into two arrays using the given callback or key.
      *
      * @param  (callable(TModel, TKey): bool)|TModel|string  $key
-     * @param  mixed  $operator
-     * @param  mixed  $value
+     * @param  TModel|string|null  $operator
+     * @param  TModel|null  $value
      * @return \Illuminate\Support\Collection<int<0, 1>, static<TKey, TModel>>
      */
     public function partition($key, $operator = null, $value = null)
@@ -718,8 +717,8 @@ class Collection extends BaseCollection implements QueueableCollection
     /**
      * Get an array with the values of a given key.
      *
-     * @param  string|array<array-key, string>|Closure|null  $value
-     * @param  string|Closure|null  $key
+     * @param  string|array<array-key, string>|null  $value
+     * @param  string|null  $key
      * @return \Illuminate\Support\Collection<array-key, mixed>
      */
     public function pluck($value, $key = null)

@@ -165,6 +165,7 @@ class CacheAttributeListener implements EventSubscriberInterface
             }
 
             if (true === $cache->noStore) {
+                $response->setPrivate();
                 $response->headers->addCacheControlDirective('no-store');
             }
 

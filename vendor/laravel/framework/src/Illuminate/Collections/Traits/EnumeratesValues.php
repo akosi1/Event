@@ -508,8 +508,8 @@ trait EnumeratesValues
      * Partition the collection into two arrays using the given callback or key.
      *
      * @param  (callable(TValue, TKey): bool)|TValue|string  $key
-     * @param  mixed  $operator
-     * @param  mixed  $value
+     * @param  TValue|string|null  $operator
+     * @param  TValue|null  $value
      * @return static<int<0, 1>, static<TKey, TValue>>
      */
     public function partition($key, $operator = null, $value = null)
@@ -982,16 +982,6 @@ trait EnumeratesValues
     public function toJson($options = 0)
     {
         return json_encode($this->jsonSerialize(), $options);
-    }
-
-    /**
-     * Get the collection of items as pretty print formatted JSON.
-     *
-     * @return string
-     */
-    public function toPrettyJson()
-    {
-        return $this->toJson(JSON_PRETTY_PRINT);
     }
 
     /**

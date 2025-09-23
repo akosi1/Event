@@ -13,6 +13,8 @@ trait TransformsToResource
      *
      * @param  class-string<\Illuminate\Http\Resources\Json\JsonResource>|null  $resourceClass
      * @return \Illuminate\Http\Resources\Json\JsonResource
+     *
+     * @throws \Throwable
      */
     public function toResource(?string $resourceClass = null): JsonResource
     {
@@ -27,6 +29,8 @@ trait TransformsToResource
      * Guess the resource class for the model.
      *
      * @return \Illuminate\Http\Resources\Json\JsonResource
+     *
+     * @throws \Throwable
      */
     protected function guessResource(): JsonResource
     {

@@ -374,7 +374,7 @@ class RouteUrlGenerator
      *
      * @param  string  $uri
      * @param  array  $parameters
-     * @return mixed
+     * @return mixed|string
      */
     protected function addQueryString($uri, array $parameters)
     {

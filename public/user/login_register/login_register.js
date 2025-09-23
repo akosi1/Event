@@ -1,9 +1,9 @@
-// Login/Register Animation System
+// Login/Register Animation System with Enhanced Mobile Support
 class AuthAnimator {
     constructor() {
         this.isRegisterMode = false;
         this.isAnimating = false;
-        this.isMobile = window.innerWidth <= 768;
+        this.customSelects = [];
         this.init();
     }
 
@@ -13,7 +13,7 @@ class AuthAnimator {
         this.startParticleSystem();
         this.bindEvents();
         this.setupFormAnimations();
-        this.handleResize();
+        this.initCustomSelects();
     }
 
     initElements() {
@@ -32,18 +32,199 @@ class AuthAnimator {
         // If single form, we'll create the toggle functionality
         if (!this.loginForm && !this.registerForm) {
             this.singleFormMode = true;
-            this.currentForm = this.formSection.querySelector('form');
+            this.currentForm = this.formSection?.querySelector('form');
         }
+    }
+
+    // Initialize custom select dropdowns for consistent mobile/desktop UI
+    initCustomSelects() {
+        const selects = document.querySelectorAll('.form-select');
+        selects.forEach(select => {
+            this.createCustomSelect(select);
+        });
+    }
+
+    createCustomSelect(originalSelect) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'custom-select';
+        
+        const trigger = document.createElement('div');
+        trigger.className = 'custom-select-trigger';
+        trigger.textContent = originalSelect.options[originalSelect.selectedIndex].text || 'Select an option';
+        
+        const optionsContainer = document.createElement('div');
+        optionsContainer.className = 'custom-select-options';
+        
+        // Create custom options
+        Array.from(originalSelect.options).forEach((option, index) => {
+            if (option.value === '') return; // Skip placeholder option
+            
+            const customOption = document.createElement('div');
+            customOption.className = 'custom-select-option';
+            customOption.textContent = option.text;
+            customOption.dataset.value = option.value;
+            
+            if (option.selected) {
+                customOption.classList.add('selected');
+                trigger.textContent = option.text;
+                trigger.classList.add('has-value');
+            }
+            
+            customOption.addEventListener('click', () => {
+                this.selectCustomOption(originalSelect, customOption, trigger, optionsContainer);
+            });
+            
+            optionsContainer.appendChild(customOption);
+        });
+        
+        // Toggle dropdown
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.toggleCustomSelect(trigger, optionsContainer);
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!wrapper.contains(e.target)) {
+                this.closeCustomSelect(trigger, optionsContainer);
+            }
+        });
+        
+        // Keyboard navigation
+        trigger.addEventListener('keydown', (e) => {
+            this.handleCustomSelectKeydown(e, optionsContainer, originalSelect);
+        });
+        
+        wrapper.appendChild(trigger);
+        wrapper.appendChild(optionsContainer);
+        
+        // Hide original select and insert custom one
+        originalSelect.style.display = 'none';
+        originalSelect.parentNode.insertBefore(wrapper, originalSelect);
+        
+        // Store reference for cleanup
+        this.customSelects.push({
+            original: originalSelect,
+            custom: wrapper,
+            trigger: trigger,
+            options: optionsContainer
+        });
+    }
+
+    selectCustomOption(originalSelect, customOption, trigger, optionsContainer) {
+        // Update original select
+        const value = customOption.dataset.value;
+        originalSelect.value = value;
+        
+        // Update custom select
+        trigger.textContent = customOption.textContent;
+        trigger.classList.add('has-value');
+        
+        // Update selected state
+        optionsContainer.querySelectorAll('.custom-select-option').forEach(opt => {
+            opt.classList.remove('selected');
+        });
+        customOption.classList.add('selected');
+        
+        // Close dropdown
+        this.closeCustomSelect(trigger, optionsContainer);
+        
+        // Trigger change event
+        originalSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        
+        // Update label position
+        const label = originalSelect.parentNode.querySelector('.select-label');
+        if (label) {
+            label.style.top = '-8px';
+            label.style.left = '8px';
+            label.style.fontSize = '11px';
+            label.style.color = '#dc2626';
+            label.style.background = 'rgba(45, 21, 21, 0.9)';
+            label.style.padding = '0 4px';
+            label.style.borderRadius = '4px';
+        }
+    }
+
+    toggleCustomSelect(trigger, optionsContainer) {
+        const isOpen = optionsContainer.classList.contains('open');
+        
+        // Close all other custom selects
+        this.customSelects.forEach(select => {
+            if (select.options !== optionsContainer) {
+                this.closeCustomSelect(select.trigger, select.options);
+            }
+        });
+        
+        if (isOpen) {
+            this.closeCustomSelect(trigger, optionsContainer);
+        } else {
+            this.openCustomSelect(trigger, optionsContainer);
+        }
+    }
+
+    openCustomSelect(trigger, optionsContainer) {
+        trigger.classList.add('open');
+        optionsContainer.classList.add('open');
+        
+        // Focus first option
+        const firstOption = optionsContainer.querySelector('.custom-select-option');
+        if (firstOption) {
+            firstOption.classList.add('highlighted');
+        }
+    }
+
+    closeCustomSelect(trigger, optionsContainer) {
+        trigger.classList.remove('open');
+        optionsContainer.classList.remove('open');
+        
+        // Remove highlights
+        optionsContainer.querySelectorAll('.custom-select-option').forEach(opt => {
+            opt.classList.remove('highlighted');
+        });
+    }
+
+    handleCustomSelectKeydown(e, optionsContainer, originalSelect) {
+        const options = optionsContainer.querySelectorAll('.custom-select-option');
+        const highlighted = optionsContainer.querySelector('.custom-select-option.highlighted');
+        let currentIndex = Array.from(options).indexOf(highlighted);
+
+        switch (e.key) {
+            case 'Enter':
+            case ' ':
+                e.preventDefault();
+                if (highlighted) {
+                    highlighted.click();
+                } else {
+                    this.toggleCustomSelect(e.target, optionsContainer);
+                }
+                break;
+            case 'ArrowDown':
+                e.preventDefault();
+                currentIndex = currentIndex < options.length - 1 ? currentIndex + 1 : 0;
+                this.highlightOption(options, currentIndex);
+                break;
+            case 'ArrowUp':
+                e.preventDefault();
+                currentIndex = currentIndex > 0 ? currentIndex - 1 : options.length - 1;
+                this.highlightOption(options, currentIndex);
+                break;
+            case 'Escape':
+                this.closeCustomSelect(e.target, optionsContainer);
+                break;
+        }
+    }
+
+    highlightOption(options, index) {
+        options.forEach((opt, i) => {
+            opt.classList.toggle('highlighted', i === index);
+        });
     }
 
     createParticles() {
         if (!this.particlesContainer) return;
         
-        // Reduce particles on mobile for better performance
-        const particleCount = this.isMobile ? 8 : 15;
-        
         // Create multiple particles
-        for (let i = 0; i < particleCount; i++) {
+        for (let i = 0; i < 15; i++) {
             setTimeout(() => {
                 const particle = document.createElement('div');
                 particle.className = 'particle';
@@ -65,7 +246,7 @@ class AuthAnimator {
         this.createParticles();
         this.particleInterval = setInterval(() => {
             this.createParticles();
-        }, this.isMobile ? 5000 : 3000); // Slower on mobile
+        }, 3000);
     }
 
     bindEvents() {
@@ -86,60 +267,13 @@ class AuthAnimator {
             }
         });
 
-        // Handle form submissions
+        // Handle form submissions if needed
         document.addEventListener('submit', (e) => {
             const form = e.target;
             if (form.matches('form')) {
                 this.handleFormSubmit(e);
             }
         });
-
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            this.handleResize();
-        });
-
-        // Handle orientation change for mobile
-        window.addEventListener('orientationchange', () => {
-            setTimeout(() => {
-                this.handleResize();
-            }, 200);
-        });
-    }
-
-    handleResize() {
-        const wasMobile = this.isMobile;
-        this.isMobile = window.innerWidth <= 768;
-        
-        // If switching between mobile and desktop, adjust particle system
-        if (wasMobile !== this.isMobile) {
-            clearInterval(this.particleInterval);
-            this.startParticleSystem();
-        }
-        
-        // Ensure proper centering on mobile
-        if (this.isMobile) {
-            this.ensureMobileCentering();
-        }
-    }
-
-    ensureMobileCentering() {
-        // Force mobile layout adjustments
-        if (this.formSection) {
-            this.formSection.style.position = 'relative';
-            this.formSection.style.transform = 'none';
-            this.formSection.style.left = 'auto';
-            this.formSection.style.top = 'auto';
-        }
-        
-        // Hide elements that aren't needed on mobile
-        if (this.diagonalSection) {
-            this.diagonalSection.style.display = 'none';
-        }
-        
-        if (this.welcomeSection) {
-            this.welcomeSection.style.display = 'none';
-        }
     }
 
     switchToRegister() {
@@ -147,39 +281,32 @@ class AuthAnimator {
         this.isAnimating = true;
         this.isRegisterMode = true;
 
-        // Skip welcome text update on mobile since it's hidden
-        if (!this.isMobile) {
-            this.updateWelcomeText('WELCOME!', 'Create your account');
-        }
+        // Update welcome section text with fade
+        this.updateWelcomeText('WELCOME!', 'Create your account');
         
-        // Add register mode classes with stagger (only on desktop)
-        if (!this.isMobile) {
-            setTimeout(() => {
-                this.authContainer.classList.add('register-mode');
-            }, 100);
-            
-            setTimeout(() => {
-                this.diagonalSection?.classList.add('register-mode');
-            }, 200);
-            
-            setTimeout(() => {
-                this.welcomeSection?.classList.add('register-mode');
-            }, 300);
-        } else {
-            // Immediate class addition on mobile
-            this.authContainer.classList.add('register-mode');
-        }
+        // Add register mode classes with stagger
+        setTimeout(() => {
+            this.authContainer?.classList.add('register-mode');
+        }, 100);
         
         setTimeout(() => {
-            this.formSection.classList.add('register-mode');
-        }, this.isMobile ? 100 : 400);
+            this.diagonalSection?.classList.add('register-mode');
+        }, 200);
+        
+        setTimeout(() => {
+            this.welcomeSection?.classList.add('register-mode');
+        }, 300);
+        
+        setTimeout(() => {
+            this.formSection?.classList.add('register-mode');
+        }, 400);
 
         // Handle form transition
         this.transitionToRegisterForm();
 
         setTimeout(() => {
             this.isAnimating = false;
-        }, this.isMobile ? 400 : 800);
+        }, 800);
     }
 
     switchToLogin() {
@@ -187,45 +314,36 @@ class AuthAnimator {
         this.isAnimating = true;
         this.isRegisterMode = false;
 
-        // Skip welcome text update on mobile since it's hidden
-        if (!this.isMobile) {
-            this.updateWelcomeText('WELCOME BACK!', 'Please sign in to continue');
-        }
+        // Update welcome section text
+        this.updateWelcomeText('WELCOME BACK!', 'Please sign in to continue');
 
-        // Remove register mode classes with stagger (only on desktop)
-        if (!this.isMobile) {
-            setTimeout(() => {
-                this.formSection.classList.remove('register-mode');
-            }, 100);
-            
-            setTimeout(() => {
-                this.welcomeSection?.classList.remove('register-mode');
-            }, 200);
-            
-            setTimeout(() => {
-                this.diagonalSection?.classList.remove('register-mode');
-            }, 300);
-            
-            setTimeout(() => {
-                this.authContainer.classList.remove('register-mode');
-            }, 400);
-        } else {
-            // Immediate class removal on mobile
-            this.formSection.classList.remove('register-mode');
-            this.authContainer.classList.remove('register-mode');
-        }
+        // Remove register mode classes with stagger
+        setTimeout(() => {
+            this.formSection?.classList.remove('register-mode');
+        }, 100);
+        
+        setTimeout(() => {
+            this.welcomeSection?.classList.remove('register-mode');
+        }, 200);
+        
+        setTimeout(() => {
+            this.diagonalSection?.classList.remove('register-mode');
+        }, 300);
+        
+        setTimeout(() => {
+            this.authContainer?.classList.remove('register-mode');
+        }, 400);
 
         // Handle form transition
         this.transitionToLoginForm();
 
         setTimeout(() => {
             this.isAnimating = false;
-        }, this.isMobile ? 400 : 800);
+        }, 800);
     }
 
     updateWelcomeText(title, text) {
-        // Skip on mobile since welcome section is hidden
-        if (this.isMobile || !this.welcomeTitle || !this.welcomeText) return;
+        if (!this.welcomeTitle || !this.welcomeText) return;
         
         // Fade out
         this.welcomeTitle.style.opacity = '0';
@@ -243,33 +361,39 @@ class AuthAnimator {
 
     transitionToRegisterForm() {
         if (this.singleFormMode) {
+            // Create register form content
             this.createRegisterFormContent();
         } else if (this.loginForm && this.registerForm) {
+            // Handle multiple forms
             this.loginForm.classList.add('sliding-out');
             setTimeout(() => {
                 this.loginForm.style.display = 'none';
                 this.registerForm.style.display = 'block';
                 this.registerForm.classList.add('sliding-in');
-            }, this.isMobile ? 150 : 250);
+            }, 250);
         }
     }
 
     transitionToLoginForm() {
         if (this.singleFormMode) {
+            // Create login form content
             this.createLoginFormContent();
         } else if (this.loginForm && this.registerForm) {
+            // Handle multiple forms
             this.registerForm.classList.add('sliding-out');
             setTimeout(() => {
                 this.registerForm.style.display = 'none';
                 this.loginForm.style.display = 'block';
                 this.loginForm.classList.add('sliding-in');
-            }, this.isMobile ? 150 : 250);
+            }, 250);
         }
     }
 
     createRegisterFormContent() {
-        const formTitle = this.formSection.querySelector('.form-title');
-        const form = this.formSection.querySelector('form');
+        const formTitle = this.formSection?.querySelector('.form-title');
+        const form = this.formSection?.querySelector('form');
+        
+        if (!form) return;
         
         // Update title
         if (formTitle) {
@@ -277,10 +401,8 @@ class AuthAnimator {
         }
         
         // Update form action and method
-        if (form) {
-            form.action = '/register';
-            form.method = 'POST';
-        }
+        form.action = '/register';
+        form.method = 'POST';
         
         // Create register form HTML
         const registerHTML = `
@@ -368,10 +490,41 @@ class AuthAnimator {
         `;
 
         // Transition form content
-        this.transitionFormContent(registerHTML, 'Sign Up', '/register');
+        const formContainer = form.parentElement;
+        const currentHTML = formContainer.innerHTML;
+        
+        // Create wrapper for transition
+        const wrapper = document.createElement('div');
+        wrapper.className = 'form-content sliding-out';
+        wrapper.innerHTML = currentHTML.replace(form.outerHTML, '');
+        
+        formContainer.innerHTML = '';
+        formContainer.appendChild(wrapper);
+        
+        setTimeout(() => {
+            const newWrapper = document.createElement('div');
+            newWrapper.className = 'form-content sliding-in';
+            newWrapper.innerHTML = `
+                <div class="form-title">Sign Up</div>
+                <form method="POST" action="/register">
+                    <input type="hidden" name="_token" value="${this.getCSRFToken()}">
+                    ${registerHTML}
+                </form>
+            `;
+            
+            formContainer.innerHTML = '';
+            formContainer.appendChild(newWrapper);
+            
+            // Re-initialize animations and custom selects
+            this.setupFormAnimations();
+            this.initCustomSelects();
+        }, 250);
     }
 
     createLoginFormContent() {
+        const form = this.formSection?.querySelector('form');
+        if (!form) return;
+        
         // Create login form HTML
         const loginHTML = `
             <div class="form-group">
@@ -420,43 +573,35 @@ class AuthAnimator {
         `;
 
         // Transition form content
-        this.transitionFormContent(loginHTML, 'Sign In', '/login');
-    }
-
-    transitionFormContent(newHTML, title, action) {
-        const form = this.formSection.querySelector('form');
         const formContainer = form.parentElement;
+        const currentHTML = formContainer.innerHTML;
         
         // Create wrapper for transition
         const wrapper = document.createElement('div');
         wrapper.className = 'form-content sliding-out';
-        wrapper.innerHTML = formContainer.innerHTML;
+        wrapper.innerHTML = currentHTML.replace(form.outerHTML, '');
         
         formContainer.innerHTML = '';
         formContainer.appendChild(wrapper);
-        
-        const transitionDelay = this.isMobile ? 150 : 250;
         
         setTimeout(() => {
             const newWrapper = document.createElement('div');
             newWrapper.className = 'form-content sliding-in';
             newWrapper.innerHTML = `
-                <div class="form-title">${title}</div>
-                <form method="POST" action="${action}">
+                <div class="form-title">Sign In</div>
+                <form method="POST" action="/login">
                     <input type="hidden" name="_token" value="${this.getCSRFToken()}">
-                    ${newHTML}
+                    ${loginHTML}
                 </form>
             `;
             
             formContainer.innerHTML = '';
             formContainer.appendChild(newWrapper);
             
-            // Re-bind form events and ensure mobile layout
+            // Re-initialize animations and custom selects
             this.setupFormAnimations();
-            if (this.isMobile) {
-                this.ensureMobileCentering();
-            }
-        }, transitionDelay);
+            this.initCustomSelects();
+        }, 250);
     }
 
     getCSRFToken() {
@@ -486,45 +631,28 @@ class AuthAnimator {
     inputFocusHandler(e) {
         const wrapper = e.target.parentElement;
         if (wrapper.classList.contains('input-wrapper')) {
-            if (!this.isMobile) {
-                wrapper.style.transform = 'scale(1.02)';
-                wrapper.style.zIndex = '10';
-            }
+            wrapper.style.transform = 'scale(1.02)';
+            wrapper.style.zIndex = '10';
         }
     }
 
     inputBlurHandler(e) {
         const wrapper = e.target.parentElement;
         if (wrapper.classList.contains('input-wrapper')) {
-            if (!this.isMobile) {
-                wrapper.style.transform = 'scale(1)';
-                wrapper.style.zIndex = 'auto';
-            }
+            wrapper.style.transform = 'scale(1)';
+            wrapper.style.zIndex = 'auto';
         }
     }
 
     handleFormSubmit(e) {
         const submitBtn = e.target.querySelector('.btn-submit');
         if (submitBtn) {
-            if (!this.isMobile) {
-                submitBtn.style.transform = 'translateY(-1px)';
-            }
-            
-            const originalHTML = submitBtn.innerHTML;
+            submitBtn.style.transform = 'translateY(-1px)';
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-            submitBtn.disabled = true;
-            
-            // Re-enable button after a timeout (in case form validation fails)
-            setTimeout(() => {
-                if (submitBtn.disabled) {
-                    submitBtn.innerHTML = originalHTML;
-                    submitBtn.disabled = false;
-                    if (!this.isMobile) {
-                        submitBtn.style.transform = 'none';
-                    }
-                }
-            }, 5000);
         }
+        
+        // Allow form to submit normally
+        // Add any additional form validation or AJAX handling here if needed
     }
 
     // Public method to manually trigger mode switch
@@ -536,30 +664,24 @@ class AuthAnimator {
         }
     }
 
-    // Method to check if device is mobile
-    checkMobile() {
-        return window.innerWidth <= 768;
-    }
-
-    // Method to force mobile layout
-    forceMobileLayout() {
-        this.isMobile = true;
-        this.ensureMobileCentering();
-        
-        // Restart particle system for mobile
-        clearInterval(this.particleInterval);
-        this.startParticleSystem();
-    }
-
     // Cleanup method
     destroy() {
         if (this.particleInterval) {
             clearInterval(this.particleInterval);
         }
         
+        // Cleanup custom selects
+        this.customSelects.forEach(select => {
+            if (select.custom && select.custom.parentNode) {
+                select.custom.parentNode.removeChild(select.custom);
+                select.original.style.display = '';
+            }
+        });
+        this.customSelects = [];
+        
         // Remove event listeners
-        window.removeEventListener('resize', this.handleResize);
-        window.removeEventListener('orientationchange', this.handleResize);
+        document.removeEventListener('click', this.clickHandler);
+        document.removeEventListener('submit', this.submitHandler);
     }
 }
 
@@ -568,11 +690,6 @@ let authAnimator;
 
 document.addEventListener('DOMContentLoaded', function() {
     authAnimator = new AuthAnimator();
-    
-    // Force mobile layout check
-    if (window.innerWidth <= 768) {
-        authAnimator.forceMobileLayout();
-    }
 });
 
 // Expose to global scope for onclick handlers
@@ -597,36 +714,5 @@ function pushAuthState(mode) {
     const title = mode === 'register' ? 'Sign Up' : 'Sign In';
     const url = mode === 'register' ? '/register' : '/login';
     
-    if (history.pushState) {
-        history.pushState({ mode: mode }, title, url);
-    }
+    history.pushState({ mode: mode }, title, url);
 }
-
-// Touch event handling for mobile
-if ('ontouchstart' in window) {
-    document.addEventListener('touchstart', function(e) {
-        // Improve touch responsiveness
-        if (e.target.matches('.btn-submit, .auth-links a')) {
-            e.target.style.opacity = '0.8';
-        }
-    });
-    
-    document.addEventListener('touchend', function(e) {
-        if (e.target.matches('.btn-submit, .auth-links a')) {
-            setTimeout(() => {
-                e.target.style.opacity = '1';
-            }, 150);
-        }
-    });
-}
-
-// Prevent zoom on double tap for iOS
-document.addEventListener('touchend', function(event) {
-    var now = (new Date()).getTime();
-    if (now - lastTouchEnd <= 300) {
-        event.preventDefault();
-    }
-    lastTouchEnd = now;
-}, false);
-
-var lastTouchEnd = 0;

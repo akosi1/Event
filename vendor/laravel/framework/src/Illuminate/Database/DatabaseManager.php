@@ -13,8 +13,6 @@ use InvalidArgumentException;
 use PDO;
 use RuntimeException;
 
-use function Illuminate\Support\enum_value;
-
 /**
  * @mixin \Illuminate\Database\Connection
  */
@@ -87,12 +85,12 @@ class DatabaseManager implements ConnectionResolverInterface
     /**
      * Get a database connection instance.
      *
-     * @param  \UnitEnum|string|null  $name
+     * @param  string|null  $name
      * @return \Illuminate\Database\Connection
      */
     public function connection($name = null)
     {
-        $name = enum_value($name) ?: $this->getDefaultConnection();
+        $name = $name ?: $this->getDefaultConnection();
 
         [$database, $type] = $this->parseConnectionName($name);
 
@@ -118,7 +116,9 @@ class DatabaseManager implements ConnectionResolverInterface
      */
     public function build(array $config)
     {
-        $config['name'] ??= static::calculateDynamicConnectionName($config);
+        if (! isset($config['name'])) {
+            $config['name'] = static::calculateDynamicConnectionName($config);
+        }
 
         $this->dynamicConnectionConfigurations[$config['name']] = $config;
 
@@ -354,11 +354,9 @@ class DatabaseManager implements ConnectionResolverInterface
 
         $this->setDefaultConnection($name);
 
-        try {
-            return $callback();
-        } finally {
+        return tap($callback(), function () use ($previousName) {
             $this->setDefaultConnection($previousName);
-        }
+        });
     }
 
     /**

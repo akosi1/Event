@@ -19,8 +19,9 @@ if (! function_exists('append_config')) {
      * Assign high numeric IDs to a config item to force appending.
      *
      * @param  array  $array
+     * @return array
      */
-    function append_config(array $array): array
+    function append_config(array $array)
     {
         $start = 9999;
 
@@ -45,8 +46,9 @@ if (! function_exists('blank')) {
      * @phpstan-assert-if-true !=numeric|bool $value
      *
      * @param  mixed  $value
+     * @return bool
      */
-    function blank($value): bool
+    function blank($value)
     {
         if (is_null($value)) {
             return true;
@@ -81,8 +83,9 @@ if (! function_exists('class_basename')) {
      * Get the class "basename" of the given object / class.
      *
      * @param  string|object  $class
+     * @return string
      */
-    function class_basename($class): string
+    function class_basename($class)
     {
         $class = is_object($class) ? get_class($class) : $class;
 
@@ -95,9 +98,9 @@ if (! function_exists('class_uses_recursive')) {
      * Returns all traits used by a class, its parent classes and trait of their traits.
      *
      * @param  object|string  $class
-     * @return array<string, string>
+     * @return array
      */
-    function class_uses_recursive($class): array
+    function class_uses_recursive($class)
     {
         if (is_object($class)) {
             $class = get_class($class);
@@ -119,8 +122,9 @@ if (! function_exists('e')) {
      *
      * @param  \Illuminate\Contracts\Support\DeferringDisplayableValue|\Illuminate\Contracts\Support\Htmlable|\BackedEnum|string|int|float|null  $value
      * @param  bool  $doubleEncode
+     * @return string
      */
-    function e($value, $doubleEncode = true): string
+    function e($value, $doubleEncode = true)
     {
         if ($value instanceof DeferringDisplayableValue) {
             $value = $value->resolveDisplayableValue();
@@ -161,8 +165,9 @@ if (! function_exists('filled')) {
      * @phpstan-assert-if-false !=numeric|bool $value
      *
      * @param  mixed  $value
+     * @return bool
      */
-    function filled($value): bool
+    function filled($value)
     {
         return ! blank($value);
     }
@@ -173,8 +178,9 @@ if (! function_exists('fluent')) {
      * Create a Fluent object from the given value.
      *
      * @param  object|array  $value
+     * @return \Illuminate\Support\Fluent
      */
-    function fluent($value): Fluent
+    function fluent($value)
     {
         return new Fluent($value);
     }
@@ -184,7 +190,7 @@ if (! function_exists('literal')) {
     /**
      * Return a new literal or anonymous object using named arguments.
      *
-     * @return mixed
+     * @return \stdClass
      */
     function literal(...$arguments)
     {
@@ -228,8 +234,10 @@ if (! function_exists('object_get')) {
 if (! function_exists('laravel_cloud')) {
     /**
      * Determine if the application is running on Laravel Cloud.
+     *
+     * @return bool
      */
-    function laravel_cloud(): bool
+    function laravel_cloud()
     {
         return ($_ENV['LARAVEL_CLOUD'] ?? false) === '1' ||
                ($_SERVER['LARAVEL_CLOUD'] ?? false) === '1';
@@ -284,8 +292,9 @@ if (! function_exists('preg_replace_array')) {
      * @param  string  $pattern
      * @param  array  $replacements
      * @param  string  $subject
+     * @return string
      */
-    function preg_replace_array($pattern, array $replacements, $subject): string
+    function preg_replace_array($pattern, array $replacements, $subject)
     {
         return preg_replace_callback($pattern, function () use (&$replacements) {
             foreach ($replacements as $value) {
@@ -448,9 +457,9 @@ if (! function_exists('trait_uses_recursive')) {
      * Returns all traits used by a trait and its traits.
      *
      * @param  object|string  $trait
-     * @return array<string, string>
+     * @return array
      */
-    function trait_uses_recursive($trait): array
+    function trait_uses_recursive($trait)
     {
         $traits = class_uses($trait) ?: [];
 
@@ -492,8 +501,10 @@ if (! function_exists('transform')) {
 if (! function_exists('windows_os')) {
     /**
      * Determine whether the current environment is Windows based.
+     *
+     * @return bool
      */
-    function windows_os(): bool
+    function windows_os()
     {
         return PHP_OS_FAMILY === 'Windows';
     }

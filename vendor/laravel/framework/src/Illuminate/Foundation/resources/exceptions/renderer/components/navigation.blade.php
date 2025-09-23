@@ -21,7 +21,6 @@
             </div>
 
             <div class="flex items-center gap-3 sm:gap-6">
-                <x-laravel-exceptions-renderer::copy-button :markdown="$exceptionAsMarkdown" />
                 <x-laravel-exceptions-renderer::theme-switcher />
             </div>
         </div>

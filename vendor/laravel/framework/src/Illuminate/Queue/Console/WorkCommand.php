@@ -228,22 +228,20 @@ class WorkCommand extends Command
      */
     protected function writeOutputForCli(Job $job, $status)
     {
-        $isVerbose = $this->output->isVerbose();
-
-        $this->output->write(rtrim(sprintf(
-            '  <fg=gray>%s</> %s %s',
+        $this->output->write(sprintf(
+            '  <fg=gray>%s</> %s%s',
             $this->now()->format('Y-m-d H:i:s'),
             $job->resolveName(),
-            $isVerbose
-                ? sprintf('<fg=gray>%s</> <fg=blue>%s</> <fg=blue>%s</>', $job->getJobId(), $job->getConnectionName(), $job->getQueue())
+            $this->output->isVerbose()
+                ? sprintf(' <fg=gray>%s</>', $job->getJobId())
                 : ''
-        )));
+        ));
 
         if ($status == 'starting') {
             $this->latestStartedAt = microtime(true);
 
             $dots = max(terminal()->width() - mb_strlen($job->resolveName()) - (
-                $isVerbose ? mb_strlen($job->getJobId()) + mb_strlen($job->getConnectionName()) + mb_strlen($job->getQueue()) + 2 : 0
+                $this->output->isVerbose() ? (mb_strlen($job->getJobId()) + 1) : 0
             ) - 33, 0);
 
             $this->output->write(' '.str_repeat('<fg=gray>.</>', $dots));
@@ -254,7 +252,7 @@ class WorkCommand extends Command
         $runTime = $this->runTimeForHumans($this->latestStartedAt);
 
         $dots = max(terminal()->width() - mb_strlen($job->resolveName()) - (
-            $isVerbose ? mb_strlen($job->getJobId()) + mb_strlen($job->getConnectionName()) + mb_strlen($job->getQueue()) + 2 : 0
+            $this->output->isVerbose() ? (mb_strlen($job->getJobId()) + 1) : 0
         ) - mb_strlen($runTime) - 31, 0);
 
         $this->output->write(' '.str_repeat('<fg=gray>.</>', $dots));

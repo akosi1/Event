@@ -387,7 +387,7 @@ abstract class Grammar extends BaseGrammar
         $commands = $this->getCommandsByName($blueprint, $name);
 
         if (count($commands) > 0) {
-            return array_last($commands);
+            return reset($commands);
         }
     }
 
@@ -478,12 +478,12 @@ abstract class Grammar extends BaseGrammar
         }
 
         if ($value instanceof BackedEnum) {
-            return "'".str_replace("'", "''", $value->value)."'";
+            return "'{$value->value}'";
         }
 
         return is_bool($value)
             ? "'".(int) $value."'"
-            : "'".str_replace("'", "''", $value)."'";
+            : "'".(string) $value."'";
     }
 
     /**

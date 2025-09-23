@@ -12,8 +12,6 @@ use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\CanBeEscapedWhenCastToString;
 use Illuminate\Contracts\Support\Jsonable;
 use Illuminate\Database\ConnectionResolverInterface as Resolver;
-use Illuminate\Database\Eloquent\Attributes\Boot;
-use Illuminate\Database\Eloquent\Attributes\Initialize;
 use Illuminate\Database\Eloquent\Attributes\Scope as LocalScope;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
@@ -253,27 +251,6 @@ abstract class Model implements Arrayable, ArrayAccess, CanBeEscapedWhenCastToSt
     protected static string $collectionClass = Collection::class;
 
     /**
-     * Cache of soft deletable models.
-     *
-     * @var array<class-string<self>, bool>
-     */
-    protected static array $isSoftDeletable;
-
-    /**
-     * Cache of prunable models.
-     *
-     * @var array<class-string<self>, bool>
-     */
-    protected static array $isPrunable;
-
-    /**
-     * Cache of mass prunable models.
-     *
-     * @var array<class-string<self>, bool>
-     */
-    protected static array $isMassPrunable;
-
-    /**
      * The name of the "created at" column.
      *
      * @var string|null
@@ -362,28 +339,23 @@ abstract class Model implements Arrayable, ArrayAccess, CanBeEscapedWhenCastToSt
 
         static::$traitInitializers[$class] = [];
 
-        $uses = class_uses_recursive($class);
+        foreach (class_uses_recursive($class) as $trait) {
+            $method = 'boot'.class_basename($trait);
 
-        $conventionalBootMethods = array_map(static fn ($trait) => 'boot'.class_basename($trait), $uses);
-        $conventionalInitMethods = array_map(static fn ($trait) => 'initialize'.class_basename($trait), $uses);
+            if (method_exists($class, $method) && ! in_array($method, $booted)) {
+                forward_static_call([$class, $method]);
 
-        foreach ((new ReflectionClass($class))->getMethods() as $method) {
-            if (! in_array($method->getName(), $booted) &&
-                $method->isStatic() &&
-                (in_array($method->getName(), $conventionalBootMethods) ||
-                $method->getAttributes(Boot::class) !== [])) {
-                $method->invoke(null);
-
-                $booted[] = $method->getName();
+                $booted[] = $method;
             }
 
-            if (in_array($method->getName(), $conventionalInitMethods) ||
-                $method->getAttributes(Initialize::class) !== []) {
-                static::$traitInitializers[$class][] = $method->getName();
+            if (method_exists($class, $method = 'initialize'.class_basename($trait))) {
+                static::$traitInitializers[$class][] = $method;
+
+                static::$traitInitializers[$class] = array_unique(
+                    static::$traitInitializers[$class]
+                );
             }
         }
-
-        static::$traitInitializers[$class] = array_unique(static::$traitInitializers[$class]);
     }
 
     /**
@@ -744,7 +716,11 @@ abstract class Model implements Arrayable, ArrayAccess, CanBeEscapedWhenCastToSt
         // First we will just create a fresh instance of this model, and then we can set the
         // connection on the model so that it is used for the queries we execute, as well
         // as being set on every relation we retrieve without a custom connection name.
-        return (new static)->setConnection($connection)->newQuery();
+        $instance = new static;
+
+        $instance->setConnection($connection);
+
+        return $instance->newQuery();
     }
 
     /**
@@ -1801,18 +1777,6 @@ abstract class Model implements Arrayable, ArrayAccess, CanBeEscapedWhenCastToSt
     }
 
     /**
-     * Convert the model instance to pretty print formatted JSON.
-     *
-     * @return string
-     *
-     * @throws \Illuminate\Database\Eloquent\JsonEncodingException
-     */
-    public function toPrettyJson()
-    {
-        return $this->toJson(JSON_PRETTY_PRINT);
-    }
-
-    /**
      * Convert the object into something JSON serializable.
      *
      * @return mixed
@@ -2330,7 +2294,7 @@ abstract class Model implements Arrayable, ArrayAccess, CanBeEscapedWhenCastToSt
      */
     public static function isSoftDeletable(): bool
     {
-        return static::$isSoftDeletable[static::class] ??= in_array(SoftDeletes::class, class_uses_recursive(static::class));
+        return in_array(SoftDeletes::class, class_uses_recursive(static::class));
     }
 
     /**
@@ -2338,7 +2302,7 @@ abstract class Model implements Arrayable, ArrayAccess, CanBeEscapedWhenCastToSt
      */
     protected function isPrunable(): bool
     {
-        return self::$isPrunable[static::class] ??= in_array(Prunable::class, class_uses_recursive(static::class)) || static::isMassPrunable();
+        return in_array(Prunable::class, class_uses_recursive(static::class)) || static::isMassPrunable();
     }
 
     /**
@@ -2346,7 +2310,7 @@ abstract class Model implements Arrayable, ArrayAccess, CanBeEscapedWhenCastToSt
      */
     protected function isMassPrunable(): bool
     {
-        return self::$isMassPrunable[static::class] ??= in_array(MassPrunable::class, class_uses_recursive(static::class));
+        return in_array(MassPrunable::class, class_uses_recursive(static::class));
     }
 
     /**
@@ -2482,12 +2446,7 @@ abstract class Model implements Arrayable, ArrayAccess, CanBeEscapedWhenCastToSt
      */
     public function offsetUnset($offset): void
     {
-        unset(
-            $this->attributes[$offset],
-            $this->relations[$offset],
-            $this->attributeCastCache[$offset],
-            $this->classCastCache[$offset]
-        );
+        unset($this->attributes[$offset], $this->relations[$offset], $this->attributeCastCache[$offset]);
     }
 
     /**
