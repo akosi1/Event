@@ -463,9 +463,19 @@ body {
 
 /* Mobile responsiveness - maintains diagonal design */
 @media (max-width: 768px) {
+    body {
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
     .auth-container {
         height: 100vh;
         width: 100vw;
+        min-height: 100vh;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         background: linear-gradient(135deg, 
             #1a0d0d 0%, 
             #2d1515 25%, 
@@ -484,56 +494,67 @@ body {
     }
     
     .diagonal-section {
-        width: 65%;
-        height: 100%;
+        width: 100%;
+        height: 40%;
         top: 0;
         right: 0;
-        clip-path: polygon(20% 0, 100% 0, 100% 100%, 0% 100%);
-        box-shadow: -15px 0 30px rgba(220, 38, 38, 0.3);
+        left: 0;
+        clip-path: polygon(0 0, 100% 0, 100% 70%, 0 100%);
+        box-shadow: 0 15px 30px rgba(220, 38, 38, 0.3);
     }
     
     .diagonal-section.register-mode {
-        right: auto;
-        left: 0;
-        clip-path: polygon(0 0, 80% 0, 100% 100%, 0% 100%);
-        box-shadow: 15px 0 30px rgba(220, 38, 38, 0.3);
+        top: auto;
+        bottom: 0;
+        clip-path: polygon(0 30%, 100% 0, 100% 100%, 0 100%);
+        box-shadow: 0 -15px 30px rgba(220, 38, 38, 0.3);
     }
     
     .welcome-section {
-        right: 8%;
-        max-width: 280px;
-        transform: translateY(-50%);
+        position: absolute;
+        top: 15%;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        max-width: 90%;
+        text-align: center;
+        z-index: 2;
     }
     
     .welcome-section.register-mode {
+        top: auto;
+        bottom: 15%;
+        left: 50%;
         right: auto;
-        left: 8%;
+        transform: translateX(-50%);
     }
     
     .welcome-section h1 {
-        font-size: 36px;
-        margin-bottom: 12px;
+        font-size: 28px;
+        margin-bottom: 8px;
         line-height: 1.1;
     }
     
     .welcome-section p {
-        font-size: 16px;
+        font-size: 14px;
     }
     
     .form-section {
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%) scale(0.85);
-        width: 300px;
+        position: static;
+        left: auto;
+        top: auto;
+        transform: none;
+        width: 90%;
+        max-width: 340px;
         padding: 20px 18px;
-        max-height: 90vh;
-        overflow-y: auto;
+        margin: 20px auto;
+        z-index: 3;
     }
     
     .form-section.register-mode {
-        width: 320px;
+        width: 90%;
+        max-width: 360px;
         padding: 18px 16px;
-        transform: translate(-50%, -50%) scale(0.85);
     }
     
     .form-title {
@@ -552,7 +573,7 @@ body {
     }
 
     .form-control, .form-select {
-        padding: 10px;
+        padding: 12px;
         font-size: 14px;
     }
 
@@ -561,56 +582,60 @@ body {
     }
 
     .btn-submit {
-        padding: 12px;
-        font-size: 13px;
-        margin-top: 18px;
+        padding: 14px;
+        font-size: 14px;
+        margin-top: 20px;
     }
 
     .auth-links {
         margin-top: 20px;
-        font-size: 12px;
+        font-size: 13px;
     }
 }
 
 @media (max-width: 480px) {
+    .auth-container {
+        min-height: 100vh;
+        padding: 15px;
+    }
+    
     .diagonal-section {
-        width: 70%;
-        clip-path: polygon(15% 0, 100% 0, 100% 100%, 0% 100%);
+        width: 100%;
+        height: 35%;
+        clip-path: polygon(0 0, 100% 0, 100% 60%, 0 100%);
     }
     
     .diagonal-section.register-mode {
-        clip-path: polygon(0 0, 85% 0, 100% 100%, 0% 100%);
+        clip-path: polygon(0 40%, 100% 0, 100% 100%, 0 100%);
     }
     
     .welcome-section {
-        right: 5%;
-        max-width: 240px;
+        top: 12%;
+        max-width: 95%;
     }
     
     .welcome-section.register-mode {
-        right: auto;
-        left: 5%;
+        bottom: 12%;
     }
     
     .welcome-section h1 {
-        font-size: 30px;
-        margin-bottom: 10px;
+        font-size: 24px;
+        margin-bottom: 6px;
     }
     
     .welcome-section p {
-        font-size: 14px;
+        font-size: 13px;
     }
     
     .form-section {
-        width: 280px;
+        width: 95%;
+        max-width: 320px;
         padding: 18px 15px;
-        transform: translate(-50%, -50%) scale(0.8);
     }
     
     .form-section.register-mode {
-        width: 300px;
+        max-width: 340px;
         padding: 16px 14px;
-        transform: translate(-50%, -50%) scale(0.8);
     }
     
     .form-title {
@@ -619,14 +644,14 @@ body {
     }
 
     .form-control, .form-select {
-        padding: 9px;
+        padding: 11px;
         font-size: 13px;
     }
 
     .btn-submit {
-        padding: 11px;
-        font-size: 12px;
-        margin-top: 16px;
+        padding: 13px;
+        font-size: 13px;
+        margin-top: 18px;
     }
 }
 
