@@ -62,7 +62,7 @@
                         <x-input-error :messages="$errors->get('department')" class="error-msg" />
                     </div>
 
-                    <!-- reCAPTCHA hidden token -->
+                    <!-- reCAPTCHA v3 hidden token -->
                     <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
 
                     <!-- Submit Button -->
@@ -85,16 +85,21 @@
     @if(config('services.recaptcha.site_key'))
         <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}"></script>
         <script>
-            grecaptcha.ready(function () {
-                grecaptcha.execute('{{ config('services.recaptcha.site_key') }}', { action: 'login' })
-                    .then(function (token) {
-                        document.getElementById('g-recaptcha-response').value = token;
-                    });
+            document.addEventListener("DOMContentLoaded", function () {
+                grecaptcha.ready(function () {
+                    grecaptcha.execute('{{ config('services.recaptcha.site_key') }}', { action: 'login' })
+                        .then(function (token) {
+                            document.getElementById('g-recaptcha-response').value = token;
+                        })
+                        .catch(function (error) {
+                            console.error("reCAPTCHA error:", error);
+                        });
+                });
             });
         </script>
     @else
         <script>
-            console.warn(' Google reCAPTCHA site key is not configured in services.php');
+            console.warn('⚠️ Google reCAPTCHA site key is not configured in services.php or .env');
         </script>
     @endif
 
