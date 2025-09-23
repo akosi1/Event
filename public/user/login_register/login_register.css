@@ -213,32 +213,144 @@ body {
     position: relative;
 }
 
+/* Enhanced Select Styling for Consistent UI */
 .form-control, .form-select {
     width: 100%;
-    padding: 12px;
+    padding: 12px 40px 12px 12px;
     background: rgba(255, 255, 255, 0.1);
     border: 2px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;
     color: white;
     font-size: 13px;
     transition: all 0.3s ease;
-}
-
-.form-control::placeholder, .form-select option:first-child {
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 13px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
 }
 
 .form-select {
     cursor: pointer;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.6)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    padding-right: 40px;
+}
+
+/* Custom Select Dropdown */
+.custom-select {
+    position: relative;
+}
+
+.custom-select-trigger {
+    width: 100%;
+    padding: 12px 40px 12px 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 44px;
+}
+
+.custom-select-trigger:after {
+    content: '';
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid rgba(255, 255, 255, 0.6);
+    transition: transform 0.3s ease;
+}
+
+.custom-select-trigger.open:after {
+    transform: rotate(180deg);
+}
+
+.custom-select-options {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(45, 21, 21, 0.98);
+    border: 2px solid rgba(220, 38, 38, 0.3);
+    border-radius: 8px;
+    margin-top: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+}
+
+.custom-select-options.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.custom-select-option {
+    padding: 12px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.custom-select-option:last-child {
+    border-bottom: none;
+}
+
+.custom-select-option:hover,
+.custom-select-option.highlighted {
+    background: rgba(220, 38, 38, 0.2);
+    color: #dc2626;
+}
+
+.custom-select-option.selected {
+    background: rgba(220, 38, 38, 0.3);
+    color: #ef4444;
+    font-weight: 600;
+}
+
+/* Fallback for native select on mobile if custom fails */
+@media (max-width: 768px) {
+    .form-select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.6)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 16px;
+    }
+    
+    .form-select::-ms-expand {
+        display: none;
+    }
+}
+
+.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 13px;
 }
 
 .form-select option {
     background: #2d1515;
     color: white;
+    padding: 8px;
 }
 
-.form-control:focus, .form-select:focus {
+.form-control:focus, .form-select:focus, .custom-select-trigger:focus {
     outline: none;
     border-color: #dc2626;
     background: rgba(220, 38, 38, 0.1);
@@ -259,7 +371,9 @@ body {
 .form-control:focus + .input-label,
 .form-control:not(:placeholder-shown) + .input-label,
 .form-select:focus + .select-label,
-.form-select:not([value=""]) + .select-label {
+.form-select:not([value=""]) + .select-label,
+.custom-select-trigger:focus + .select-label,
+.custom-select-trigger.has-value + .select-label {
     top: -8px;
     left: 8px;
     font-size: 11px;
@@ -277,6 +391,7 @@ body {
     color: rgba(255, 255, 255, 0.4);
     font-size: 14px;
     pointer-events: none;
+    z-index: 1;
 }
 
 .btn-submit {
@@ -567,6 +682,17 @@ body {
     
     .form-row .form-group {
         margin-bottom: 16px;
+    }
+    
+    /* Force custom select on mobile */
+    .custom-select-options {
+        max-height: 150px;
+        border-radius: 12px;
+    }
+    
+    .custom-select-option {
+        padding: 14px 12px;
+        font-size: 14px;
     }
 }
 
