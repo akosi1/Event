@@ -105,7 +105,7 @@
 
                     <div class="auth-links">
                         <p>{{ __('Already registered?') }} 
-                           <a href="#" onclick="authAnimator.switchToLogin(); return false;">{{ __('Sign in here') }}</a>
+                           <a href="{{ route('login') }}">{{ __('Sign in here') }}</a>
                         </p>
                     </div>
                 </form>
@@ -114,12 +114,4 @@
     </div>
 
     <script src="{{ asset('user/login_register/login_register.js') }}"></script>
-    <script>
-        // Set register mode on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            if (window.authAnimator) {
-                window.authAnimator.isRegisterMode = true;
-            }
-        });
-    </script>
 </x-guest-layout>
