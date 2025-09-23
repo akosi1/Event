@@ -94,7 +94,7 @@
         </script>
     @else
         <script>
-            console.warn('⚠️ Google reCAPTCHA site key is not configured in services.php');
+            console.warn(' Google reCAPTCHA site key is not configured in services.php');
         </script>
     @endif
 
