@@ -11,14 +11,6 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
-
-Route::get('/', function () {
-   
-    return view('welcome');
-   
-})->name('home');
-
-// Guest routes (for unauthenticated users)
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])
         ->name('register');
@@ -43,13 +35,7 @@ Route::middleware('guest')->group(function () {
         ->name('password.store');
 });
 
-// Authenticated routes (for logged-in users)
 Route::middleware('auth')->group(function () {
-    // Dashboard route (add this if you have a dashboard)
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
-
     Route::get('verify-email', EmailVerificationPromptController::class)
         ->name('verification.notice');
 
@@ -71,21 +57,3 @@ Route::middleware('auth')->group(function () {
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
 });
-
-
-Route::get('/about', function () {
-    return view('about');
-})->name('about');
-
-Route::get('/contact', function () {
-    return view('contact');
-})->name('contact');
-
-
-Route::get('/events', function () {
-    return view('events.index');
-})->name('events.index');
-
-Route::get('/portfolio', function () {
-    return view('portfolio.index');
-})->name('portfolio.index');
