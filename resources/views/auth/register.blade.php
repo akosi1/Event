@@ -112,6 +112,5 @@
             </div>
         </div>
     </div>
-
-    <script src="{{ asset('user/login_register/login_register.js') }}"></script>
+  <script src="{{ asset('user/login_register/login_register.js') }}"></script>
 </x-guest-layout>
