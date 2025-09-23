@@ -439,6 +439,47 @@ body {
         color: #ff6b6b;
     }
 
+    /* Show department modal on mobile */
+    .department-modal {
+        display: flex !important;
+    }
+    
+    /* Hide original select on mobile */
+    .form-select {
+        display: none !important;
+    }
+    
+    /* Show and style custom trigger on mobile */
+    .mobile-only {
+        display: block !important;
+    }
+    
+    .mobile-only .department-trigger {
+        display: block !important;
+        text-align: left;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: rgba(255, 255, 255, 0.8);
+        cursor: pointer;
+    }
+    
+    .mobile-only .input-label,
+    .mobile-only .input-icon {
+        display: block !important;
+    }
+    
+    .department-trigger:hover,
+    .department-trigger:focus {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.5);
+        color: white;
+    }
+    
+    .department-trigger.selected {
+        color: white;
+        border-color: rgba(255, 255, 255, 0.7);
+    }
+
     /* Mobile department modal */
     .department-content {
         background: rgba(0, 0, 0, 0.9);
@@ -462,6 +503,11 @@ body {
     .department-option.selected {
         background: #ff6b6b;
         border-color: #ff6b6b;
+    }
+
+    /* Hide mobile department selection on desktop */
+    .department-trigger {
+        display: none !important;
     }
 
     .department-close {
