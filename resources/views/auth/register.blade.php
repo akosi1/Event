@@ -1,4 +1,5 @@
 <x-guest-layout>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="{{ asset('user/login_register/login_register.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
@@ -105,7 +106,7 @@
 
                     <div class="auth-links">
                         <p>{{ __('Already registered?') }} 
-                           <a href="#" onclick="authAnimator.switchToLogin(); return false;">{{ __('Sign in here') }}</a>
+                           <a href="{{ route('login') }}">{{ __('Sign in here') }}</a>
                         </p>
                     </div>
                 </form>
@@ -115,11 +116,137 @@
 
     <script src="{{ asset('user/login_register/login_register.js') }}"></script>
     <script>
-        // Set register mode on page load
+        // Set register mode on page load and ensure mobile optimization
         document.addEventListener('DOMContentLoaded', function() {
+            // Force mobile layout if on mobile device
+            if (window.innerWidth <= 768) {
+                document.body.classList.add('mobile-view');
+                
+                // Ensure proper mobile styling
+                const authContainer = document.querySelector('.auth-container');
+                const formSection = document.querySelector('.form-section');
+                
+                if (authContainer) {
+                    authContainer.style.display = 'flex';
+                    authContainer.style.alignItems = 'center';
+                    authContainer.style.justifyContent = 'center';
+                    authContainer.style.minHeight = '100vh';
+                }
+                
+                if (formSection) {
+                    formSection.style.position = 'relative';
+                    formSection.style.transform = 'none';
+                    formSection.style.left = 'auto';
+                    formSection.style.top = 'auto';
+                    formSection.style.width = '100%';
+                    formSection.style.maxWidth = '400px';
+                    formSection.style.margin = '0 auto';
+                }
+            }
+            
+            // Initialize animator
             if (window.authAnimator) {
                 window.authAnimator.isRegisterMode = true;
+                
+                // Force mobile layout in animator if needed
+                if (window.innerWidth <= 768) {
+                    window.authAnimator.forceMobileLayout();
+                }
             }
         });
+        
+        // Handle orientation change
+        window.addEventListener('orientationchange', function() {
+            setTimeout(function() {
+                // Recalculate layout after orientation change
+                if (window.innerWidth <= 768) {
+                    const authContainer = document.querySelector('.auth-container');
+                    const formSection = document.querySelector('.form-section');
+                    
+                    if (authContainer) {
+                        authContainer.style.height = window.innerHeight + 'px';
+                    }
+                    
+                    if (formSection) {
+                        formSection.style.maxWidth = window.innerWidth > window.innerHeight ? '450px' : '400px';
+                    }
+                }
+            }, 200);
+        });
+
+        // Prevent zoom on iOS
+        document.addEventListener('gesturestart', function (e) {
+            e.preventDefault();
+        });
+
+        // Handle viewport height for mobile browsers
+        function setViewportHeight() {
+            let vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', vh + 'px');
+        }
+
+        setViewportHeight();
+        window.addEventListener('resize', setViewportHeight);
     </script>
+
+    <style>
+        /* Additional mobile-specific styles */
+        @media (max-width: 768px) {
+            body.mobile-view {
+                height: 100vh;
+                height: calc(var(--vh, 1vh) * 100);
+                overflow: hidden;
+            }
+            
+            .auth-container {
+                height: 100vh !important;
+                height: calc(var(--vh, 1vh) * 100) !important;
+                padding: 15px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+            
+            .diagonal-section {
+                display: none !important;
+            }
+            
+            .welcome-section {
+                display: none !important;
+            }
+            
+            .form-section {
+                position: relative !important;
+                transform: none !important;
+                left: auto !important;
+                top: auto !important;
+                width: 100% !important;
+                max-width: 400px !important;
+                margin: 0 auto !important;
+            }
+        }
+        
+        /* Handle landscape orientation */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .auth-container {
+                overflow-y: auto !important;
+                align-items: flex-start !important;
+                padding-top: 20px !important;
+                padding-bottom: 20px !important;
+            }
+            
+            .form-section {
+                margin-top: 10px !important;
+                margin-bottom: 10px !important;
+                max-width: 450px !important;
+            }
+        }
+        
+        /* Very small screens */
+        @media (max-width: 375px) {
+            .form-section {
+                max-width: calc(100vw - 20px) !important;
+            }
+        }
+    </style>
 </x-guest-layout>

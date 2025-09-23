@@ -3,6 +3,7 @@ class AuthAnimator {
     constructor() {
         this.isRegisterMode = false;
         this.isAnimating = false;
+        this.isMobile = window.innerWidth <= 768;
         this.init();
     }
 
@@ -12,14 +13,15 @@ class AuthAnimator {
         this.startParticleSystem();
         this.bindEvents();
         this.setupFormAnimations();
+        this.handleResize();
     }
 
     initElements() {
         this.authContainer = document.querySelector('.auth-container');
         this.diagonalSection = document.querySelector('.diagonal-section');
         this.welcomeSection = document.querySelector('.welcome-section');
-        this.welcomeTitle = document.getElementById('welcomeTitle') || this.welcomeSection.querySelector('h1');
-        this.welcomeText = document.getElementById('welcomeText') || this.welcomeSection.querySelector('p');
+        this.welcomeTitle = document.getElementById('welcomeTitle') || this.welcomeSection?.querySelector('h1');
+        this.welcomeText = document.getElementById('welcomeText') || this.welcomeSection?.querySelector('p');
         this.formSection = document.querySelector('.form-section');
         this.particlesContainer = document.getElementById('particles');
         
@@ -37,8 +39,11 @@ class AuthAnimator {
     createParticles() {
         if (!this.particlesContainer) return;
         
+        // Reduce particles on mobile for better performance
+        const particleCount = this.isMobile ? 8 : 15;
+        
         // Create multiple particles
-        for (let i = 0; i < 15; i++) {
+        for (let i = 0; i < particleCount; i++) {
             setTimeout(() => {
                 const particle = document.createElement('div');
                 particle.className = 'particle';
@@ -60,7 +65,7 @@ class AuthAnimator {
         this.createParticles();
         this.particleInterval = setInterval(() => {
             this.createParticles();
-        }, 3000);
+        }, this.isMobile ? 5000 : 3000); // Slower on mobile
     }
 
     bindEvents() {
@@ -81,13 +86,60 @@ class AuthAnimator {
             }
         });
 
-        // Handle form submissions if needed
+        // Handle form submissions
         document.addEventListener('submit', (e) => {
             const form = e.target;
             if (form.matches('form')) {
                 this.handleFormSubmit(e);
             }
         });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            this.handleResize();
+        });
+
+        // Handle orientation change for mobile
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                this.handleResize();
+            }, 200);
+        });
+    }
+
+    handleResize() {
+        const wasMobile = this.isMobile;
+        this.isMobile = window.innerWidth <= 768;
+        
+        // If switching between mobile and desktop, adjust particle system
+        if (wasMobile !== this.isMobile) {
+            clearInterval(this.particleInterval);
+            this.startParticleSystem();
+        }
+        
+        // Ensure proper centering on mobile
+        if (this.isMobile) {
+            this.ensureMobileCentering();
+        }
+    }
+
+    ensureMobileCentering() {
+        // Force mobile layout adjustments
+        if (this.formSection) {
+            this.formSection.style.position = 'relative';
+            this.formSection.style.transform = 'none';
+            this.formSection.style.left = 'auto';
+            this.formSection.style.top = 'auto';
+        }
+        
+        // Hide elements that aren't needed on mobile
+        if (this.diagonalSection) {
+            this.diagonalSection.style.display = 'none';
+        }
+        
+        if (this.welcomeSection) {
+            this.welcomeSection.style.display = 'none';
+        }
     }
 
     switchToRegister() {
@@ -95,32 +147,39 @@ class AuthAnimator {
         this.isAnimating = true;
         this.isRegisterMode = true;
 
-        // Update welcome section text with fade
-        this.updateWelcomeText('WELCOME!', 'Create your account');
+        // Skip welcome text update on mobile since it's hidden
+        if (!this.isMobile) {
+            this.updateWelcomeText('WELCOME!', 'Create your account');
+        }
         
-        // Add register mode classes with stagger
-        setTimeout(() => {
+        // Add register mode classes with stagger (only on desktop)
+        if (!this.isMobile) {
+            setTimeout(() => {
+                this.authContainer.classList.add('register-mode');
+            }, 100);
+            
+            setTimeout(() => {
+                this.diagonalSection?.classList.add('register-mode');
+            }, 200);
+            
+            setTimeout(() => {
+                this.welcomeSection?.classList.add('register-mode');
+            }, 300);
+        } else {
+            // Immediate class addition on mobile
             this.authContainer.classList.add('register-mode');
-        }, 100);
-        
-        setTimeout(() => {
-            this.diagonalSection.classList.add('register-mode');
-        }, 200);
-        
-        setTimeout(() => {
-            this.welcomeSection.classList.add('register-mode');
-        }, 300);
+        }
         
         setTimeout(() => {
             this.formSection.classList.add('register-mode');
-        }, 400);
+        }, this.isMobile ? 100 : 400);
 
         // Handle form transition
         this.transitionToRegisterForm();
 
         setTimeout(() => {
             this.isAnimating = false;
-        }, 800);
+        }, this.isMobile ? 400 : 800);
     }
 
     switchToLogin() {
@@ -128,35 +187,46 @@ class AuthAnimator {
         this.isAnimating = true;
         this.isRegisterMode = false;
 
-        // Update welcome section text
-        this.updateWelcomeText('WELCOME BACK!', 'Please sign in to continue');
+        // Skip welcome text update on mobile since it's hidden
+        if (!this.isMobile) {
+            this.updateWelcomeText('WELCOME BACK!', 'Please sign in to continue');
+        }
 
-        // Remove register mode classes with stagger
-        setTimeout(() => {
+        // Remove register mode classes with stagger (only on desktop)
+        if (!this.isMobile) {
+            setTimeout(() => {
+                this.formSection.classList.remove('register-mode');
+            }, 100);
+            
+            setTimeout(() => {
+                this.welcomeSection?.classList.remove('register-mode');
+            }, 200);
+            
+            setTimeout(() => {
+                this.diagonalSection?.classList.remove('register-mode');
+            }, 300);
+            
+            setTimeout(() => {
+                this.authContainer.classList.remove('register-mode');
+            }, 400);
+        } else {
+            // Immediate class removal on mobile
             this.formSection.classList.remove('register-mode');
-        }, 100);
-        
-        setTimeout(() => {
-            this.welcomeSection.classList.remove('register-mode');
-        }, 200);
-        
-        setTimeout(() => {
-            this.diagonalSection.classList.remove('register-mode');
-        }, 300);
-        
-        setTimeout(() => {
             this.authContainer.classList.remove('register-mode');
-        }, 400);
+        }
 
         // Handle form transition
         this.transitionToLoginForm();
 
         setTimeout(() => {
             this.isAnimating = false;
-        }, 800);
+        }, this.isMobile ? 400 : 800);
     }
 
     updateWelcomeText(title, text) {
+        // Skip on mobile since welcome section is hidden
+        if (this.isMobile || !this.welcomeTitle || !this.welcomeText) return;
+        
         // Fade out
         this.welcomeTitle.style.opacity = '0';
         this.welcomeText.style.opacity = '0';
@@ -172,36 +242,28 @@ class AuthAnimator {
     }
 
     transitionToRegisterForm() {
-        const currentContent = this.formSection.querySelector('.form-content') || this.formSection;
-        
         if (this.singleFormMode) {
-            // Create register form content
             this.createRegisterFormContent();
         } else if (this.loginForm && this.registerForm) {
-            // Handle multiple forms
             this.loginForm.classList.add('sliding-out');
             setTimeout(() => {
                 this.loginForm.style.display = 'none';
                 this.registerForm.style.display = 'block';
                 this.registerForm.classList.add('sliding-in');
-            }, 250);
+            }, this.isMobile ? 150 : 250);
         }
     }
 
     transitionToLoginForm() {
-        const currentContent = this.formSection.querySelector('.form-content') || this.formSection;
-        
         if (this.singleFormMode) {
-            // Create login form content
             this.createLoginFormContent();
         } else if (this.loginForm && this.registerForm) {
-            // Handle multiple forms
             this.registerForm.classList.add('sliding-out');
             setTimeout(() => {
                 this.registerForm.style.display = 'none';
                 this.loginForm.style.display = 'block';
                 this.loginForm.classList.add('sliding-in');
-            }, 250);
+            }, this.isMobile ? 150 : 250);
         }
     }
 
@@ -306,39 +368,10 @@ class AuthAnimator {
         `;
 
         // Transition form content
-        const formContainer = form.parentElement;
-        const currentHTML = formContainer.innerHTML;
-        
-        // Create wrapper for transition
-        const wrapper = document.createElement('div');
-        wrapper.className = 'form-content sliding-out';
-        wrapper.innerHTML = currentHTML.replace(form.outerHTML, '');
-        
-        formContainer.innerHTML = '';
-        formContainer.appendChild(wrapper);
-        
-        setTimeout(() => {
-            const newWrapper = document.createElement('div');
-            newWrapper.className = 'form-content sliding-in';
-            newWrapper.innerHTML = `
-                <div class="form-title">Sign Up</div>
-                <form method="POST" action="/register">
-                    <input type="hidden" name="_token" value="${this.getCSRFToken()}">
-                    ${registerHTML}
-                </form>
-            `;
-            
-            formContainer.innerHTML = '';
-            formContainer.appendChild(newWrapper);
-            
-            // Re-bind form events
-            this.setupFormAnimations();
-        }, 250);
+        this.transitionFormContent(registerHTML, 'Sign Up', '/register');
     }
 
     createLoginFormContent() {
-        const form = this.formSection.querySelector('form');
-        
         // Create login form HTML
         const loginHTML = `
             <div class="form-group">
@@ -387,34 +420,43 @@ class AuthAnimator {
         `;
 
         // Transition form content
+        this.transitionFormContent(loginHTML, 'Sign In', '/login');
+    }
+
+    transitionFormContent(newHTML, title, action) {
+        const form = this.formSection.querySelector('form');
         const formContainer = form.parentElement;
-        const currentHTML = formContainer.innerHTML;
         
         // Create wrapper for transition
         const wrapper = document.createElement('div');
         wrapper.className = 'form-content sliding-out';
-        wrapper.innerHTML = currentHTML.replace(form.outerHTML, '');
+        wrapper.innerHTML = formContainer.innerHTML;
         
         formContainer.innerHTML = '';
         formContainer.appendChild(wrapper);
+        
+        const transitionDelay = this.isMobile ? 150 : 250;
         
         setTimeout(() => {
             const newWrapper = document.createElement('div');
             newWrapper.className = 'form-content sliding-in';
             newWrapper.innerHTML = `
-                <div class="form-title">Sign In</div>
-                <form method="POST" action="/login">
+                <div class="form-title">${title}</div>
+                <form method="POST" action="${action}">
                     <input type="hidden" name="_token" value="${this.getCSRFToken()}">
-                    ${loginHTML}
+                    ${newHTML}
                 </form>
             `;
             
             formContainer.innerHTML = '';
             formContainer.appendChild(newWrapper);
             
-            // Re-bind form events
+            // Re-bind form events and ensure mobile layout
             this.setupFormAnimations();
-        }, 250);
+            if (this.isMobile) {
+                this.ensureMobileCentering();
+            }
+        }, transitionDelay);
     }
 
     getCSRFToken() {
@@ -436,36 +478,53 @@ class AuthAnimator {
             input.removeEventListener('blur', this.inputBlurHandler);
             
             // Add new listeners
-            input.addEventListener('focus', this.inputFocusHandler);
-            input.addEventListener('blur', this.inputBlurHandler);
+            input.addEventListener('focus', this.inputFocusHandler.bind(this));
+            input.addEventListener('blur', this.inputBlurHandler.bind(this));
         });
     }
 
     inputFocusHandler(e) {
         const wrapper = e.target.parentElement;
         if (wrapper.classList.contains('input-wrapper')) {
-            wrapper.style.transform = 'scale(1.02)';
-            wrapper.style.zIndex = '10';
+            if (!this.isMobile) {
+                wrapper.style.transform = 'scale(1.02)';
+                wrapper.style.zIndex = '10';
+            }
         }
     }
 
     inputBlurHandler(e) {
         const wrapper = e.target.parentElement;
         if (wrapper.classList.contains('input-wrapper')) {
-            wrapper.style.transform = 'scale(1)';
-            wrapper.style.zIndex = 'auto';
+            if (!this.isMobile) {
+                wrapper.style.transform = 'scale(1)';
+                wrapper.style.zIndex = 'auto';
+            }
         }
     }
 
     handleFormSubmit(e) {
         const submitBtn = e.target.querySelector('.btn-submit');
         if (submitBtn) {
-            submitBtn.style.transform = 'translateY(-1px)';
+            if (!this.isMobile) {
+                submitBtn.style.transform = 'translateY(-1px)';
+            }
+            
+            const originalHTML = submitBtn.innerHTML;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            submitBtn.disabled = true;
+            
+            // Re-enable button after a timeout (in case form validation fails)
+            setTimeout(() => {
+                if (submitBtn.disabled) {
+                    submitBtn.innerHTML = originalHTML;
+                    submitBtn.disabled = false;
+                    if (!this.isMobile) {
+                        submitBtn.style.transform = 'none';
+                    }
+                }
+            }, 5000);
         }
-        
-        // Allow form to submit normally
-        // Add any additional form validation or AJAX handling here if needed
     }
 
     // Public method to manually trigger mode switch
@@ -477,6 +536,21 @@ class AuthAnimator {
         }
     }
 
+    // Method to check if device is mobile
+    checkMobile() {
+        return window.innerWidth <= 768;
+    }
+
+    // Method to force mobile layout
+    forceMobileLayout() {
+        this.isMobile = true;
+        this.ensureMobileCentering();
+        
+        // Restart particle system for mobile
+        clearInterval(this.particleInterval);
+        this.startParticleSystem();
+    }
+
     // Cleanup method
     destroy() {
         if (this.particleInterval) {
@@ -484,8 +558,8 @@ class AuthAnimator {
         }
         
         // Remove event listeners
-        document.removeEventListener('click', this.clickHandler);
-        document.removeEventListener('submit', this.submitHandler);
+        window.removeEventListener('resize', this.handleResize);
+        window.removeEventListener('orientationchange', this.handleResize);
     }
 }
 
@@ -494,6 +568,11 @@ let authAnimator;
 
 document.addEventListener('DOMContentLoaded', function() {
     authAnimator = new AuthAnimator();
+    
+    // Force mobile layout check
+    if (window.innerWidth <= 768) {
+        authAnimator.forceMobileLayout();
+    }
 });
 
 // Expose to global scope for onclick handlers
@@ -518,5 +597,36 @@ function pushAuthState(mode) {
     const title = mode === 'register' ? 'Sign Up' : 'Sign In';
     const url = mode === 'register' ? '/register' : '/login';
     
-    history.pushState({ mode: mode }, title, url);
+    if (history.pushState) {
+        history.pushState({ mode: mode }, title, url);
+    }
 }
+
+// Touch event handling for mobile
+if ('ontouchstart' in window) {
+    document.addEventListener('touchstart', function(e) {
+        // Improve touch responsiveness
+        if (e.target.matches('.btn-submit, .auth-links a')) {
+            e.target.style.opacity = '0.8';
+        }
+    });
+    
+    document.addEventListener('touchend', function(e) {
+        if (e.target.matches('.btn-submit, .auth-links a')) {
+            setTimeout(() => {
+                e.target.style.opacity = '1';
+            }, 150);
+        }
+    });
+}
+
+// Prevent zoom on double tap for iOS
+document.addEventListener('touchend', function(event) {
+    var now = (new Date()).getTime();
+    if (now - lastTouchEnd <= 300) {
+        event.preventDefault();
+    }
+    lastTouchEnd = now;
+}, false);
+
+var lastTouchEnd = 0;
