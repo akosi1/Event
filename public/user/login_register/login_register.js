@@ -70,20 +70,18 @@ class AuthAnimator {
     }
 
     bindEvents() {
-        // Handle clicks on auth links for animation
+        // Handle clicks on auth links - allow normal navigation
         document.addEventListener('click', (e) => {
-            if (e.target.matches('a[href*="register"]') || 
-                e.target.matches('a[href*="sign-up"]') ||
-                e.target.textContent.toLowerCase().includes('sign up')) {
-                e.preventDefault();
-                this.switchToRegister();
-            }
+            const link = e.target.closest('a');
+            if (!link) return;
             
-            if (e.target.matches('a[href*="login"]') || 
-                e.target.matches('a[href*="sign-in"]') ||
-                e.target.textContent.toLowerCase().includes('sign in')) {
-                e.preventDefault();
-                this.switchToLogin();
+            // Don't prevent default - let the browser navigate normally
+            if (link.href && (link.href.includes('register') || link.href.includes('login'))) {
+                // Just add a small visual feedback
+                link.style.transform = 'scale(0.98)';
+                setTimeout(() => {
+                    link.style.transform = 'scale(1)';
+                }, 150);
             }
         });
 
