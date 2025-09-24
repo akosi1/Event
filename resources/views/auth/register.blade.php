@@ -2,6 +2,12 @@
     <link rel="stylesheet" href="{{ asset('user/login_register/login_register.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
+    <!-- Pass Laravel routes to JavaScript -->
+    <script>
+        window.loginRoute = @json(route('login'));
+        window.registerRoute = @json(route('register'));
+    </script>
+
     <div class="auth-container register-mode">
         <div class="floating-particles" id="particles"></div>
         <div class="diagonal-section register-mode"></div>
@@ -98,6 +104,9 @@
                         </div>
                     </div>
 
+                    <!-- reCAPTCHA v3 hidden token -->
+                    <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
+
                     <button type="submit" class="btn-submit">
                         <i class="fas fa-user-plus"></i>
                         {{ __('Sign Up') }}
@@ -112,6 +121,28 @@
             </div>
         </div>
     </div>
+
+    <!-- reCAPTCHA v3 Script -->
+    @if(config('services.recaptcha.site_key'))
+        <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                grecaptcha.ready(function () {
+                    grecaptcha.execute('{{ config('services.recaptcha.site_key') }}', { action: 'register' })
+                        .then(function (token) {
+                            document.getElementById('g-recaptcha-response').value = token;
+                        })
+                        .catch(function (error) {
+                            console.error("reCAPTCHA error:", error);
+                        });
+                });
+            });
+        </script>
+    @else
+        <script>
+            console.warn('⚠️ Google reCAPTCHA site key is not configured in services.php or .env');
+        </script>
+    @endif
     
     <script src="{{ asset('user/login_register/login_register.js') }}"></script>
 </x-guest-layout>

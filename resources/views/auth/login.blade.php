@@ -105,4 +105,4 @@
 
     <!-- Custom JS -->
     <script src="{{ asset('user/login_register/login_register.js') }}"></script>
-</x-guest-layout>
+</x-guest-layout>   
