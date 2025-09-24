@@ -3,16 +3,7 @@ class AuthAnimator {
     constructor() {
         this.isRegisterMode = false;
         this.isAnimating = false;
-        this.routes = this.initRoutes();
         this.init();
-    }
-
-    initRoutes() {
-        // Get routes from Laravel route() helper or fallback to relative paths
-        return {
-            login: window.loginRoute || '/login',
-            register: window.registerRoute || '/register'
-        };
     }
 
     init() {
@@ -35,11 +26,9 @@ class AuthAnimator {
     }
 
     detectCurrentMode() {
-        // Detect if we're on register page - more flexible detection
-        const currentPath = window.location.pathname.toLowerCase();
-        const currentUrl = window.location.href.toLowerCase();
-        
-        if (currentPath.includes('register') || currentUrl.includes('register')) {
+        // Detect if we're on register page
+        const currentPath = window.location.pathname;
+        if (currentPath.includes('register')) {
             this.isRegisterMode = true;
             // Ensure register classes are applied
             setTimeout(() => {
@@ -83,23 +72,18 @@ class AuthAnimator {
     bindEvents() {
         // Handle clicks on auth links for animation
         document.addEventListener('click', (e) => {
-            // Check if the clicked element or its parent is a register link
-            const target = e.target.closest('a');
-            if (!target) return;
-
-            const href = target.getAttribute('href') || '';
-            const text = target.textContent.toLowerCase();
-            
-            if (href.includes('register') || text.includes('sign up')) {
+            if (e.target.matches('a[href*="register"]') || 
+                e.target.matches('a[href*="sign-up"]') ||
+                e.target.textContent.toLowerCase().includes('sign up')) {
                 e.preventDefault();
                 this.switchToRegister();
-                return;
             }
             
-            if (href.includes('login') || text.includes('sign in')) {
+            if (e.target.matches('a[href*="login"]') || 
+                e.target.matches('a[href*="sign-in"]') ||
+                e.target.textContent.toLowerCase().includes('sign in')) {
                 e.preventDefault();
                 this.switchToLogin();
-                return;
             }
         });
 
@@ -137,9 +121,9 @@ class AuthAnimator {
             this.formSection?.classList.add('register-mode');
         }, 400);
 
-        // Navigate to register page after animation using proper route
+        // Navigate to register page after animation
         setTimeout(() => {
-            window.location.href = this.routes.register;
+            window.location.href = '/register';
         }, 800);
     }
 
@@ -168,9 +152,9 @@ class AuthAnimator {
             this.authContainer?.classList.remove('register-mode');
         }, 400);
 
-        // Navigate to login page after animation using proper route
+        // Navigate to login page after animation
         setTimeout(() => {
-            window.location.href = this.routes.login;
+            window.location.href = '/login';
         }, 800);
     }
 
@@ -248,11 +232,12 @@ class AuthAnimator {
         if (submitBtn) {
             submitBtn.style.transform = 'translateY(-1px)';
             
-            const formAction = e.target.action.toLowerCase();
+            const isLogin = e.target.action.includes('login');
+            const isRegister = e.target.action.includes('register');
             
-            if (formAction.includes('login')) {
+            if (isLogin) {
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
-            } else if (formAction.includes('register')) {
+            } else if (isRegister) {
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
             } else {
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
@@ -302,7 +287,9 @@ window.addEventListener('popstate', function(e) {
 });
 
 // Push state for better UX
-function pushAuthState(mode, url) {
+function pushAuthState(mode) {
     const title = mode === 'register' ? 'Sign Up' : 'Sign In';
+    const url = mode === 'register' ? '/register' : '/login';
+    
     history.pushState({ mode: mode }, title, url);
 }
