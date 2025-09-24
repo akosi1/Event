@@ -9,7 +9,7 @@
 
         <!-- Welcome Section -->
         <div class="welcome-section">
-            <h1 id="welcomeTitle">WELCOME BACK!</h1>
+            <h1 id="welcomeTitle">WELCOME BACK! salamat</h1>
             <p id="welcomeText">Please sign in to continue</p>
         </div>
 
@@ -99,7 +99,7 @@
         </script>
     @else
         <script>
-            console.warn('⚠️ Google reCAPTCHA site key is not configured in services.php or .env');
+            console.warn(' Google reCAPTCHA site key is not configured in services.php or .env');
         </script>
     @endif
 
