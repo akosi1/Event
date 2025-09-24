@@ -73,7 +73,7 @@
 
                     <div class="auth-links">
                         <p>{{ __("Don't have an account?") }}
-                            <a href="#" onclick="authAnimator.switchToRegister(); return false;">{{ __('Sign up here') }}</a>
+                            <a href="{{ route('register') }}">{{ __('Sign up here') }}</a>
                         </p>
                     </div>
                 </form>

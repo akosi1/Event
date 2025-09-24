@@ -120,7 +120,7 @@ body {
     position: absolute;
     left: 50%;
     top: 50%;
-    transform: translate(-50%, -50%) scale(0.9);
+    transform: translate(-50%, -50%);
     width: 320px;
     padding: 25px 22px;
     z-index: 3;
@@ -138,9 +138,8 @@ body {
 }
 
 .form-section.register-mode {
-    width: 340px;
+    width: 360px;
     padding: 22px 20px;
-    transform: translate(-50%, -50%) scale(0.9);
 }
 
 .form-section::before {
@@ -160,24 +159,6 @@ body {
     opacity: 1;
     transform: translateX(0);
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.form-content.sliding-out {
-    opacity: 0;
-    transform: translateX(-30px);
-}
-
-.form-content.sliding-in {
-    opacity: 0;
-    transform: translateX(30px);
-    animation: slideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-@keyframes slideIn {
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
 }
 
 .form-title {
@@ -213,7 +194,6 @@ body {
     position: relative;
 }
 
-/* Enhanced Select Styling for Consistent UI */
 .form-control, .form-select {
     width: 100%;
     padding: 12px 40px 12px 12px;
@@ -237,108 +217,6 @@ body {
     padding-right: 40px;
 }
 
-/* Custom Select Dropdown */
-.custom-select {
-    position: relative;
-}
-
-.custom-select-trigger {
-    width: 100%;
-    padding: 12px 40px 12px 12px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    color: white;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 44px;
-}
-
-.custom-select-trigger:after {
-    content: '';
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 5px solid rgba(255, 255, 255, 0.6);
-    transition: transform 0.3s ease;
-}
-
-.custom-select-trigger.open:after {
-    transform: rotate(180deg);
-}
-
-.custom-select-options {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: rgba(45, 21, 21, 0.98);
-    border: 2px solid rgba(220, 38, 38, 0.3);
-    border-radius: 8px;
-    margin-top: 4px;
-    max-height: 200px;
-    overflow-y: auto;
-    z-index: 1000;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-10px);
-    transition: all 0.3s ease;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(10px);
-}
-
-.custom-select-options.open {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-}
-
-.custom-select-option {
-    padding: 12px;
-    color: white;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.custom-select-option:last-child {
-    border-bottom: none;
-}
-
-.custom-select-option:hover,
-.custom-select-option.highlighted {
-    background: rgba(220, 38, 38, 0.2);
-    color: #dc2626;
-}
-
-.custom-select-option.selected {
-    background: rgba(220, 38, 38, 0.3);
-    color: #ef4444;
-    font-weight: 600;
-}
-
-/* Fallback for native select on mobile if custom fails */
-@media (max-width: 768px) {
-    .form-select {
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        appearance: none;
-        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.6)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
-        background-repeat: no-repeat;
-        background-position: right 12px center;
-        background-size: 16px;
-    }
-    
-    .form-select::-ms-expand {
-        display: none;
-    }
-}
-
 .form-control::placeholder {
     color: rgba(255, 255, 255, 0.6);
     font-size: 13px;
@@ -350,7 +228,7 @@ body {
     padding: 8px;
 }
 
-.form-control:focus, .form-select:focus, .custom-select-trigger:focus {
+.form-control:focus, .form-select:focus {
     outline: none;
     border-color: #dc2626;
     background: rgba(220, 38, 38, 0.1);
@@ -371,9 +249,18 @@ body {
 .form-control:focus + .input-label,
 .form-control:not(:placeholder-shown) + .input-label,
 .form-select:focus + .select-label,
-.form-select:not([value=""]) + .select-label,
-.custom-select-trigger:focus + .select-label,
-.custom-select-trigger.has-value + .select-label {
+.form-select:not([value=""]) + .select-label {
+    top: -8px;
+    left: 8px;
+    font-size: 11px;
+    color: #dc2626;
+    background: rgba(45, 21, 21, 0.9);
+    padding: 0 4px;
+    border-radius: 4px;
+}
+
+/* Fix for select labels when option is selected */
+.form-select:not([value=""]):not(:focus) + .select-label {
     top: -8px;
     left: 8px;
     font-size: 11px;
@@ -466,7 +353,6 @@ body {
 
 .auth-links a {
     color: #ef4444;
-    cursor: pointer;
     text-decoration: none;
     font-weight: 600;
     transition: all 0.3s ease;
@@ -543,7 +429,7 @@ body {
     background: rgba(220, 38, 38, 0.4);
 }
 
-/* Desktop side-by-side layout adjustments */
+/* Desktop responsiveness */
 @media (min-width: 1200px) {
     .welcome-section {
         max-width: 380px;
@@ -576,39 +462,34 @@ body {
     }
 }
 
-/* Enhanced Mobile Responsiveness */
+/* Mobile Responsive Design */
 @media (max-width: 768px) {
+    body {
+        overflow-x: hidden;
+    }
+    
     .auth-container {
         width: 100vw;
         height: 100vh;
-        display: grid;
-        grid-template-rows: auto 1fr;
-        gap: 20px;
-        padding: 20px;
-        align-items: center;
-        justify-items: center;
-    }
-    
-    .auth-container.register-mode {
-        background: linear-gradient(135deg, 
-            #dc2626 0%, 
-            #b91c1c 25%, 
-            #2d1515 75%, 
-            #1a0d0d 100%) !important;
+        position: relative;
+        overflow: hidden;
+        /* Remove flexbox - keep original positioning */
     }
     
     .diagonal-section {
         position: absolute;
         width: 100%;
-        height: 35%;
+        height: 40%;
         z-index: 1;
+        transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     .diagonal-section:not(.register-mode) {
         top: 0;
         left: 0;
         right: 0;
-        clip-path: polygon(0 0, 100% 0, 100% 60%, 0 100%);
+        clip-path: polygon(0 0, 100% 0, 100% 70%, 0 100%);
+        box-shadow: 0 10px 30px rgba(220, 38, 38, 0.3);
     }
     
     .diagonal-section.register-mode {
@@ -616,57 +497,52 @@ body {
         top: auto;
         left: 0;
         right: 0;
-        clip-path: polygon(0 40%, 100% 0, 100% 100%, 0 100%);
+        clip-path: polygon(0 30%, 100% 0, 100% 100%, 0 100%);
+        box-shadow: 0 -10px 30px rgba(220, 38, 38, 0.3);
     }
     
     .welcome-section {
-        position: relative;
-        left: auto;
-        right: auto;
-        transform: none;
-        margin: 0;
-        padding: 15px;
+        position: absolute;
+        top: 20%;
+        left: 50%;
+        transform: translateX(-50%);
         text-align: center;
         z-index: 2;
-        max-width: 100%;
-        grid-row: 1;
-    }
-    
-    .welcome-section:not(.register-mode) {
-        align-self: end;
+        max-width: 90%;
+        transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     .welcome-section.register-mode {
-        align-self: end;
+        top: auto;
+        bottom: 20%;
     }
     
     .welcome-section h1 {
-        font-size: 32px;
-        margin-bottom: 8px;
+        font-size: 36px;
+        margin-bottom: 10px;
         line-height: 1.2;
+        transition: all 0.4s ease;
     }
     
     .welcome-section p {
-        font-size: 15px;
+        font-size: 16px;
         opacity: 0.95;
+        transition: all 0.4s ease;
     }
     
     .form-section {
-        position: relative;
-        left: auto;
-        top: auto;
-        transform: none;
-        width: 100%;
-        max-width: 340px;
-        margin: 0;
-        padding: 25px 20px;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        max-width: 400px;
         z-index: 3;
-        grid-row: 2;
-        align-self: start;
+        transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     .form-section.register-mode {
-        max-width: 360px;
+        max-width: 420px;
     }
     
     .form-title {
@@ -675,35 +551,25 @@ body {
     }
     
     .form-row {
-        flex-direction: column;
-        gap: 0;
-        margin-bottom: 0;
-    }
-    
-    .form-row .form-group {
+        display: flex;
+        gap: 10px;
         margin-bottom: 16px;
     }
     
-    /* Force custom select on mobile */
-    .custom-select-options {
-        max-height: 150px;
-        border-radius: 12px;
-    }
-    
-    .custom-select-option {
-        padding: 14px 12px;
-        font-size: 14px;
+    .form-row .form-group {
+        flex: 1;
+        margin-bottom: 0;
     }
 }
 
 @media (max-width: 480px) {
     .auth-container {
         padding: 15px;
-        gap: 15px;
     }
     
     .welcome-section {
-        padding: 10px;
+        margin-bottom: 20px;
+        padding: 0 15px;
     }
     
     .welcome-section h1 {
@@ -726,35 +592,5 @@ body {
     .form-title {
         font-size: 20px;
         margin-bottom: 18px;
-    }
-}
-
-@media (max-height: 700px) and (max-width: 768px) {
-    .auth-container {
-        padding: 10px;
-        gap: 10px;
-        grid-template-rows: auto 1fr;
-    }
-    
-    .welcome-section {
-        padding: 8px;
-    }
-    
-    .welcome-section h1 {
-        font-size: 26px;
-        margin-bottom: 5px;
-    }
-    
-    .welcome-section p {
-        font-size: 13px;
-    }
-    
-    .form-section {
-        padding: 18px 15px;
-    }
-    
-    .form-title {
-        font-size: 18px;
-        margin-bottom: 15px;
     }
 }
