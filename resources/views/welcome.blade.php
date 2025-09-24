@@ -10,6 +10,9 @@
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+    <!-- Tailwind CSS (required for live mode) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
     <style>
         * {
             margin: 0;
@@ -22,13 +25,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(90deg, #1a0a0a 50%, #c00000 50%);
+            /* Split background: deep maroon (not black) + red */
+            background: linear-gradient(90deg, #2a0a0a 50%, #c00000 50%);
             font-family: 'Barlow', sans-serif;
             padding: 20px;
         }
 
         .welcome-container {
-            background: rgba(10, 5, 5, 0.85);
+            background: rgba(15, 8, 8, 0.85);
             padding: 60px 40px;
             text-align: center;
             width: 100%;
