@@ -30,18 +30,13 @@ class AuthAnimator {
         const currentPath = window.location.pathname;
         if (currentPath.includes('register')) {
             this.isRegisterMode = true;
-            // Ensure register classes are applied immediately
-            this.authContainer?.classList.add('register-mode');
-            this.diagonalSection?.classList.add('register-mode');
-            this.welcomeSection?.classList.add('register-mode');
-            this.formSection?.classList.add('register-mode');
-        } else {
-            this.isRegisterMode = false;
-            // Ensure login classes are applied
-            this.authContainer?.classList.remove('register-mode');
-            this.diagonalSection?.classList.remove('register-mode');
-            this.welcomeSection?.classList.remove('register-mode');
-            this.formSection?.classList.remove('register-mode');
+            // Ensure register classes are applied
+            setTimeout(() => {
+                this.authContainer?.classList.add('register-mode');
+                this.diagonalSection?.classList.add('register-mode');
+                this.welcomeSection?.classList.add('register-mode');
+                this.formSection?.classList.add('register-mode');
+            }, 100);
         }
     }
 
@@ -75,21 +70,20 @@ class AuthAnimator {
     }
 
     bindEvents() {
-        // Handle clicks on auth links for navigation (FIXED - Allow default behavior)
+        // Handle clicks on auth links for animation
         document.addEventListener('click', (e) => {
-            // Check if it's an auth link but don't prevent default navigation
             if (e.target.matches('a[href*="register"]') || 
                 e.target.matches('a[href*="sign-up"]') ||
                 e.target.textContent.toLowerCase().includes('sign up')) {
-                // Just add visual feedback, let the browser handle navigation
-                this.addClickFeedback(e.target);
+                e.preventDefault();
+                this.switchToRegister();
             }
             
             if (e.target.matches('a[href*="login"]') || 
                 e.target.matches('a[href*="sign-in"]') ||
                 e.target.textContent.toLowerCase().includes('sign in')) {
-                // Just add visual feedback, let the browser handle navigation
-                this.addClickFeedback(e.target);
+                e.preventDefault();
+                this.switchToLogin();
             }
         });
 
@@ -102,18 +96,67 @@ class AuthAnimator {
         });
     }
 
-    addClickFeedback(element) {
-        // Add a brief visual feedback for link clicks
-        element.style.transform = 'scale(0.95)';
-        element.style.transition = 'transform 0.1s ease';
+    switchToRegister() {
+        if (this.isAnimating || this.isRegisterMode) return;
+        this.isAnimating = true;
+        this.isRegisterMode = true;
+
+        // Update welcome section text with fade
+        this.updateWelcomeText('WELCOME!', 'Create your account');
+        
+        // Add register mode classes with stagger
+        setTimeout(() => {
+            this.authContainer?.classList.add('register-mode');
+        }, 100);
         
         setTimeout(() => {
-            element.style.transform = 'scale(1)';
-        }, 100);
+            this.diagonalSection?.classList.add('register-mode');
+        }, 200);
+        
+        setTimeout(() => {
+            this.welcomeSection?.classList.add('register-mode');
+        }, 300);
+        
+        setTimeout(() => {
+            this.formSection?.classList.add('register-mode');
+        }, 400);
+
+        // Navigate to register page after animation
+        setTimeout(() => {
+            window.location.href = '/register';
+        }, 800);
     }
 
-    // Remove the problematic switchToRegister and switchToLogin methods
-    // that were preventing navigation
+    switchToLogin() {
+        if (this.isAnimating || !this.isRegisterMode) return;
+        this.isAnimating = true;
+        this.isRegisterMode = false;
+
+        // Update welcome section text
+        this.updateWelcomeText('WELCOME BACK!', 'Please sign in to continue');
+
+        // Remove register mode classes with stagger
+        setTimeout(() => {
+            this.formSection?.classList.remove('register-mode');
+        }, 100);
+        
+        setTimeout(() => {
+            this.welcomeSection?.classList.remove('register-mode');
+        }, 200);
+        
+        setTimeout(() => {
+            this.diagonalSection?.classList.remove('register-mode');
+        }, 300);
+        
+        setTimeout(() => {
+            this.authContainer?.classList.remove('register-mode');
+        }, 400);
+
+        // Navigate to login page after animation
+        setTimeout(() => {
+            window.location.href = '/login';
+        }, 800);
+    }
 
     updateWelcomeText(title, text) {
         if (!this.welcomeTitle || !this.welcomeText) return;
@@ -139,10 +182,9 @@ class AuthAnimator {
             input.addEventListener('blur', this.inputBlurHandler.bind(this));
         });
 
-        // Setup select labels with improved mobile support
+        // Setup select labels
         document.querySelectorAll('.form-select').forEach(select => {
             const label = select.parentElement.querySelector('.select-label');
-            if (!label) return;
             
             const updateLabel = () => {
                 if (select.value && select.value !== '') {
@@ -165,13 +207,7 @@ class AuthAnimator {
 
             select.addEventListener('change', updateLabel);
             select.addEventListener('focus', updateLabel);
-            select.addEventListener('blur', updateLabel);
-            
-            // Initial call
             updateLabel();
-            
-            // Check after a short delay to ensure DOM is ready
-            setTimeout(updateLabel, 100);
         });
     }
 
@@ -209,6 +245,15 @@ class AuthAnimator {
         }
     }
 
+    // Public method to manually trigger mode switch
+    setMode(mode) {
+        if (mode === 'register' && !this.isRegisterMode) {
+            this.switchToRegister();
+        } else if (mode === 'login' && this.isRegisterMode) {
+            this.switchToLogin();
+        }
+    }
+
     // Cleanup method
     destroy() {
         if (this.particleInterval) {
@@ -226,3 +271,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Expose to global scope for onclick handlers
 window.authAnimator = authAnimator;
+
+// Additional utility functions for Laravel integration
+function updateFormMode(mode) {
+    if (window.authAnimator) {
+        window.authAnimator.setMode(mode);
+    }
+}
+
+// Handle browser back/forward buttons
+window.addEventListener('popstate', function(e) {
+    if (e.state && e.state.mode) {
+        updateFormMode(e.state.mode);
+    }
+});
+
+// Push state for better UX
+function pushAuthState(mode) {
+    const title = mode === 'register' ? 'Sign Up' : 'Sign In';
+    const url = mode === 'register' ? '/register' : '/login';
+    
+    history.pushState({ mode: mode }, title, url);
+}
