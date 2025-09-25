@@ -14,7 +14,7 @@
         <!-- Welcome Section -->
         <div class="welcome-section">
             <h1 id="welcomeTitle">WELCOME BACK!</h1>
-            <p id="welcomeText">Please sign in to continue</p>
+            <p id="welcomeText">Please sign in to continue di ako</p>
         </div>
 
         <!-- Login Form Section -->
@@ -79,7 +79,7 @@
                     </button>
 
                     <div class="auth-links">
-                        <p>{{ __("Don't have an account?wapa!") }}
+                        <p>{{ __("Don't have an account?") }}
                             <a href="{{ route('register') }}">{{ __('Sign up here') }}</a>
                         </p>
                         <p>
