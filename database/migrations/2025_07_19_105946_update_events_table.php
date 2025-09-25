@@ -9,7 +9,6 @@ return new class extends Migration
     public function up()
     {
         Schema::table('events', function (Blueprint $table) {
-
             if (!Schema::hasColumn('events', 'status')) {
                 $table->enum('status', ['active', 'postponed', 'cancelled'])->default('active')->after('location');
             }
@@ -32,29 +31,50 @@ return new class extends Migration
 
             if (!Schema::hasColumn('events', 'parent_event_id')) {
                 $table->unsignedBigInteger('parent_event_id')->nullable()->after('repeat_until');
-                $table->foreign('parent_event_id')->references('id')->on('events')->onDelete('set null');
             }
 
             if (!Schema::hasColumn('events', 'cancel_reason')) {
                 $table->text('cancel_reason')->nullable()->after('parent_event_id');
             }
+
+            // Only add the foreign key if the column exists and the constraint doesn't already exist
+            // Laravel doesn't provide a built-in way to check foreign keys by name, so be cautious here.
         });
+
+        // Add foreign key outside of the table modification block
+        if (
+            Schema::hasColumn('events', 'parent_event_id') &&
+            !\Illuminate\Support\Facades\DB::select(
+                "SELECT CONSTRAINT_NAME 
+                 FROM information_schema.KEY_COLUMN_USAGE 
+                 WHERE TABLE_NAME = 'events' 
+                 AND COLUMN_NAME = 'parent_event_id' 
+                 AND REFERENCED_TABLE_NAME = 'events'"
+            )
+        ) {
+            Schema::table('events', function (Blueprint $table) {
+                $table->foreign('parent_event_id')->references('id')->on('events')->onDelete('set null');
+            });
+        }
     }
 
     public function down()
     {
         Schema::table('events', function (Blueprint $table) {
-            // Drop foreign key if column exists, wrapped in try-catch
+            // Drop foreign key first if it exists
             if (Schema::hasColumn('events', 'parent_event_id')) {
-                try {
-                    $table->dropForeign(['parent_event_id']);
-                } catch (\Exception $e) {
-                    // Ignore error if foreign key does not exist
+                $sm = Schema::getConnection()->getDoctrineSchemaManager();
+                $foreignKeys = $sm->listTableForeignKeys('events');
+                foreach ($foreignKeys as $fk) {
+                    if (in_array('parent_event_id', $fk->getColumns())) {
+                        $table->dropForeign([$fk->getName()]);
+                    }
                 }
             }
 
             // Drop columns if they exist
             $columns = ['status', 'department', 'repeat_type', 'repeat_interval', 'repeat_until', 'parent_event_id', 'cancel_reason'];
+
             foreach ($columns as $column) {
                 if (Schema::hasColumn('events', $column)) {
                     $table->dropColumn($column);
