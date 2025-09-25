@@ -120,7 +120,7 @@
 
         <!-- Login link -->
         <div class="login-link">
-            Already have an account? wapa<a href="{{ route('login') }}">Sign in here</a>
+            Already have an account?<a href="{{ route('login') }}">Sign in here</a>
         </div>
     </div>
 
