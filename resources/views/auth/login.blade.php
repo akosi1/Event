@@ -79,7 +79,7 @@
                     </button>
 
                     <div class="auth-links">
-                        <p>{{ __("Don't have an account?") }}
+                        <p>{{ __("Don't have an account?wapa!") }}
                             <a href="{{ route('register') }}">{{ __('Sign up here') }}</a>
                         </p>
                         <p>
