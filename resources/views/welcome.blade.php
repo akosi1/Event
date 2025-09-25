@@ -23,7 +23,7 @@
             
             /* Background styling - Using your image with a soft purple overlay */
             .bg-image {
-                background-image: url('{!! asset("images/background.jpg") !!}');
+                background-image: url('{!! asset("images/mcc background.jpg") !!}');
                 background-size: cover;
                 background-position: center;
                 background-repeat: no-repeat;
@@ -208,8 +208,6 @@
             }
         </style>
     </head>
-            <!-- test !--> 
-    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     <body class="antialiased">
         <!-- Hero Section -->
         <section class="bg-image relative overflow-hidden">

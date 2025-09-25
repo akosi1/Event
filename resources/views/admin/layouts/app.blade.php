@@ -381,11 +381,6 @@
                href="{{ route('admin.events.index') }}">
                 <i class="fas fa-calendar-alt"></i> Events
             </a>
-          <a class="nav-link {{ request()->routeIs('admin.msaccount.*') ? 'active' : '' }}" 
-            href="{{ route('admin.msaccount.index') }}">
-                <i class="fas fa-user-shield"></i> MS365account
-            </a>
-
             <a class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}" 
                href="{{ route('admin.users.index') }}">
                 <i class="fas fa-users"></i> Users

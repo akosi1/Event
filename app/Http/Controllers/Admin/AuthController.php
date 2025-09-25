@@ -11,11 +11,21 @@ class AuthController extends Controller
 {
     public function showLoginForm()
     {
+        // If user is already logged in and is an admin, redirect to dashboard
+        if (Auth::check() && Auth::user()->isAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
+        
         return view('admin.auth.login');
     }
 
     public function login(Request $request)
     {
+        // If user is already logged in and is an admin, redirect to dashboard
+        if (Auth::check() && Auth::user()->isAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
+
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',

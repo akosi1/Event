@@ -720,7 +720,7 @@ function updateTextProperties() {
     selected.set({
         text: content,
         fontSize: size,
-        fontFamily: font,   
+        fontFamily: font,
         fill: color
     });
     
