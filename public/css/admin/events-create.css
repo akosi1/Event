@@ -1,0 +1,169 @@
+/* Events Create Styles */
+
+/* Enhanced Card Styling */
+.card {
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.card-header {
+    background: linear-gradient(135deg, #4f46e5, #4338ca);
+    border-radius: 16px 16px 0 0 !important;
+    border-bottom: none;
+    padding: 1.25rem 1.5rem;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+/* Form Controls */
+.form-control, .form-select {
+    border-radius: 10px;
+    border: 2px solid #e5e7eb;
+    padding: 0.75rem 1rem;
+    transition: all 0.2s ease;
+    font-size: 0.95rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.1);
+    transform: translateY(-1px);
+}
+
+.form-label {
+    color: #374151;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 10px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #4f46e5, #4338ca);
+    border: none;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #4338ca, #3730a3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
+}
+
+.btn-outline-secondary {
+    border-color: #d1d5db;
+    color: #6b7280;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #f9fafb;
+    border-color: #9ca3af;
+    transform: translateY(-1px);
+}
+
+.btn-outline-danger {
+    border-color: #fca5a5;
+    color: #dc2626;
+    font-size: 0.85rem;
+}
+
+.btn-outline-danger:hover {
+    background-color: #dc2626;
+    border-color: #dc2626;
+    color: white;
+}
+
+.btn-light {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: none;
+    color: #4f46e5;
+    font-weight: 500;
+}
+
+.btn-light:hover {
+    background-color: white;
+    color: #4338ca;
+    transform: translateY(-1px);
+}
+
+/* Image Preview */
+#imagePreview {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+#imagePreview .border {
+    border: 2px dashed #d1d5db !important;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    transition: all 0.2s ease;
+}
+
+#imagePreview:hover .border {
+    border-color: #4f46e5 !important;
+}
+
+/* Text Areas */
+textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Required Field Indicator */
+.text-danger {
+    color: #ef4444 !important;
+}
+
+/* Invalid Feedback */
+.invalid-feedback {
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.form-control.is-invalid, .form-select.is-invalid {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 0.2rem rgba(239, 68, 68, 0.1);
+}
+
+/* Form Text */
+.form-text {
+    color: #6b7280;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+}
+
+/* Cancel Reason Row Animation */
+#cancelReasonRow {
+    transition: all 0.3s ease;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    .btn {
+        padding: 0.625rem 1.25rem;
+        font-size: 0.9rem;
+    }
+    
+    .form-control, .form-select {
+        font-size: 0.9rem;
+        padding: 0.625rem 0.875rem;
+    }
+}
