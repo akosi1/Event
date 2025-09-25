@@ -4,7 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{
     ProfileController,
     EventJoinController,
-    DashboardController
+    DashboardController,
+    EventController,
+    AdminController
 };
 
 // Public route
@@ -30,6 +32,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('events/{event}')->name('events.')->group(function () {
         Route::post('join', [EventJoinController::class, 'join'])->name('join');
         Route::delete('leave', [EventJoinController::class, 'leave'])->name('leave');
+    });
+
+    // Optional: Event management (for organizers/admins)
+    Route::resource('events', EventController::class)->except(['show'])->middleware('can:manage-events');
+
+    // Optional: Admin-only routes
+    Route::middleware('can:is-admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+        Route::get('/users', [AdminController::class, 'users'])->name('users');
+        // Add more admin routes here
+    });
+
+    // Optional: Student-only routes
+    Route::middleware('can:is-student')->prefix('student')->name('student.')->group(function () {
+        Route::get('/events', [EventController::class, 'index'])->name('events');
+        // Add more student-only routes here
     });
 
 });

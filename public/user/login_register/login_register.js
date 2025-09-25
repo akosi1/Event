@@ -70,20 +70,28 @@ class AuthAnimator {
     }
 
     bindEvents() {
-        // Handle clicks on auth links for animation
+        // Handle clicks on auth links for animation - Fixed targeting
         document.addEventListener('click', (e) => {
+            // Check if clicked element is a link in auth-links
+            const authLinksContainer = e.target.closest('.auth-links');
+            if (!authLinksContainer) return;
+
+            // More specific targeting for register links
             if (e.target.matches('a[href*="register"]') || 
-                e.target.matches('a[href*="sign-up"]') ||
-                e.target.textContent.toLowerCase().includes('sign up')) {
+                e.target.getAttribute('href') === '/register' ||
+                (e.target.textContent && e.target.textContent.toLowerCase().includes('sign up here'))) {
                 e.preventDefault();
                 this.switchToRegister();
+                return;
             }
             
+            // More specific targeting for login links
             if (e.target.matches('a[href*="login"]') || 
-                e.target.matches('a[href*="sign-in"]') ||
-                e.target.textContent.toLowerCase().includes('sign in')) {
+                e.target.getAttribute('href') === '/login' ||
+                (e.target.textContent && e.target.textContent.toLowerCase().includes('sign in here'))) {
                 e.preventDefault();
                 this.switchToLogin();
+                return;
             }
         });
 
@@ -102,7 +110,7 @@ class AuthAnimator {
         this.isRegisterMode = true;
 
         // Update welcome section text with fade
-        this.updateWelcomeText('WELCOME!', 'Create your account');
+        this.updateWelcomeText('WELCOME!', 'Create your student account');
         
         // Add register mode classes with stagger
         setTimeout(() => {
@@ -123,6 +131,7 @@ class AuthAnimator {
 
         // Navigate to register page after animation
         setTimeout(() => {
+            this.isAnimating = false;
             window.location.href = '/register';
         }, 800);
     }
@@ -154,6 +163,7 @@ class AuthAnimator {
 
         // Navigate to login page after animation
         setTimeout(() => {
+            this.isAnimating = false;
             window.location.href = '/login';
         }, 800);
     }

@@ -13,9 +13,21 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            
+            // Name fields
+            $table->string('first_name');
+            $table->string('middle_name')->nullable();
+            $table->string('last_name');
+            
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
+
+            // Additional fields
+            $table->string('department')->nullable();
+            $table->string('student_id')->nullable();
+            $table->string('role')->default('student'); // example roles: student, admin, etc.
+            $table->string('status')->default('active'); // example statuses: active, inactive
+
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
@@ -42,8 +54,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('users');
     }
 };

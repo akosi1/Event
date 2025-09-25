@@ -9,12 +9,10 @@ return new class extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            // Add 'role' column if it doesn't exist
             if (!Schema::hasColumn('users', 'role')) {
                 $table->enum('role', ['admin', 'user'])->default('user')->after('email');
             }
 
-            // Add 'status' column if it doesn't exist
             if (!Schema::hasColumn('users', 'status')) {
                 $table->enum('status', ['active', 'inactive'])->default('active')->after('role');
             }
@@ -23,8 +21,21 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['role', 'status']);
-        });
+        // Check outside the table closure to avoid runtime errors
+        $columnsToDrop = [];
+
+        if (Schema::hasColumn('users', 'role')) {
+            $columnsToDrop[] = 'role';
+        }
+
+        if (Schema::hasColumn('users', 'status')) {
+            $columnsToDrop[] = 'status';
+        }
+
+        if (!empty($columnsToDrop)) {
+            Schema::table('users', function (Blueprint $table) use ($columnsToDrop) {
+                $table->dropColumn($columnsToDrop);
+            });
+        }
     }
 };

@@ -3,13 +3,17 @@
     <link rel="stylesheet" href="{{ asset('user/login_register/login_register.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
+    @if(config('services.recaptcha.site_key'))
+        <meta name="recaptcha-key" content="{{ config('services.recaptcha.site_key') }}">
+    @endif
+
     <div class="auth-container">
         <div class="floating-particles" id="particles"></div>
         <div class="diagonal-section"></div>
 
         <!-- Welcome Section -->
         <div class="welcome-section">
-            <h1 id="welcomeTitle">WELCOME BACK! salamat</h1>
+            <h1 id="welcomeTitle">WELCOME BACK!</h1>
             <p id="welcomeText">Please sign in to continue</p>
         </div>
 
@@ -23,15 +27,18 @@
                 <form method="POST" action="{{ route('login') }}" id="login-form">
                     @csrf
 
-                    <!-- Email -->
+                    <!-- Email or Student ID -->
                     <div class="form-group">
                         <div class="input-wrapper">
-                            <input id="email" type="email" name="email" value="{{ old('email') }}"
+                            <input id="email" type="text" name="email" value="{{ old('email') }}"
                                 class="form-control" placeholder=" " required autocomplete="username" autofocus>
-                            <label class="input-label">Email Address</label>
-                            <i class="fas fa-envelope input-icon"></i>
+                            <label class="input-label">MS365 Email or Student ID</label>
+                            <i class="fas fa-user input-icon"></i>
                         </div>
                         <x-input-error :messages="$errors->get('email')" class="error-msg" />
+                        <div class="input-hint">
+                            <small>Enter your MS365 email (e.g., firstname.lastname@mcclawis.edu.ph) or Student ID</small>
+                        </div>
                     </div>
 
                     <!-- Password -->
@@ -50,11 +57,11 @@
                         <div class="input-wrapper">
                             <select id="department" name="department" class="form-select" required>
                                 <option value=""></option>
-                                <option value="BSIT" {{ old('department') == 'BSIT' ? 'selected' : '' }}>BSIT</option>
-                                <option value="BSBA" {{ old('department') == 'BSBA' ? 'selected' : '' }}>BSBA</option>
-                                <option value="BSED" {{ old('department') == 'BSED' ? 'selected' : '' }}>BSED</option>
-                                <option value="BEED" {{ old('department') == 'BEED' ? 'selected' : '' }}>BEED</option>
-                                <option value="BSHM" {{ old('department') == 'BSHM' ? 'selected' : '' }}>BSHM</option>
+                                <option value="BSIT" {{ old('department') == 'BSIT' ? 'selected' : '' }}>BSIT - Information Technology</option>
+                                <option value="BSBA" {{ old('department') == 'BSBA' ? 'selected' : '' }}>BSBA - Business Administration</option>
+                                <option value="BSED" {{ old('department') == 'BSED' ? 'selected' : '' }}>BSED - Secondary Education</option>
+                                <option value="BEED" {{ old('department') == 'BEED' ? 'selected' : '' }}>BEED - Elementary Education</option>
+                                <option value="BSHM" {{ old('department') == 'BSHM' ? 'selected' : '' }}>BSHM - Hospitality Management</option>
                             </select>
                             <label class="select-label">Select Your Department</label>
                             <i class="fas fa-graduation-cap input-icon"></i>
@@ -75,34 +82,34 @@
                         <p>{{ __("Don't have an account?") }}
                             <a href="{{ route('register') }}">{{ __('Sign up here') }}</a>
                         </p>
+                        <p>
+                            <a href="{{ route('password.request') }}">{{ __('Forgot your password?') }}</a>
+                        </p>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- reCAPTCHA v3 Script -->
+    <!-- reCAPTCHA v3 CDN -->
     @if(config('services.recaptcha.site_key'))
         <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}"></script>
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                grecaptcha.ready(function () {
-                    grecaptcha.execute('{{ config('services.recaptcha.site_key') }}', { action: 'login' })
-                        .then(function (token) {
-                            document.getElementById('g-recaptcha-response').value = token;
-                        })
-                        .catch(function (error) {
-                            console.error("reCAPTCHA error:", error);
-                        });
-                });
-            });
-        </script>
+        <script src="{{ asset('user/v3/recapcha.js') }}"></script>
     @else
         <script>
-            console.warn(' Google reCAPTCHA site key is not configured in services.php or .env');
+            console.warn('Google reCAPTCHA site key is not configured in services.php or .env');
         </script>
     @endif
 
     <!-- Custom JS -->
     <script src="{{ asset('user/login_register/login_register.js') }}"></script>
-</x-guest-layout>   
+
+    <style>
+    .input-hint {
+        margin-top: 4px;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 11px;
+    }
+    </style>
+    
+</x-guest-layout>
