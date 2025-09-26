@@ -1,75 +1,120 @@
-// Fixed recapcha.js - Corrects token name mismatch
-
-document.addEventListener("DOMContentLoaded", function () {
-    const siteKey = document.querySelector('meta[name="recaptcha-key"]')?.content;
-
+// reCAPTCHA v3 Implementation for Login/Register Forms
+document.addEventListener('DOMContentLoaded', function() {
+    const siteKey = document.querySelector('meta[name="recaptcha-key"]')?.getAttribute('content');
+    
     if (!siteKey) {
-        console.error("reCAPTCHA site key not found in meta tag.");
+        console.warn('reCAPTCHA site key not found in meta tag');
         return;
     }
 
-    console.log('reCAPTCHA site key found:', siteKey);
+    // Initialize reCAPTCHA when script is loaded
+    if (typeof grecaptcha !== 'undefined') {
+        initRecaptcha();
+    } else {
+        // Wait for reCAPTCHA script to load
+        window.addEventListener('load', initRecaptcha);
+    }
 
-    // Function to generate and inject token
-    function generateRecaptchaToken(action = 'homepage') {
-        grecaptcha.ready(function () {
+    function initRecaptcha() {
+        if (typeof grecaptcha === 'undefined') {
+            console.error('reCAPTCHA library not loaded');
+            return;
+        }
+
+        grecaptcha.ready(function() {
+            console.log('reCAPTCHA ready');
+            
+            // Handle login form
+            const loginForm = document.getElementById('login-form');
+            if (loginForm) {
+                setupFormRecaptcha(loginForm, 'login');
+            }
+
+            // Handle register form
+            const registerForm = document.getElementById('register-form');
+            if (registerForm) {
+                setupFormRecaptcha(registerForm, 'register');
+            }
+        });
+    }
+
+    function setupFormRecaptcha(form, action) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const submitButton = form.querySelector('.btn-submit');
+            const originalText = submitButton.innerHTML;
+            
+            // Show loading state
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+            
             grecaptcha.execute(siteKey, { action: action })
-                .then(function (token) {
-                    console.log('reCAPTCHA token generated for', action, ':', token);
-
-                    // Inject token into the correct input field name
-                    const input = document.querySelector('input[name="g-recaptcha-response"]');
-                    if (input) {
-                        input.value = token;
-                        console.log('Token injected into g-recaptcha-response field');
-                    } else {
-                        console.warn('g-recaptcha-response input field not found');
+                .then(function(token) {
+                    // Set the token in the hidden input
+                    const tokenInput = form.querySelector('input[name="g-recaptcha-response"]');
+                    if (tokenInput) {
+                        tokenInput.value = token;
                     }
+                    
+                    // Update button text for actual submission
+                    if (action === 'login') {
+                        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
+                    } else if (action === 'register') {
+                        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+                    }
+                    
+                    // Submit the form
+                    form.submit();
                 })
-                .catch(function (error) {
-                    console.error("reCAPTCHA error:", error);
+                .catch(function(error) {
+                    console.error('reCAPTCHA error:', error);
+                    
+                    // Reset button
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalText;
+                    
+                    // Show error message
+                    showRecaptchaError('reCAPTCHA verification failed. Please try again.');
                 });
         });
     }
 
-    // Generate initial token
-    generateRecaptchaToken('homepage');
+    function showRecaptchaError(message) {
+        // Remove existing error
+        const existingError = document.querySelector('.recaptcha-error');
+        if (existingError) {
+            existingError.remove();
+        }
 
-    // Re-generate token before form submission
-    document.addEventListener('submit', function(e) {
-        const form = e.target;
-        if (form.querySelector('input[name="g-recaptcha-response"]')) {
-            e.preventDefault(); // Prevent initial submission
-            
-            let action = 'homepage';
-            if (form.id === 'login-form') {
-                action = 'login';
-            } else if (form.id === 'register-form') {
-                action = 'register';
+        // Create error element
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'recaptcha-error error-msg';
+        errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
+        
+        // Add to form
+        const submitButton = document.querySelector('.btn-submit');
+        if (submitButton) {
+            submitButton.parentNode.insertBefore(errorDiv, submitButton);
+        }
+
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (errorDiv.parentNode) {
+                errorDiv.remove();
             }
-            
-            console.log('Generating fresh token for form submission:', action);
-            
-            grecaptcha.ready(function () {
-                grecaptcha.execute(siteKey, { action: action })
-                    .then(function (token) {
-                        const input = form.querySelector('input[name="g-recaptcha-response"]');
-                        if (input) {
-                            input.value = token;
-                            console.log('Fresh token generated and injected');
-                            form.submit(); // Now submit the form
-                        }
-                    })
-                    .catch(function (error) {
-                        console.error("reCAPTCHA error during form submission:", error);
-                        form.submit(); // Submit anyway if reCAPTCHA fails
-                    });
-            });
+        }, 5000);
+    }
+
+    // Handle network errors
+    window.addEventListener('online', function() {
+        const error = document.querySelector('.recaptcha-error');
+        if (error) {
+            error.remove();
         }
     });
 
-    // Refresh token every 2 minutes (tokens expire after 2 minutes)
-    setInterval(function() {
-        generateRecaptchaToken('refresh');
-    }, 110000); // 1 minute 50 seconds
+    window.addEventListener('offline', function() {
+        showRecaptchaError('Network connection lost. Please check your internet connection.');
+    });
 });
