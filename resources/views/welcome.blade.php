@@ -132,5 +132,6 @@
             console.warn('Google reCAPTCHA site key is not configured.');
         </script>
     @endif
+    <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
 </body>
 </html>
