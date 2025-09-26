@@ -499,13 +499,5 @@
                 });
             });
         </script>
-            @if(config('services.recaptcha.site_key'))
-        <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}"></script>
-        <script src="{{ asset('user/v3/recapcha.js') }}"></script>
-    @else
-        <script>
-            console.warn('Google reCAPTCHA site key is not configured.');
-        </script>
-    @endif
     </body>
     </html>
