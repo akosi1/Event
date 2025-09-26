@@ -1,8 +1,6 @@
-// Login/Register Animation System with Enhanced Mobile Support
+// Fixed Login/Register Animation System - Production Ready
 class AuthAnimator {
     constructor() {
-        this.isRegisterMode = false;
-        this.isAnimating = false;
         this.init();
     }
 
@@ -10,40 +8,18 @@ class AuthAnimator {
         this.initElements();
         this.createParticles();
         this.startParticleSystem();
-        this.bindEvents();
         this.setupFormAnimations();
-        this.detectCurrentMode();
+        this.bindFormEvents();
     }
 
     initElements() {
-        this.authContainer = document.querySelector('.auth-container');
-        this.diagonalSection = document.querySelector('.diagonal-section');
-        this.welcomeSection = document.querySelector('.welcome-section');
-        this.welcomeTitle = document.getElementById('welcomeTitle') || this.welcomeSection?.querySelector('h1');
-        this.welcomeText = document.getElementById('welcomeText') || this.welcomeSection?.querySelector('p');
-        this.formSection = document.querySelector('.form-section');
         this.particlesContainer = document.getElementById('particles');
-    }
-
-    detectCurrentMode() {
-        // Detect if we're on register page
-        const currentPath = window.location.pathname;
-        if (currentPath.includes('register')) {
-            this.isRegisterMode = true;
-            // Ensure register classes are applied
-            setTimeout(() => {
-                this.authContainer?.classList.add('register-mode');
-                this.diagonalSection?.classList.add('register-mode');
-                this.welcomeSection?.classList.add('register-mode');
-                this.formSection?.classList.add('register-mode');
-            }, 100);
-        }
     }
 
     createParticles() {
         if (!this.particlesContainer) return;
         
-        // Create multiple particles
+        // Create floating particles
         for (let i = 0; i < 15; i++) {
             setTimeout(() => {
                 const particle = document.createElement('div');
@@ -69,146 +45,80 @@ class AuthAnimator {
         }, 3000);
     }
 
-    bindEvents() {
-        // Handle clicks on auth links for animation
-        document.addEventListener('click', (e) => {
-            if (e.target.matches('a[href*="register"]') || 
-                e.target.matches('a[href*="sign-up"]') ||
-                e.target.textContent.toLowerCase().includes('sign up')) {
-                e.preventDefault();
-                this.switchToRegister();
-            }
-            
-            if (e.target.matches('a[href*="login"]') || 
-                e.target.matches('a[href*="sign-in"]') ||
-                e.target.textContent.toLowerCase().includes('sign in')) {
-                e.preventDefault();
-                this.switchToLogin();
-            }
-        });
-
-        // Handle form submissions
-        document.addEventListener('submit', (e) => {
-            const form = e.target;
-            if (form.matches('form')) {
-                this.handleFormSubmit(e);
-            }
-        });
-    }
-
-    switchToRegister() {
-        if (this.isAnimating || this.isRegisterMode) return;
-        this.isAnimating = true;
-        this.isRegisterMode = true;
-
-        // Update welcome section text with fade
-        this.updateWelcomeText('WELCOME!', 'Create your account');
-        
-        // Add register mode classes with stagger
-        setTimeout(() => {
-            this.authContainer?.classList.add('register-mode');
-        }, 100);
-        
-        setTimeout(() => {
-            this.diagonalSection?.classList.add('register-mode');
-        }, 200);
-        
-        setTimeout(() => {
-            this.welcomeSection?.classList.add('register-mode');
-        }, 300);
-        
-        setTimeout(() => {
-            this.formSection?.classList.add('register-mode');
-        }, 400);
-
-        // Navigate to register page after animation
-        setTimeout(() => {
-            window.location.href = '/register';
-        }, 800);
-    }
-
-    switchToLogin() {
-        if (this.isAnimating || !this.isRegisterMode) return;
-        this.isAnimating = true;
-        this.isRegisterMode = false;
-
-        // Update welcome section text
-        this.updateWelcomeText('WELCOME BACK!', 'Please sign in to continue');
-
-        // Remove register mode classes with stagger
-        setTimeout(() => {
-            this.formSection?.classList.remove('register-mode');
-        }, 100);
-        
-        setTimeout(() => {
-            this.welcomeSection?.classList.remove('register-mode');
-        }, 200);
-        
-        setTimeout(() => {
-            this.diagonalSection?.classList.remove('register-mode');
-        }, 300);
-        
-        setTimeout(() => {
-            this.authContainer?.classList.remove('register-mode');
-        }, 400);
-
-        // Navigate to login page after animation
-        setTimeout(() => {
-            window.location.href = '/login';
-        }, 800);
-    }
-
-    updateWelcomeText(title, text) {
-        if (!this.welcomeTitle || !this.welcomeText) return;
-        
-        // Fade out
-        this.welcomeTitle.style.opacity = '0';
-        this.welcomeText.style.opacity = '0';
-        
-        setTimeout(() => {
-            this.welcomeTitle.textContent = title;
-            this.welcomeText.textContent = text;
-            
-            // Fade in
-            this.welcomeTitle.style.opacity = '1';
-            this.welcomeText.style.opacity = '1';
-        }, 300);
-    }
-
     setupFormAnimations() {
         // Enhanced form animations
         document.querySelectorAll('input, select').forEach(input => {
             input.addEventListener('focus', this.inputFocusHandler.bind(this));
             input.addEventListener('blur', this.inputBlurHandler.bind(this));
+            
+            // Handle label animations for inputs with values
+            if (input.value) {
+                this.activateLabel(input);
+            }
         });
 
         // Setup select labels
         document.querySelectorAll('.form-select').forEach(select => {
             const label = select.parentElement.querySelector('.select-label');
+            if (!label) return;
             
             const updateLabel = () => {
                 if (select.value && select.value !== '') {
-                    label.style.top = '-8px';
-                    label.style.left = '8px';
-                    label.style.fontSize = '11px';
-                    label.style.color = '#dc2626';
-                    label.style.background = 'rgba(45, 21, 21, 0.9)';
-                    label.style.padding = '0 4px';
-                    label.style.borderRadius = '4px';
+                    this.activateLabel(select);
                 } else {
-                    label.style.top = '12px';
-                    label.style.left = '12px';
-                    label.style.fontSize = '13px';
-                    label.style.color = 'rgba(255, 255, 255, 0.6)';
-                    label.style.background = 'transparent';
-                    label.style.padding = '0';
+                    this.deactivateLabel(select);
                 }
             };
 
             select.addEventListener('change', updateLabel);
             select.addEventListener('focus', updateLabel);
-            updateLabel();
+            updateLabel(); // Initial state
         });
+
+        // Setup input labels
+        document.querySelectorAll('.form-control').forEach(input => {
+            const label = input.parentElement.querySelector('.input-label');
+            if (!label) return;
+
+            const updateLabel = () => {
+                if (input.value && input.value !== '') {
+                    this.activateLabel(input);
+                } else {
+                    this.deactivateLabel(input);
+                }
+            };
+
+            input.addEventListener('input', updateLabel);
+            input.addEventListener('change', updateLabel);
+            updateLabel(); // Initial state
+        });
+    }
+
+    activateLabel(element) {
+        const label = element.parentElement.querySelector('.input-label, .select-label');
+        if (label) {
+            label.style.top = '-8px';
+            label.style.left = '8px';
+            label.style.fontSize = '11px';
+            label.style.color = '#dc2626';
+            label.style.background = 'rgba(45, 21, 21, 0.9)';
+            label.style.padding = '0 4px';
+            label.style.borderRadius = '4px';
+            label.style.transform = 'translateY(0)';
+        }
+    }
+
+    deactivateLabel(element) {
+        const label = element.parentElement.querySelector('.input-label, .select-label');
+        if (label) {
+            label.style.top = '12px';
+            label.style.left = '12px';
+            label.style.fontSize = '13px';
+            label.style.color = 'rgba(255, 255, 255, 0.6)';
+            label.style.background = 'transparent';
+            label.style.padding = '0';
+            label.style.transform = 'translateY(0)';
+        }
     }
 
     inputFocusHandler(e) {
@@ -217,6 +127,7 @@ class AuthAnimator {
             wrapper.style.transform = 'scale(1.02)';
             wrapper.style.zIndex = '10';
         }
+        this.activateLabel(e.target);
     }
 
     inputBlurHandler(e) {
@@ -225,33 +136,69 @@ class AuthAnimator {
             wrapper.style.transform = 'scale(1)';
             wrapper.style.zIndex = 'auto';
         }
+        
+        if (!e.target.value) {
+            this.deactivateLabel(e.target);
+        }
     }
 
-    handleFormSubmit(e) {
-        const submitBtn = e.target.querySelector('.btn-submit');
-        if (submitBtn) {
+    bindFormEvents() {
+        // Handle form submissions with loading states
+        document.addEventListener('submit', (e) => {
+            const form = e.target;
+            if (!form.matches('form')) return;
+
+            const submitBtn = form.querySelector('.btn-submit');
+            if (!submitBtn) return;
+
+            // Prevent double submission
+            if (submitBtn.disabled) {
+                e.preventDefault();
+                return;
+            }
+
+            submitBtn.disabled = true;
             submitBtn.style.transform = 'translateY(-1px)';
             
-            const isLogin = e.target.action.includes('login');
-            const isRegister = e.target.action.includes('register');
+            // Update button text based on form type
+            const originalText = submitBtn.innerHTML;
+            const isLogin = form.action.includes('login') || form.id === 'login-form';
+            const isRegister = form.action.includes('register') || form.id === 'register-form';
+            const isOtp = form.action.includes('otp') || form.id === 'otp-form';
             
             if (isLogin) {
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
             } else if (isRegister) {
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+            } else if (isOtp) {
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
             } else {
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
             }
-        }
-    }
 
-    // Public method to manually trigger mode switch
-    setMode(mode) {
-        if (mode === 'register' && !this.isRegisterMode) {
-            this.switchToRegister();
-        } else if (mode === 'login' && this.isRegisterMode) {
-            this.switchToLogin();
-        }
+            // Re-enable button after 30 seconds as failsafe
+            setTimeout(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+                submitBtn.style.transform = 'translateY(0)';
+            }, 30000);
+        });
+
+        // Handle input validation feedback
+        document.addEventListener('input', (e) => {
+            const input = e.target;
+            if (!input.matches('input, select')) return;
+
+            const wrapper = input.closest('.input-wrapper');
+            if (!wrapper) return;
+
+            // Remove error styling on input
+            wrapper.classList.remove('error');
+            const errorMsg = wrapper.parentElement.querySelector('.error-msg');
+            if (errorMsg) {
+                errorMsg.style.opacity = '0';
+            }
+        });
     }
 
     // Cleanup method
@@ -262,34 +209,20 @@ class AuthAnimator {
     }
 }
 
-// Initialize the auth animator when DOM is ready
-let authAnimator;
-
+// Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
-    authAnimator = new AuthAnimator();
-});
-
-// Expose to global scope for onclick handlers
-window.authAnimator = authAnimator;
-
-// Additional utility functions for Laravel integration
-function updateFormMode(mode) {
-    if (window.authAnimator) {
-        window.authAnimator.setMode(mode);
-    }
-}
-
-// Handle browser back/forward buttons
-window.addEventListener('popstate', function(e) {
-    if (e.state && e.state.mode) {
-        updateFormMode(e.state.mode);
-    }
-});
-
-// Push state for better UX
-function pushAuthState(mode) {
-    const title = mode === 'register' ? 'Sign Up' : 'Sign In';
-    const url = mode === 'register' ? '/register' : '/login';
+    window.authAnimator = new AuthAnimator();
     
-    history.pushState({ mode: mode }, title, url);
-}
+    // Focus first input
+    const firstInput = document.querySelector('input:not([type="hidden"])');
+    if (firstInput) {
+        setTimeout(() => firstInput.focus(), 100);
+    }
+});
+
+// Handle page unload
+window.addEventListener('beforeunload', function() {
+    if (window.authAnimator) {
+        window.authAnimator.destroy();
+    }
+});
