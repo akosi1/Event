@@ -12,13 +12,21 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            // Add new name fields
-            $table->string('first_name')->after('id');
-            $table->string('middle_name')->nullable()->after('first_name');
-            $table->string('last_name')->after('middle_name');
-            
-            // Remove old name field
-            $table->dropColumn('name');
+            // Only add if not exists
+            if (!Schema::hasColumn('users', 'first_name')) {
+                $table->string('first_name')->after('id');
+            }
+            if (!Schema::hasColumn('users', 'middle_name')) {
+                $table->string('middle_name')->nullable()->after('first_name');
+            }
+            if (!Schema::hasColumn('users', 'last_name')) {
+                $table->string('last_name')->after('middle_name');
+            }
+
+            // Drop old "name" field if it exists
+            if (Schema::hasColumn('users', 'name')) {
+                $table->dropColumn('name');
+            }
         });
     }
 
@@ -28,11 +36,17 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            // Add back old name field
-            $table->string('name')->after('id');
-            
-            // Remove new name fields
-            $table->dropColumn(['first_name', 'middle_name', 'last_name']);
+            // Restore old "name" field if missing
+            if (!Schema::hasColumn('users', 'name')) {
+                $table->string('name')->after('id');
+            }
+
+            // Drop new fields if they exist
+            foreach (['first_name', 'middle_name', 'last_name'] as $col) {
+                if (Schema::hasColumn('users', $col)) {
+                    $table->dropColumn($col);
+                }
+            }
         });
     }
 };

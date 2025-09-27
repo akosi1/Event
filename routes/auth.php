@@ -9,19 +9,40 @@ use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\Auth\MS365OTPController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
+    // MS365 Email Verification Routes
+    Route::get('verify-ms365', [MS365OTPController::class, 'showMS365Form'])
+        ->name('ms365.verify');
+    
+    Route::post('verify-ms365', [MS365OTPController::class, 'verifyMS365Account'])
+        ->name('ms365.verify.store');
+    
+    // OTP Verification Routes
+    Route::get('verify-otp', [MS365OTPController::class, 'showOTPForm'])
+        ->name('otp.verify.form');
+    
+    Route::post('verify-otp', [MS365OTPController::class, 'verifyOTP'])
+        ->name('otp.verify.store');
+    
+    Route::post('resend-otp', [MS365OTPController::class, 'resendOTP'])
+        ->name('otp.resend');
+
+    // Registration Routes (requires verified email)
     Route::get('register', [RegisteredUserController::class, 'create'])
         ->name('register');
 
     Route::post('register', [RegisteredUserController::class, 'store']);
 
+    // Login Routes
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
 
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
 
+    // Password Reset Routes
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');
 
