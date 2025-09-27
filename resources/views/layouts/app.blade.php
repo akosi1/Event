@@ -36,6 +36,3 @@
         </div>
     </body>
 </html>
-<link href="{{ asset('user/nav/css/navbar.css') }}" rel="stylesheet">
-<link href="{{ asset('user/css/dashboard.css') }}" rel="stylesheet">
-<script src="{{ asset('user/nav/js/navbar.js') }}"></script>

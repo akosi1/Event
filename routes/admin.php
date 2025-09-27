@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Route;
 
 // Admin Authentication Routes
 Route::get('/', [AuthController::class, 'showLoginForm'])->name('admin.login');
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('admin.login.form'); // Add this line
 Route::post('/login', [AuthController::class, 'login'])->name('admin.login.post');
 
 // Admin Protected Routes

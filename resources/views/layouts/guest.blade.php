@@ -15,8 +15,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <!-- Scripts -->
-    <link rel="stylesheet" href="{{ asset('build/assets/app-B5LGQfPm.css') }}">
-<script src="{{ asset('build/assets/app-DaBYqt0m.js') }}" defer></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
         * {
@@ -180,22 +179,5 @@
             return emailRegex.test(email);
         }
     </script>
-    <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}"></script>
-
-<script>
-    grecaptcha.ready(function() {
-        console.log("reCAPTCHA is ready!"); // ✅ Debug message
-
-        grecaptcha.execute('{{ config('services.recaptcha.site_key') }}', {action: 'login'}).then(function(token) {
-            console.log("reCAPTCHA token received:", token); // ✅ This shows the token in the console
-
-            const recaptchaResponse = document.createElement('input');
-            recaptchaResponse.setAttribute('type', 'hidden');
-            recaptchaResponse.setAttribute('name', 'recaptcha_token');
-            recaptchaResponse.setAttribute('value', token);
-            document.querySelector('form').appendChild(recaptchaResponse);
-        });
-    });
-</script>
 </body>
 </html>

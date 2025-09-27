@@ -4,136 +4,193 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>MCC Event & Portfolio Organizer</title>
-
-    <!-- Favicon -->
-    <link rel="icon" href="{{ asset('favicon.ico') }}?v={{ filemtime(public_path('favicon.ico')) }}" type="image/x-icon">
-
+    
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
-
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-
+    
     <style>
         body {
-            margin: 0;
-            padding: 0;
             font-family: 'Inter', sans-serif;
-            height: 100vh;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .glass-effect {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .hover-scale {
+            transition: transform 0.3s ease;
+        }
+        
+        .hover-scale:hover {
+            transform: translateY(-2px);
+        }
+        
+        .floating-animation {
+            animation: floating 6s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .feature-card {
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .button-group {
             display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
             justify-content: center;
             align-items: center;
-            color: white;
-            overflow: hidden;
-            background: linear-gradient(90deg, #c43e3e 50%, #0a0202 50%);
         }
-
-        .content {
-            text-align: center;
-            z-index: 10;
-            padding: 2rem;
-            max-width: 800px;
-        }
-
-        .logo-container {
-            max-width: 250px;
-            margin: 0 auto 2rem;
-        }
-
-        .logo {
-            width: 100%;
-            height: auto;
-            max-height: 120px;
-            object-fit: contain;
-        }
-
-        .main-title {
-            font-size: 4.5rem;
-            font-weight: 900;
-            color: white;
-            margin: 0;
-            line-height: 1.1;
-            text-transform: uppercase;
-            text-shadow:
-                2px 2px 0 #000,
-                4px 4px 0 #000,
-                6px 6px 8px rgba(0, 0, 0, 0.5);
-        }
-
-        .btn-get-started {
-            display: inline-block;
-            padding: 14px 40px;
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: white;
-            background: linear-gradient(135deg, #ff4136, #ff6b6b);
-            border: none;
-            border-radius: 0;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            box-shadow: 0 6px 20px rgba(255, 65, 54, 0.5);
-            letter-spacing: 1px;
-            font-family: 'Inter', sans-serif;
-            margin-top: 1.5rem;
-        }
-
-        .btn-get-started:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(255, 65, 54, 0.7);
-            background: linear-gradient(135deg, #ff6b6b, #ff8a8a);
-        }
-
-        .login-link {
-            margin-top: 2rem;
-            font-size: 0.95rem;
-            opacity: 0.85;
-        }
-
-        .login-link a {
-            color: #ff6b6b;
-            text-decoration: underline;
-            font-weight: 600;
-        }
-
-        @media (max-width: 640px) {
-            .main-title { font-size: 2.8rem; }
-            .btn-get-started { padding: 12px 32px; font-size: 1.1rem; }
+        
+        @media (max-width: 768px) {
+            .mobile-text {
+                font-size: 2rem;
+                line-height: 1.2;
+            }
+            
+            .mobile-subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .button-group .btn {
+                width: 100%;
+                max-width: 280px;
+            }
         }
     </style>
 </head>
-<body>
-    <div class="content">
-        <!-- Logo -->
-        <div class="logo-container">
-            <img src="{{ asset('images/logo.png') }}" alt="MCC Logo" class="logo">
+<body class="antialiased">
+    <!-- Hero Section -->
+    <section class="min-h-screen gradient-bg flex items-center justify-center relative overflow-hidden">
+        <!-- Background Elements -->
+        <div class="absolute inset-0">
+            <div class="absolute top-20 left-10 w-32 h-32 md:w-72 md:h-72 bg-white opacity-10 rounded-full floating-animation"></div>
+            <div class="absolute bottom-20 right-10 w-48 h-48 md:w-96 md:h-96 bg-white opacity-5 rounded-full floating-animation" style="animation-delay: -3s;"></div>
         </div>
+        
+        <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <!-- Main Content -->
+            <div class="mb-8">
 
-        <!-- Title -->
-        <h1 class="main-title">
-            MCC EVENT &<br>
-            PORTFOLIO<br>
-            ORGANIZER
-        </h1>
-
-        <!-- Get Started Button -->
-        <a href="{{ route('register') }}" class="btn-get-started">→ GET STARTED</a>
-
-        <!-- Login link -->
-        <div class="login-link">
-            Already have an account? <a href="{{ route('login') }}">Sign in here</a>
+                
+                <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-4 sm:mb-6 leading-tight mobile-text">
+                    MCC Event & Portfolio
+                    <span class="bg-gradient-to-r from-yellow-400 to-pink-400 bg-clip-text text-transparent block sm:inline">
+                        Organizer
+                    </span>
+                </h1>
+                <!-- CTA Buttons -->
+                @if (Route::has('login'))
+                    <div class="button-group">
+                        @auth   
+                            <a href="{{ url('/dashboard') }}" class="btn btn-primary text-white px-8 py-4 rounded-full font-semibold text-lg inline-flex items-center space-x-3">
+                                <i class="fas fa-tachometer-alt text-xl"></i>
+                                <span>Go to Dashboard</span>
+                            </a>
+                        @else
+                            <a href="{{ route('login') }}" class="btn btn-secondary text-white px-8 py-4 rounded-full font-semibold text-lg inline-flex items-center space-x-3">
+                                <i class="fas fa-sign-in-alt text-xl"></i>
+                                <span>LOGIN</span>
+                            </a>
+                            @if (Route::has('register'))
+                                <a href="{{ route('register') }}" class="btn btn-primary text-white px-8 py-4 rounded-full font-semibold text-lg inline-flex items-center space-x-3">
+                                    <i class="fas fa-user-plus text-xl"></i>
+                                    <span>REGISTER</span>
+                                </a>
+                            @endif
+                        @endauth
+                    </div>
+                @endif
+                
+               
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
 
-    <!-- Load reCAPTCHA & custom JS -->
-    @if(config('services.recaptcha.site_key'))
-        <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}"></script>
-        <script src="{{ asset('user/v3/recapcha.js') }}"></script>
-    @else
-        <script>
-            console.warn('Google reCAPTCHA site key is not configured.');
-        </script>
-    @endif
+    <script>
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+        
+        // Add click animation to buttons
+        document.querySelectorAll('.btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                let ripple = document.createElement('span');
+                ripple.classList.add('ripple');
+                this.appendChild(ripple);
+                
+                let x = e.clientX - e.target.offsetLeft;
+                let y = e.clientY - e.target.offsetTop;
+                
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+    </script>
 </body>
 </html>
