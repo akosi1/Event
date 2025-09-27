@@ -27,17 +27,17 @@
                 <form method="POST" action="{{ route('login') }}" id="login-form">
                     @csrf
 
-                    <!-- Email or Student ID -->
+                    <!-- MS365 Email Only -->
                     <div class="form-group">
                         <div class="input-wrapper">
-                            <input id="email" type="text" name="email" value="{{ old('email') }}"
+                            <input id="email" type="email" name="email" value="{{ old('email') }}"
                                 class="form-control" placeholder=" " required autocomplete="username" autofocus>
-                            <label class="input-label">MS365 Email or Student ID</label>
-                            <i class="fas fa-user input-icon"></i>
+                            <label class="input-label">MS365 Email Address</label>
+                            <i class="fas fa-envelope input-icon"></i>
                         </div>
                         <x-input-error :messages="$errors->get('email')" class="error-msg" />
                         <div class="input-hint">
-                            <small>Enter your MS365 email (e.g., firstname.lastname@mcclawis.edu.ph) or Student ID</small>
+                            <small>Enter your MS365 email (e.g., firstname.lastname@mcclawis.edu.ph)</small>
                         </div>
                     </div>
 
@@ -69,6 +69,15 @@
                         <x-input-error :messages="$errors->get('department')" class="error-msg" />
                     </div>
 
+                    <!-- Remember Me -->
+                    <div class="form-group">
+                        <label class="remember-checkbox">
+                            <input type="checkbox" name="remember" {{ old('remember') ? 'checked' : '' }}>
+                            <span class="checkmark"></span>
+                            <span class="remember-text">{{ __('Remember me') }}</span>
+                        </label>
+                    </div>
+
                     <!-- reCAPTCHA v3 hidden token -->
                     <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
 
@@ -80,10 +89,10 @@
 
                     <div class="auth-links">
                         <p>{{ __("Don't have an account?") }}
-                            <a href="{{ route('register') }}">{{ __('Sign up here') }}</a>
+                            <a href="{{ route('register') }}" class="auth-link-primary">{{ __('Sign up here') }}</a>
                         </p>
                         <p>
-                            <a href="{{ route('password.request') }}">{{ __('Forgot your password?') }}</a>
+                            <a href="{{ route('password.request') }}" class="auth-link-secondary">{{ __('Forgot your password?') }}</a>
                         </p>
                     </div>
                 </form>
@@ -105,11 +114,61 @@
     <script src="{{ asset('user/login_register/login_register.js') }}"></script>
 
     <style>
-    .input-hint {
-        margin-top: 4px;
-        color: rgba(255, 255, 255, 0.5);
-        font-size: 11px;
-    }
+        .input-hint {
+            margin-top: 4px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 11px;
+        }
+
+        .remember-checkbox {
+            display: flex;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 13px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+
+        .remember-checkbox input[type="checkbox"] {
+            display: none;
+        }
+
+        .checkmark {
+            width: 18px;
+            height: 18px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            margin-right: 10px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .remember-checkbox input[type="checkbox"]:checked + .checkmark {
+            background: #dc2626;
+            border-color: #dc2626;
+        }
+
+        .remember-checkbox input[type="checkbox"]:checked + .checkmark::after {
+            content: '\2713';
+            position: absolute;
+            top: -2px;
+            left: 2px;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .auth-link-primary {
+            color: #ef4444 !important;
+            font-weight: 700 !important;
+            text-decoration: underline !important;
+        }
+
+        .auth-link-secondary {
+            color: #dc2626 !important;
+            font-weight: 500 !important;
+        }
     </style>
     
 </x-guest-layout>
