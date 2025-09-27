@@ -13,19 +13,10 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-
-            // student fields
-            $table->string('id_number')->unique(); // e.g. 2010-1999
-            $table->string('first_name');
-            $table->string('middle_name')->nullable();
-            $table->string('last_name');
-
-            // MS365 account
-            $table->string('email')->unique(); // must be MS365 (ex: student@mcclawis.edu.ph)
-
-            // auth fields
+            $table->string('name');
+            $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password')->nullable(); // optional if login is OTP-only
+            $table->string('password');
             $table->rememberToken();
             $table->timestamps();
         });
