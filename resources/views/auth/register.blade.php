@@ -61,17 +61,17 @@
                         <x-input-error :messages="$errors->get('middle_name')" class="error-msg" />
                     </div>
 
-                    <!-- Student ID -->
+                    <!-- MS365 Email -->
                     <div class="form-group">
                         <div class="input-wrapper">
-                            <input id="student_id" type="text" name="student_id" value="{{ old('student_id') }}"
+                            <input id="email" type="email" name="email" value="{{ old('email') }}"
                                 class="form-control" placeholder=" " required>
-                            <label class="input-label">Student ID Number</label>
-                            <i class="fas fa-id-card input-icon"></i>
+                            <label class="input-label">MS365 Email Address</label>
+                            <i class="fas fa-envelope input-icon"></i>
                         </div>
-                        <x-input-error :messages="$errors->get('student_id')" class="error-msg" />
+                        <x-input-error :messages="$errors->get('email')" class="error-msg" />
                         <div class="input-hint">
-                            <small>Enter your official student ID number</small>
+                            <small>Use your official McClawis email (e.g., john.doe@mcclawis.edu.ph)</small>
                         </div>
                     </div>
 
@@ -81,11 +81,11 @@
                             <div class="input-wrapper">
                                 <select id="department" name="department" class="form-select" required>
                                     <option value=""></option>
-                                    <option value="BSIT" {{ old('department') == 'BSIT' ? 'selected' : '' }}>BSIT - Information Technology</option>
-                                    <option value="BSBA" {{ old('department') == 'BSBA' ? 'selected' : '' }}>BSBA - Business Administration</option>
-                                    <option value="BSED" {{ old('department') == 'BSED' ? 'selected' : '' }}>BSED - Secondary Education</option>
-                                    <option value="BEED" {{ old('department') == 'BEED' ? 'selected' : '' }}>BEED - Elementary Education</option>
-                                    <option value="BSHM" {{ old('department') == 'BSHM' ? 'selected' : '' }}>BSHM - Hospitality Management</option>
+                                    <option value="BSIT" {{ old('department') == 'BSIT' ? 'selected' : '' }}>BSIT</option>
+                                    <option value="BSBA" {{ old('department') == 'BSBA' ? 'selected' : '' }}>BSBA</option>
+                                    <option value="BSED" {{ old('department') == 'BSED' ? 'selected' : '' }}>BSED</option>
+                                    <option value="BEED" {{ old('department') == 'BEED' ? 'selected' : '' }}>BEED</option>
+                                    <option value="BSHM" {{ old('department') == 'BSHM' ? 'selected' : '' }}>BSHM</option>
                                 </select>
                                 <label class="select-label">Department</label>
                                 <i class="fas fa-graduation-cap input-icon"></i>
@@ -132,18 +132,6 @@
                         </div>
                     </div>
 
-                    <!-- Terms and Conditions -->
-                    <div class="form-group">
-                        <label class="terms-checkbox">
-                            <input type="checkbox" name="terms" required>
-                            <span class="checkmark"></span>
-                            <span class="terms-text">
-                                I agree to the <a href="#" class="terms-link">Terms and Conditions</a> and <a href="#" class="terms-link">Privacy Policy</a>
-                            </span>
-                        </label>
-                        <x-input-error :messages="$errors->get('terms')" class="error-msg" />
-                    </div>
-
                     <!-- reCAPTCHA v3 hidden token -->
                     <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
 
@@ -155,7 +143,7 @@
 
                     <div class="auth-links">
                         <p>{{ __("Already have an account?") }}
-                            <a href="{{ route('login') }}" class="auth-link-primary">{{ __('Sign in here') }}</a>
+                            <a href="{{ route('login') }}">{{ __('Sign in here') }}</a>
                         </p>
                     </div>
                 </form>
@@ -185,69 +173,6 @@
 
         .form-row .form-group:last-child {
             margin-left: 5px;
-        }
-
-        .terms-checkbox {
-            display: flex;
-            align-items: flex-start;
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 12px;
-            cursor: pointer;
-            margin: 10px 0;
-            line-height: 1.4;
-        }
-
-        .terms-checkbox input[type="checkbox"] {
-            display: none;
-        }
-
-        .checkmark {
-            width: 16px;
-            height: 16px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 4px;
-            margin-right: 8px;
-            margin-top: 2px;
-            position: relative;
-            transition: all 0.3s ease;
-            flex-shrink: 0;
-        }
-
-        .terms-checkbox input[type="checkbox"]:checked + .checkmark {
-            background: #dc2626;
-            border-color: #dc2626;
-        }
-
-        .terms-checkbox input[type="checkbox"]:checked + .checkmark::after {
-            content: '\2713';
-            position: absolute;
-            top: -2px;
-            left: 1px;
-            color: white;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .terms-text {
-            flex: 1;
-        }
-
-        .terms-link {
-            color: #ef4444 !important;
-            text-decoration: underline !important;
-            font-weight: 600 !important;
-        }
-
-        .terms-link:hover {
-            color: #ffffff !important;
-            text-shadow: 0 0 10px rgba(239, 68, 68, 0.8) !important;
-        }
-
-        .auth-link-primary {
-            color: #ef4444 !important;
-            font-weight: 700 !important;
-            text-decoration: underline !important;
         }
 
         @media (max-width: 768px) {
