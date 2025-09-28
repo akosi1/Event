@@ -7,7 +7,82 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="main-card">
+            <!-- Left Section -->
+            <div class="left-section">
+                <div class="illustration">
+                    <div class="main-illustration">
+                        <i class="fas fa-user-shield illustration-icon"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Section -->
+            <div class="right-section">
+                <div class="brand-logo">
+                    <h2>MCC Admin Event</h2>
+                </div>
+
+                <h1 class="welcome-title">Welcome Back</h1>
+                <p class="welcome-subtitle">Sign in to your admin account</p>
+                
+                @if ($errors->any())
+                    <div class="alert alert-danger">
+                        @foreach ($errors->all() as $error)
+                            <div>{{ $error }}</div>
+                        @endforeach
+                    </div>
+                @endif
+
+                <form method="POST" action="{{ route('admin.login.post') }}" id="loginForm">
+                    @csrf
+                    
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <input type="email" 
+                                   class="form-control @error('email') is-invalid @enderror" 
+                                   id="email" 
+                                   name="email" 
+                                   value="{{ old('email') }}" 
+                                   placeholder="Email address"
+                                   required>
+                            <i class="fas fa-envelope input-icon"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <input type="password" 
+                                   class="form-control @error('password') is-invalid @enderror" 
+                                   id="password" 
+                                   name="password" 
+                                   placeholder="Password"
+                                   required>
+                            <i class="fas fa-lock input-icon" id="passwordIcon"></i>
+                        </div>
+                    </div>
+
+                    <!-- ✅ Hidden reCAPTCHA token field -->
+                    <input type="hidden" name="recaptcha_token" id="recaptcha-token">
+
+                    <button type="submit" class="btn login-btn" id="loginButton">
+                        Sign In
+                    </button>
+                </form>
+
+                <div class="back-link">
+                    <a href="{{ url('/') }}">
+                        <i class="fas fa-arrow-left"></i>
+                        Back to homepage
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+ <style>
         * {
             margin: 0;
             padding: 0;
@@ -479,111 +554,27 @@
             }
         }
     </style>
-</head>
-<body>
-    <div class="bg-particles">
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-    </div>
-
-    <div class="login-container">
-        <div class="main-card">
-            <div class="left-section">
-                <div class="floating-shapes">
-                    <div class="shape"></div>
-                    <div class="shape"></div>
-                    <div class="shape"></div>
-                    <div class="shape"></div>
-                </div>
-                <div class="illustration">
-                    <div class="main-illustration">
-                        <i class="fas fa-user-shield illustration-icon"></i>
-                    </div>
-                </div>
-            </div>
-
-            <div class="right-section">
-                <div class="brand-logo">
-                    <h2>MCC Admin Event</h2>
-                </div>
-
-                <h1 class="welcome-title">Welcome Back</h1>
-                <p class="welcome-subtitle">Sign in to your admin account</p>
-                
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        @foreach ($errors->all() as $error)
-                            {{ $error }}
-                        @endforeach
-                    </div>
-                @endif
-
-                <form method="POST" action="{{ route('admin.login.post') }}" id="loginForm">
-                    @csrf
-                    
-                    <div class="form-group">
-                        <div class="input-wrapper">
-                            <input type="email" 
-                                   class="form-control @error('email') is-invalid @enderror" 
-                                   id="email" 
-                                   name="email" 
-                                   value="{{ old('email') }}" 
-                                   placeholder="Email address"
-                                   required>
-                            <i class="fas fa-envelope input-icon"></i>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="input-wrapper">
-                            <input type="password" 
-                                   class="form-control @error('password') is-invalid @enderror" 
-                                   id="password" 
-                                   name="password" 
-                                   placeholder="Password"
-                                   required>
-                            <i class="fas fa-lock input-icon" id="passwordIcon"></i>
-                        </div>
-                    </div>
-
-                    <!-- <div class="forgot-password">
-                        <a href="#">Forgot your password?</a>
-                    </div> -->
-
-                    <button type="submit" class="btn login-btn" id="loginButton">
-                        Sign In
-                    </button>
-                </form>
-
-                <div class="back-link">
-                    <a href="{{ url('/') }}">
-                        <i class="fas fa-arrow-left"></i>
-                        Back to homepage
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- ✅ reCAPTCHA Script -->
+    @if(config('services.recaptcha.site_key'))
+        <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}"></script>
+        <script>
+            grecaptcha.ready(function () {
+                grecaptcha.execute('{{ config('services.recaptcha.site_key') }}', { action: 'admin_login' })
+                    .then(function (token) {
+                        let input = document.getElementById('recaptcha-token');
+                        if (input) {
+                            input.value = token;
+                        }
+                    });
+            });
+        </script>
+    @endif
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', function() {
-            const button = document.getElementById('loginButton');
-            button.classList.add('btn-loading');
-            button.disabled = true;
-        });
-
         // Password toggle functionality
         document.getElementById('passwordIcon').addEventListener('click', function() {
             const passwordField = document.getElementById('password');
             const icon = this;
-            
             if (passwordField.type === 'password') {
                 passwordField.type = 'text';
                 icon.classList.remove('fa-lock');
@@ -594,34 +585,6 @@
                 icon.classList.add('fa-lock');
             }
         });
-
-        // Add some interactive feedback
-        document.querySelectorAll('.form-control').forEach(input => {
-            input.addEventListener('focus', function() {
-                this.parentElement.style.transform = 'scale(1.02)';
-            });
-            
-            input.addEventListener('blur', function() {
-                this.parentElement.style.transform = 'scale(1)';
-            });
-        });
     </script>
-      <!-- ✅ Load reCAPTCHA script and inject token -->
-    @if(config('services.recaptcha.site_key'))
-        <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}"></script>
-        <script>
-            grecaptcha.ready(function () {
-                grecaptcha.execute('{{ config('services.recaptcha.site_key') }}', { action: 'login' })
-                    .then(function (token) {
-                        document.getElementById('recaptcha-token').value = token;
-                    });
-            });
-        </script>
-    @else
-        <script>
-            console.warn('Google reCAPTCHA site key is not configured.');
-        </script>
-    @endif
-
 </body>
 </html>
