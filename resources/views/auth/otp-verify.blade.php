@@ -1,4 +1,4 @@
-<x-guest-layout>
+ <x-guest-layout>
     <div class="otp-wrapper">
         <div class="otp-container">
             <div class="otp-header">
