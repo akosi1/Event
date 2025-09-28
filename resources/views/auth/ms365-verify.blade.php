@@ -42,10 +42,6 @@
                     </div>
 
                     <div class="form-footer">
-                        <p class="help-text">
-                            <i class="fas fa-info-circle"></i>
-                            We'll send a 6-digit verification code to your McLawis College email address.
-                        </p>
                         
                         <div class="auth-links">
                             <p>Already have an account? 

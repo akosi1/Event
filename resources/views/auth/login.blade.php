@@ -9,36 +9,42 @@
                 <p>Use your McLawis College account</p>
             </div>
 
-            <div class="auth-form">
+            <div class="auth-form" id="authForm">
                 <x-auth-session-status class="mb-4" :status="session('status')" />
 
                 <form method="POST" action="{{ route('login') }}">
                     @csrf
 
                     <div class="form-group">
-                        <i class="fas fa-envelope"></i>
-                        <input id="email" type="email" name="email" value="{{ old('email') }}" 
-                               placeholder="McLawis College Email" required autocomplete="username" autofocus>
+                        <div class="input-wrapper">
+                            <i class="fas fa-envelope"></i>
+                            <input id="email" type="email" name="email" value="{{ old('email') }}" 
+                                placeholder="McLawis College Email" required autocomplete="username" autofocus>
+                        </div>
                         <x-input-error :messages="$errors->get('email')" class="error-msg" />
                     </div>
 
                     <div class="form-group">
-                        <i class="fas fa-lock"></i>
-                        <input id="password" type="password" name="password" 
-                               placeholder="Password" required autocomplete="current-password">
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock"></i>
+                            <input id="password" type="password" name="password" 
+                                placeholder="Password" required autocomplete="current-password">
+                        </div>
                         <x-input-error :messages="$errors->get('password')" class="error-msg" />
                     </div>
 
                     <div class="form-group">
-                        <i class="fas fa-graduation-cap"></i>
-                        <select id="department" name="department" required>
-                            <option value="">Select Your Department</option>
-                            <option value="BSIT" {{ old('department') == 'BSIT' ? 'selected' : '' }}>Bachelor of Science in Information Technology</option>
-                            <option value="BSBA" {{ old('department') == 'BSBA' ? 'selected' : '' }}>Bachelor of Science in Business Administration</option>
-                            <option value="BSED" {{ old('department') == 'BSED' ? 'selected' : '' }}>Bachelor of Science in Education</option>
-                            <option value="BEED" {{ old('department') == 'BEED' ? 'selected' : '' }}>Bachelor of Elementary Education</option>
-                            <option value="BSHM" {{ old('department') == 'BSHM' ? 'selected' : '' }}>Bachelor of Science in Hospitality Management</option>
-                        </select>
+                        <div class="input-wrapper select-wrapper">
+                            <i class="fas fa-graduation-cap"></i>
+                            <select id="department" name="department" required>
+                                <option value="">Select Your Department</option>
+                                <option value="BSIT" {{ old('department') == 'BSIT' ? 'selected' : '' }}>Bachelor of Science in Information Technology</option>
+                                <option value="BSBA" {{ old('department') == 'BSBA' ? 'selected' : '' }}>Bachelor of Science in Business Administration</option>
+                                <option value="BSED" {{ old('department') == 'BSED' ? 'selected' : '' }}>Bachelor of Science in Education</option>
+                                <option value="BEED" {{ old('department') == 'BEED' ? 'selected' : '' }}>Bachelor of Elementary Education</option>
+                                <option value="BSHM" {{ old('department') == 'BSHM' ? 'selected' : '' }}>Bachelor of Science in Hospitality Management</option>
+                            </select>
+                        </div>
                         <x-input-error :messages="$errors->get('department')" class="error-msg" />
                     </div>
 
@@ -82,14 +88,21 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            background: #f5f5f5;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        }
+
         .auth-wrapper {
-            min-height: 100vh;
+            height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             background: #f5f5f5;
-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             padding: 20px;
+            overflow: hidden;
         }
 
         .auth-container {
@@ -99,6 +112,7 @@
             width: 100%;
             max-width: 420px;
             animation: fadeIn 0.4s ease;
+            overflow: hidden;
         }
 
         @keyframes fadeIn {
@@ -133,24 +147,64 @@
 
         .auth-form {
             padding: 30px 25px;
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+            /* 👇 Hide scrollbar by default */
+            scrollbar-width: none; /* Firefox */
+        }
+
+        /* 👇 Hide scrollbar in WebKit browsers (Chrome, Safari, Edge) */
+        .auth-form::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* 👇 Show scrollbar on hover or focus */
+        .auth-form:hover,
+        .auth-form:focus-within {
+            scrollbar-width: auto; /* Firefox */
+        }
+
+        .auth-form:hover::-webkit-scrollbar,
+        .auth-form:focus-within::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .auth-form:hover::-webkit-scrollbar-track,
+        .auth-form:focus-within::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .auth-form:hover::-webkit-scrollbar-thumb,
+        .auth-form:focus-within::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+
+        .auth-form:hover::-webkit-scrollbar-thumb:hover,
+        .auth-form:focus-within::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
         }
 
         .form-group {
-            position: relative;
             margin-bottom: 20px;
         }
 
-        .form-group i {
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper i {
             position: absolute;
             left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
             color: #0078d4;
             z-index: 1;
         }
 
-        .form-group input,
-        .form-group select {
+        .input-wrapper input,
+        .input-wrapper select {
             width: 100%;
             padding: 11px 15px 11px 45px;
             border: 1px solid #605e5c;
@@ -161,7 +215,11 @@
             outline: none;
         }
 
-        .form-group select {
+        .select-wrapper {
+            position: relative;
+        }
+
+        .select-wrapper select {
             cursor: pointer;
             appearance: none;
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230078d4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
@@ -171,8 +229,8 @@
             padding-right: 45px;
         }
 
-        .form-group input:focus,
-        .form-group select:focus {
+        .input-wrapper input:focus,
+        .input-wrapper select:focus {
             border-color: #0078d4;
             box-shadow: 0 0 0 1px #0078d4;
         }
@@ -293,6 +351,7 @@
             font-size: 13px;
             margin-top: 5px;
             display: block;
+            min-height: 16px;
         }
 
         .mb-4 div {
@@ -309,6 +368,46 @@
             .auth-wrapper { padding: 15px; }
             .auth-container { max-width: 100%; }
             .auth-header, .auth-form { padding: 25px 20px; }
+            .input-wrapper input,
+            .input-wrapper select {
+                padding: 10px 12px 10px 40px;
+                font-size: 14px;
+            }
+            .input-wrapper i {
+                left: 12px;
+            }
+            .select-wrapper select {
+                background-position: right 12px center;
+                padding-right: 40px;
+            }
+            .btn-submit,
+            .btn-secondary {
+                font-size: 14px;
+            }
+            .auth-form {
+                max-height: calc(100vh - 220px);
+            }
         }
     </style>
+
+    <!-- Optional: Add JS for better mobile touch support -->
+    <script>
+        // For mobile: show scrollbar when user taps inside form
+        document.getElementById('authForm').addEventListener('touchstart', function() {
+            this.classList.add('show-scrollbar');
+        });
+
+        document.getElementById('authForm').addEventListener('touchend', function() {
+            this.classList.remove('show-scrollbar');
+        });
+
+        // Also handle mouse events
+        document.getElementById('authForm').addEventListener('mouseenter', function() {
+            this.classList.add('show-scrollbar');
+        });
+
+        document.getElementById('authForm').addEventListener('mouseleave', function() {
+            this.classList.remove('show-scrollbar');
+        });
+    </script>
 </x-guest-layout>

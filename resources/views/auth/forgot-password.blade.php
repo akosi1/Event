@@ -49,16 +49,6 @@
                                 Back to sign in
                             </a>
                         </div>
-                        
-                        <div class="help-section">
-                            <div class="help-item">
-                                <i class="fas fa-info-circle"></i>
-                                <div>
-                                    <strong>Having trouble?</strong>
-                                    <p>Make sure to use your official McLawis College email address (@mcclawis.edu.ph)</p>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </form>
             </div>
