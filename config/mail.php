@@ -36,7 +36,6 @@ return [
     */
 
     'mailers' => [
-        // local production
 
         'smtp' => [
             'transport' => 'smtp',
@@ -49,20 +48,6 @@ return [
             'timeout' => null,
             'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url(env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
         ],
-
-        //live production
-        //         'smtp' => [
-        //     'transport' => 'smtp',
-        //     'url' => env('MAIL_URL'),
-        //     'scheme' => env('MAIL_SCHEME'),
-        //     'host' => env('MAIL_HOST', 'smtp.office365.com'),
-        //     'port' => env('MAIL_PORT', 587),
-        //     'encryption' => env('MAIL_ENCRYPTION', 'tls'),
-        //     'username' => env('MAIL_USERNAME'),
-        //     'password' => env('MAIL_PASSWORD'),
-        //     'timeout' => null,
-        //     'local_domain' => env('MAIL_EHLO_DOMAIN', 'events-org.com'),
-        // ],
 
         'ses' => [
             'transport' => 'ses',

@@ -10,9 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\Rules;
-use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Carbon\Carbon;
 
@@ -23,6 +21,7 @@ class RegisteredUserController extends Controller
      */
     public function create(): View|RedirectResponse
     {
+        // Check if email is verified in session
         $verifiedEmail = session('verified_email');
 
         if (!$verifiedEmail) {
@@ -30,6 +29,7 @@ class RegisteredUserController extends Controller
                              ->with('error', 'Please verify your McLawis College email first.');
         }
 
+        // Verify OTP record is valid (not expired, and verified within 1 hour)
         $otpRecord = OtpVerification::where('email', $verifiedEmail)
                                     ->whereNotNull('verified_at')
                                     ->where('created_at', '>=', Carbon::now()->subHours(1))
@@ -45,6 +45,8 @@ class RegisteredUserController extends Controller
 
     /**
      * Handle an incoming registration request.
+     *
+     * @throws \Illuminate\Validation\ValidationException
      */
     public function store(Request $request): RedirectResponse
     {
@@ -55,6 +57,7 @@ class RegisteredUserController extends Controller
                              ->with('error', 'Please verify your McLawis College email first.');
         }
 
+        // Verify OTP record is still valid
         $otpRecord = OtpVerification::where('email', $verifiedEmail)
                                     ->whereNotNull('verified_at')
                                     ->where('created_at', '>=', Carbon::now()->subHours(1))
@@ -63,33 +66,6 @@ class RegisteredUserController extends Controller
         if (!$otpRecord) {
             return redirect()->route('ms365.verify')
                              ->with('error', 'Email verification has expired. Please verify again.');
-        }
-
-        // reCAPTCHA v3 validation
-        $recaptchaToken = $request->input('g-recaptcha-response');
-        if (!$recaptchaToken) {
-            throw ValidationException::withMessages([
-                'recaptcha' => 'Please verify that you are not a robot.',
-            ]);
-        }
-
-        $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
-            'secret'   => config('services.recaptcha.secret_key'),
-            'response' => $recaptchaToken,
-            'remoteip' => $request->ip(),
-        ]);
-
-        $recaptcha = $response->json();
-        if (!($recaptcha['success'] ?? false) || ($recaptcha['score'] ?? 0) < 0.5) {
-            \Log::warning('reCAPTCHA registration blocked', [
-                'ip'     => $request->ip(),
-                'score'  => $recaptcha['score'] ?? 'N/A',
-                'errors' => $recaptcha['error-codes'] ?? [],
-            ]);
-
-            throw ValidationException::withMessages([
-                'recaptcha' => 'Suspicious activity detected. Please try again.',
-            ]);
         }
 
         $request->validate([
@@ -117,7 +93,7 @@ class RegisteredUserController extends Controller
             'first_name'        => $request->first_name,
             'middle_name'       => $request->middle_name,
             'last_name'         => $request->last_name,
-            'email'             => $verifiedEmail,
+            'email'             => $verifiedEmail, // force verified email
             'department'        => $request->department,
             'password'          => Hash::make($request->password),
             'role'              => 'user',
@@ -125,11 +101,14 @@ class RegisteredUserController extends Controller
             'email_verified_at' => now(),
         ]);
 
+        // Remove OTP record after successful registration
         $otpRecord->delete();
 
         event(new Registered($user));
+
         Auth::login($user);
 
+        // Clear session data
         session()->forget(['verified_email', 'email']);
 
         return redirect(route('dashboard', absolute: false));

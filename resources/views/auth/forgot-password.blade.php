@@ -64,22 +64,6 @@
             </div>
         </div>
     </div>
-  <!-- ✅ Load reCAPTCHA script and inject token -->
-    @if(config('services.recaptcha.site_key'))
-        <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}"></script>
-        <script>
-            grecaptcha.ready(function () {
-                grecaptcha.execute('{{ config('services.recaptcha.site_key') }}', { action: 'login' })
-                    .then(function (token) {
-                        document.getElementById('recaptcha-token').value = token;
-                    });
-            });
-        </script>
-    @else
-        <script>
-            console.warn('Google reCAPTCHA site key is not configured.');
-        </script>
-    @endif
 
     <style>
         * {

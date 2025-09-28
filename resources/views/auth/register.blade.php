@@ -1,10 +1,9 @@
 <x-guest-layout>
     <div class="auth-wrapper">
         <div class="auth-container">
-            <div class="auth-header">
-                <div class="ms-logo">
+            <div class="ms-logo">
                     <img src="images/logo.png" alt="Logo" width="32" height="32">
-                </div>
+                </div>  
                 <h1>Complete Registration</h1>
                 <p>Create your EventAps account</p>
                 @if(session('verified_email'))
@@ -111,22 +110,6 @@
             </form>
         </div>
     </div>
-  <!-- ✅ Load reCAPTCHA script and inject token -->
-    @if(config('services.recaptcha.site_key'))
-        <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}"></script>
-        <script>
-            grecaptcha.ready(function () {
-                grecaptcha.execute('{{ config('services.recaptcha.site_key') }}', { action: 'login' })
-                    .then(function (token) {
-                        document.getElementById('recaptcha-token').value = token;
-                    });
-            });
-        </script>
-    @else
-        <script>
-            console.warn('Google reCAPTCHA site key is not configured.');
-        </script>
-    @endif
 
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
