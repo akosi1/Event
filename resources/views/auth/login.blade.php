@@ -3,7 +3,6 @@
         <div class="auth-container">
             <div class="auth-header">
                 <div class="ms-logo">
-                    <div class="ms-logo">
                     <img src="images/logo.png" alt="Logo" width="32" height="32">
                 </div>
                 <h1>Sign in to EventAps</h1>
@@ -51,6 +50,9 @@
                         </label>
                     </div>
 
+                    <!-- ✅ reCAPTCHA token field -->
+                    <input type="hidden" name="g-recaptcha-response" id="recaptcha-token">
+
                     <button type="submit" class="btn-submit">
                         <i class="fas fa-sign-in-alt"></i>
                         Sign in
@@ -79,6 +81,23 @@
             </div>
         </div>
     </div>
+
+    <!-- ✅ Load reCAPTCHA script and inject token -->
+    @if(config('services.recaptcha.site_key'))
+        <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}"></script>
+        <script>
+            grecaptcha.ready(function () {
+                grecaptcha.execute('{{ config('services.recaptcha.site_key') }}', { action: 'login' })
+                    .then(function (token) {
+                        document.getElementById('recaptcha-token').value = token;
+                    });
+            });
+        </script>
+    @else
+        <script>
+            console.warn('Google reCAPTCHA site key is not configured.');
+        </script>
+    @endif
 
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
