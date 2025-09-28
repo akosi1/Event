@@ -3,12 +3,7 @@
         <div class="otp-container">
             <div class="otp-header">
                 <div class="ms-logo">
-                    <svg width="40" height="40" viewBox="0 0 23 23" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M1 1h10v10H1z" fill="#f25022"/>
-                        <path d="M12 1h10v10H12z" fill="#00a4ef"/>
-                        <path d="M1 12h10v10H1z" fill="#ffb900"/>
-                        <path d="M12 12h10v10H12z" fill="#7fba00"/>
-                    </svg>
+                    <img src="images/logo.png" alt="Logo" width="32" height="32">
                 </div>
                 <h1>Enter verification code</h1>
                 <p>We sent a code to <strong>{{ session('email') }}</strong></p>

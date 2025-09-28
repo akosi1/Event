@@ -3,12 +3,8 @@
         <div class="auth-container">
             <div class="auth-header">
                 <div class="ms-logo">
-                    <svg width="32" height="32" viewBox="0 0 23 23" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M1 1h10v10H1z" fill="#f25022"/>
-                        <path d="M12 1h10v10H12z" fill="#00a4ef"/>
-                        <path d="M1 12h10v10H1z" fill="#ffb900"/>
-                        <path d="M12 12h10v10H12z" fill="#7fba00"/>
-                    </svg>
+                    <div class="ms-logo">
+                    <img src="images/logo.png" alt="Logo" width="32" height="32">
                 </div>
                 <h1>Sign in to EventAps</h1>
                 <p>Use your McLawis College account</p>
