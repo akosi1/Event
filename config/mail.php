@@ -109,6 +109,7 @@ return [
     | used globally for all emails that are sent by your application.
     |
     */
+// 'log_channel' => env('MAIL_LOG_CHANNEL', 'stack'),
 
     'from' => [
         'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
