@@ -20,7 +20,7 @@
                             id="email" 
                             type="email" 
                             name="email" 
-                            value="{{ old('email', 'briannick.acorda@mcclawis.edu.ph') }}" 
+                            value="{{ old('email', '') }}" 
                             placeholder="someone@mcclawis.edu.ph"
                             required 
                             autocomplete="username"
