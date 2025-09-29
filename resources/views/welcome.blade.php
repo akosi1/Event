@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -24,6 +24,20 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         
+        .glass-effect {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .hover-scale {
+            transition: transform 0.3s ease;
+        }
+        
+        .hover-scale:hover {
+            transform: translateY(-2px);
+        }
+        
         .floating-animation {
             animation: floating 6s ease-in-out infinite;
         }
@@ -33,171 +47,117 @@
             50% { transform: translateY(-10px); }
         }
         
-        .split-container {
-            display: flex;
-            min-height: 100vh;
+        .feature-card {
+            transition: all 0.3s ease;
         }
         
-        .left-section {
-            flex: 1;
-            background: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
+        .feature-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
         
-        .right-section {
-            flex: 1;
+        .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .btn-modern {
-            position: relative;
-            overflow: hidden;
-            padding: 1rem 2.5rem;
-            font-size: 1.125rem;
-            font-weight: 600;
-            border-radius: 0.75rem;
-            transition: all 0.4s ease;
-            border: none;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-            text-decoration: none;
-            width: 100%;
-        }
-        
-        .btn-admin {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
         
-        .btn-student {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
         }
         
-        .btn-modern::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, 
-                transparent 0%, 
-                rgba(255, 255, 255, 0.5) 50%, 
-                transparent 100%);
-            transition: left 0.6s ease;
-            transform: skewX(-25deg);
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
         }
         
-        .btn-modern:hover::before {
-            left: 100%;
-        }
-        
-        .btn-modern:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
-        }
-        
-        .btn-modern:active {
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
             transform: translateY(-2px);
         }
         
-        .button-container {
+        .button-group {
             display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-            width: 100%;
-            max-width: 400px;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
         }
         
-        .logo-icon {
-            font-size: 4rem;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        @media (max-width: 968px) {
-            .split-container {
+        @media (max-width: 768px) {
+            .mobile-text {
+                font-size: 2rem;
+                line-height: 1.2;
+            }
+            
+            .mobile-subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .button-group {
                 flex-direction: column;
+                width: 100%;
             }
             
-            .right-section {
-                min-height: 250px;
-            }
-            
-            .left-section {
-                padding: 3rem 1.5rem;
+            .button-group .btn {
+                width: 100%;
+                max-width: 280px;
             }
         }
     </style>
 </head>
 <body class="antialiased">
-    <div class="split-container">
-        <!-- Left Section - White Card -->
-        <div class="left-section">
-            <div class="text-center max-w-xl w-full">
-                <div class="mb-8">
-                    <div class="logo-icon">
-                        <i class="fas fa-calendar-check"></i>
-                    </div>
-                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent leading-tight">
-                        MCC Event & Portfolio
-                    </h1>
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
-                        Organizer
-                    </h2>
-                </div>
-                
-                <p class="text-lg md:text-xl text-gray-600 mb-10 px-4">
-                    Manage your academic journey with ease
-                </p>
-                
-                <!-- CTA Buttons -->
-                <div class="button-container mx-auto px-4">
-                    <a href="/admin/login" class="btn-modern btn-admin">
-                        <i class="fas fa-user-shield text-xl"></i>
-                        <span>ADMIN LOGIN</span>
-                    </a>
-                    
-                    <a href="/login" class="btn-modern btn-student">
-                        <i class="fas fa-user-graduate text-xl"></i>
-                        <span>STUDENT LOGIN</span>
-                    </a>
-                </div>
-            </div>
+    <!-- Hero Section -->
+    <section class="min-h-screen gradient-bg flex items-center justify-center relative overflow-hidden">
+        <!-- Background Elements -->
+        <div class="absolute inset-0">
+            <div class="absolute top-20 left-10 w-32 h-32 md:w-72 md:h-72 bg-white opacity-10 rounded-full floating-animation"></div>
+            <div class="absolute bottom-20 right-10 w-48 h-48 md:w-96 md:h-96 bg-white opacity-5 rounded-full floating-animation" style="animation-delay: -3s;"></div>
         </div>
         
-        <!-- Right Section - Gradient Background -->
-        <div class="right-section">
-            <!-- Background Elements -->
-            <div class="absolute inset-0">
-                <div class="absolute top-20 left-10 w-32 h-32 md:w-72 md:h-72 bg-white opacity-10 rounded-full floating-animation"></div>
-                <div class="absolute bottom-20 right-10 w-48 h-48 md:w-96 md:h-96 bg-white opacity-5 rounded-full floating-animation" style="animation-delay: -3s;"></div>
-                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-white opacity-5 rounded-full floating-animation" style="animation-delay: -1.5s;"></div>
-            </div>
-            
-            <!-- Decorative elements in gradient section -->
-            <div class="absolute inset-0 flex items-center justify-center">
-                <div class="text-white text-center opacity-20">
-                    <i class="fas fa-university text-9xl mb-6"></i>
-                    <p class="text-3xl font-bold">Welcome to MCC</p>
+        <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <!-- Main Content -->
+            <div class="mb-8">
+
+                
+                <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-4 sm:mb-6 leading-tight mobile-text">
+                    MCC Event & Portfolio
+                    <span class="bg-gradient-to-r from-yellow-400 to-pink-400 bg-clip-text text-transparent block sm:inline">
+                        Organizer
+                    </span>
+                </h1>
+                <!-- CTA Buttons -->
+                @if (Route::has('login'))
+                    <div class="button-group">
+                        @auth   
+                            <a href="{{ url('/dashboard') }}" class="btn btn-primary text-white px-8 py-4 rounded-full font-semibold text-lg inline-flex items-center space-x-3">
+                                <i class="fas fa-tachometer-alt text-xl"></i>
+                                <span>Go to Dashboard</span>
+                            </a>
+                        @else
+                            <a href="{{ route('login') }}" class="btn btn-secondary text-white px-8 py-4 rounded-full font-semibold text-lg inline-flex items-center space-x-3">
+                                <i class="fas fa-sign-in-alt text-xl"></i>
+                                <span>LOGIN</span>
+                            </a>
+                            @if (Route::has('register'))
+                                <a href="{{ route('register') }}" class="btn btn-primary text-white px-8 py-4 rounded-full font-semibold text-lg inline-flex items-center space-x-3">
+                                    <i class="fas fa-user-plus text-xl"></i>
+                                    <span>REGISTER</span>
+                                </a>
+                            @endif
+                        @endauth
+                    </div>
+                @endif
+                
+               
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
     <script>
         // Smooth scrolling for anchor links
@@ -210,6 +170,25 @@
                         behavior: 'smooth'
                     });
                 }
+            });
+        });
+        
+        // Add click animation to buttons
+        document.querySelectorAll('.btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                let ripple = document.createElement('span');
+                ripple.classList.add('ripple');
+                this.appendChild(ripple);
+                
+                let x = e.clientX - e.target.offsetLeft;
+                let y = e.clientY - e.target.offsetTop;
+                
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
             });
         });
     </script>
