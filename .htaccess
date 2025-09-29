@@ -1,4 +1,19 @@
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteRule ^(.*)$ public/$1 [L]
+  # Block common attack strings
+RewriteEngine On
+RewriteCond %{QUERY_STRING} union [NC,OR]
+RewriteCond %{QUERY_STRING} select [NC,OR]
+RewriteCond %{QUERY_STRING} sleep [NC]
+RewriteRule .* - [F,L]
+
+# Disable trace requests (XSS protection)
+TraceEnable off
+
+# Prevent access to config files
+<Files ~ "\.(env|config|ini|log)$">
+    Order allow,deny
+    Deny from all
+</Files>
 </IfModule>
