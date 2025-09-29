@@ -1,5 +1,4 @@
 <x-guest-layout>
- <link rel="icon" href="{{ asset('favicon.ico') }}?v=2" type="image/x-icon">
     <div class="auth-wrapper">
         <div class="auth-container">
             <div class="auth-header">
