@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 
 // Admin Authentication Routes
 Route::get('/', [AuthController::class, 'showLoginForm'])->name('admin.login');
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('admin.login.form');
 Route::post('/login', [AuthController::class, 'login'])->name('admin.login.post');
 
 // Admin Protected Routes
@@ -19,12 +20,15 @@ Route::middleware(['admin'])->group(function () {
     Route::get('/logout', [AuthController::class, 'logout'])->name('admin.logout.get');
     Route::post('/logout', [AuthController::class, 'logout'])->name('admin.logout');
     
-    Route::resource('/events', EventController::class)->names('admin.events');
-    
-    // Fixed print summary route - moved inside middleware group and fixed path
+    // Print summary route - MUST be before resource routes
     Route::get('/events/print/summary', [EventController::class, 'printSummary'])->name('admin.events.print-summary');
     
+    // Events resource routes
+    Route::resource('/events', EventController::class)->names('admin.events');
+    
+    // Users resource routes
     Route::resource('/users', UserController::class)->names('admin.users');
+    
     Route::get('/certificates', [AdminController::class, 'certificates'])->name('admin.certificates');
     
     // Notification routes

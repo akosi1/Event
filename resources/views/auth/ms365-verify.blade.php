@@ -5,8 +5,8 @@
                <div class="ms-logo">
                     <img src="images/logo.png" alt="Logo" width="32" height="32">
                 </div>
-                <h1>Sign up for EventAps</h1>
-                <p>Use your McLawis College email account</p>
+                <h1>Sign up for E&P-O</h1>
+                <p>Use your ms365 email account</p>
             </div>
 
             <div class="ms365-form">
