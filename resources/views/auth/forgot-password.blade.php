@@ -261,8 +261,8 @@
                 max-width: 100%;
                 border-radius: 0;
                 box-shadow: none;
-                min-height: 100vh;
-            }
+                min-height: 100vh;  
+            }   
 
             .forgot-header,
             .forgot-form {
