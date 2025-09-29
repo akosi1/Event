@@ -20,6 +20,10 @@ class OtpVerification extends Model
         'attempts',
     ];
 
+    protected $attributes = [
+        'attempts' => 0,
+    ];
+
     protected $casts = [
         'expires_at' => 'datetime',
         'verified_at' => 'datetime',
@@ -47,5 +51,22 @@ class OtpVerification extends Model
     public function maxAttemptsReached(): bool
     {
         return $this->attempts >= 3;
+    }
+
+    /**
+     * Increment attempts count safely
+     */
+    public function incrementAttempts(): void
+    {
+        $this->increment('attempts');
+    }
+
+    /**
+     * Scope to get only active (non-expired, not verified) OTP records
+     */
+    public function scopeActive($query)
+    {
+        return $query->whereNull('verified_at')
+                     ->where('expires_at', '>', Carbon::now());
     }
 }
