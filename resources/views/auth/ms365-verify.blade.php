@@ -12,14 +12,6 @@
             <div class="ms365-form">
                 <x-auth-session-status class="mb-4" :status="session('status')" />
 
-                {{-- Debugging: Show session and validation errors --}}
-                @if(session('status'))
-                    <div class="debug-info">
-                        <h3>Session Status:</h3>
-                        <pre>{{ session('status') }}</pre>
-                    </div>
-                @endif
-
                 @if($errors->any())
                     <div class="debug-info">
                         <h3>Validation Errors:</h3>
@@ -30,14 +22,6 @@
                         </ul>
                     </div>
                 @endif
-
-                {{-- Uncomment this to debug the email being passed to the controller --}}
-                {{-- 
-                    <div class="debug-info">
-                        <h3>Debugging Form Data:</h3>
-                        <pre>{{ var_dump(old('email')) }}</pre>
-                    </div>
-                --}}
 
                 <form method="POST" action="{{ route('ms365.verify.store') }}">
                     @csrf
@@ -79,14 +63,7 @@
             </div>
         </div>
     </div>
-
-    {{-- Debugging - Uncomment to check variables or data passed --}}
-    {{-- 
-        <div class="debug-info">
-            <h3>Debugging Route Data:</h3>
-            <pre>{{ var_dump(request()->all()) }}</pre>
-        </div>
-    --}}
+</x-guest-layout>
 
     <style>
         * {
