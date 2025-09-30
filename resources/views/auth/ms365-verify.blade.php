@@ -2,7 +2,7 @@
     <div class="ms365-wrapper">
         <div class="ms365-container">
             <div class="ms365-header">
-               <div class="ms-logo">
+                <div class="ms-logo">
                     <img src="images/logo.png" alt="Logo" width="32" height="32">
                 </div>
                 <h1>Sign up for E&P-O</h1>
@@ -11,6 +11,22 @@
 
             <div class="ms365-form">
                 <x-auth-session-status class="mb-4" :status="session('status')" />
+
+                {{-- Debugging: Show session and validation errors --}}
+                @if(session('status'))
+                    <div class="debug-info">
+                        <h3>Session Status:</h3>
+                        <pre>{{ session('status') }}</pre>
+                    </div>
+                @endif
+
+                {{-- Uncomment this to debug the email being passed to the controller --}}
+                {{-- 
+                    <div class="debug-info">
+                        <h3>Debugging Form Data:</h3>
+                        <pre>{{ var_dump(old('email')) }}</pre>
+                    </div>
+                --}}
 
                 <form method="POST" action="{{ route('ms365.verify.store') }}">
                     @csrf
@@ -42,7 +58,6 @@
                     </div>
 
                     <div class="form-footer">
-                        
                         <div class="auth-links">
                             <p>Already have an account? 
                                <a href="{{ route('login') }}">Sign in here</a>
@@ -54,6 +69,13 @@
         </div>
     </div>
 
+    {{-- Debugging - Uncomment to check variables or data passed --}}
+    {{-- 
+        <div class="debug-info">
+            <h3>Debugging Route Data:</h3>
+            <pre>{{ var_dump(request()->all()) }}</pre>
+        </div>
+    --}}
     <style>
         * {
             box-sizing: border-box;
