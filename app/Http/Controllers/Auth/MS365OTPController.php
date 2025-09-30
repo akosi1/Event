@@ -1,14 +1,16 @@
+<?php
+
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\OtpVerification;
-use Illuminate\Http\Request;
+use Illuminate\Http\Request;ka lag
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Log;   // <--- Added this
 use Carbon\Carbon;
 
 class MS365OTPController extends Controller
@@ -28,7 +30,7 @@ class MS365OTPController extends Controller
     {
         $request->validate([
             'email' => [
-                'required',
+                'required', 
                 'email',
                 'regex:/^[a-zA-Z0-9._%+-]+@mcclawis\.edu\.ph$/',
                 'max:255'
