@@ -44,6 +44,9 @@ class MS365OTPController extends Controller
             return back()->withErrors(['email' => 'This email is already registered.']);
         }
 
+        // Store the email in the session for OTP verification
+        session(['email' => $request->email]);
+
         // Generate OTP and send it
         return $this->sendOtp($request->email);
     }
@@ -74,7 +77,6 @@ class MS365OTPController extends Controller
             });
 
             return redirect()->route('otp.verify.form')
-                             ->with('email', $email)
                              ->with('status', 'Verification code sent to your McLawis email address.');
         } catch (\Exception $e) {
             Log::error('OTP email sending failed for email: ' . $email . ' (verifyMS365Account): ' . $e->getMessage());
@@ -130,6 +132,7 @@ class MS365OTPController extends Controller
         // Mark as verified
         $otpRecord->update(['verified_at' => Carbon::now()]);
 
+        // Redirect to registration page
         return redirect()->route('register')
                          ->with('verified_email', $request->email)
                          ->with('status', 'Email verified successfully! Please complete your registration.');
