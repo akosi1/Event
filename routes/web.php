@@ -20,9 +20,8 @@
             Route::post('join', [EventJoinController::class, 'join'])->name('join');
             Route::delete('leave', [EventJoinController::class, 'leave'])->name('leave');
         });
-        //
-        Route::post('/ms365/verify',[MS365OTPController::class, 'verifyMS365Account']) ->name('ms365.verify.store');
     });
 
     require __DIR__.'/auth.php';  
 
+;
