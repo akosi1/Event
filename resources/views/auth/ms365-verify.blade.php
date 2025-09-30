@@ -20,6 +20,17 @@
                     </div>
                 @endif
 
+                @if($errors->any())
+                    <div class="debug-info">
+                        <h3>Validation Errors:</h3>
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 {{-- Uncomment this to debug the email being passed to the controller --}}
                 {{-- 
                     <div class="debug-info">
