@@ -111,7 +111,7 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'santillanbsit@gmail.com'),
+        'address' => env('MAIL_FROM_ADDRESS', 'briannickacorda18@gmail.com'),
         'name' => env('MAIL_FROM_NAME', 'EventAps - McLawis College'),
     ],
 
