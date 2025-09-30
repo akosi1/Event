@@ -1,14 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\{ProfileController, EventJoinController, DashboardController, MS365OTPController};
+use App\Http\Controllers\{ProfileController, EventJoinController, DashboardController, Auth\MS365OTPController};
 
-// Main welcome route
 Route::get('/', fn() => view('welcome'));
 
-// Authenticated routes with 'auth' and 'verified' middleware
+// Routes protected by auth and email verification middleware
 Route::middleware(['auth', 'verified'])->group(function () {
-    // Dashboard route
+    // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
     // Profile routes
@@ -25,20 +24,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 });
 
-// MS365 Verification Routes (No middleware needed)
+// MS365 Email verification routes
 Route::get('ms365-verify', [MS365OTPController::class, 'showMS365Form'])->name('ms365.verify');
-
-// Handle MS365 email verification and send OTP
 Route::post('ms365-verify', [MS365OTPController::class, 'verifyMS365Account']);
 
-// Show OTP verification form
+// OTP verification routes
 Route::get('otp-verify', [MS365OTPController::class, 'showOTPForm'])->name('otp.verify.form');
-
-// Handle OTP verification
 Route::post('otp-verify', [MS365OTPController::class, 'verifyOTP']);
-
-// Resend OTP request
 Route::post('resend-otp', [MS365OTPController::class, 'resendOTP']);
 
-// Include the authentication routes
+// Default auth routes
 require __DIR__.'/auth.php';
