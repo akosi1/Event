@@ -76,6 +76,7 @@
             <pre>{{ var_dump(request()->all()) }}</pre>
         </div>
     --}}
+
     <style>
         * {
             box-sizing: border-box;
