@@ -3,10 +3,10 @@
         <div class="forgot-container">
             <div class="forgot-header">
                 <div class="ms-logo">
-                    <img src="images/logo.png" alt="Logo" width="32" height="32">
+                    <img src="images/logo.png" alt="Logo" width="48" height="48">
                 </div>
-                <h1>Reset your password</h1>
-                <p>Enter your McLawis College email address and we'll send you a password reset link.</p>
+                <h1>Forgot your password?</h1>
+                <p>Enter your McLawis College email address</p>
             </div>
 
             <div class="forgot-form">
@@ -16,17 +16,20 @@
                     @csrf
 
                     <div class="form-group">
-                        <input 
-                            id="email" 
-                            type="email" 
-                            name="email" 
-                            value="{{ old('email') }}" 
-                            placeholder="someone@mcclawis.edu.ph"
-                            required 
-                            autofocus
-                            autocomplete="username"
-                            class="ms-input @error('email') error @enderror"
-                        >
+                        <div class="input-wrapper">
+                            <i class="fas fa-envelope input-icon"></i>
+                            <input 
+                                id="email" 
+                                type="email" 
+                                name="email" 
+                                value="{{ old('email') }}" 
+                                placeholder="someone@mcclawis.edu.ph"
+                                required 
+                                autofocus
+                                autocomplete="username"
+                                class="ms-input @error('email') error @enderror"
+                            >
+                        </div>
                         @error('email')
                             <div class="error-msg">
                                 <i class="fas fa-exclamation-circle"></i>
@@ -42,9 +45,11 @@
                         </button>
                     </div>
 
+                    <div class="divider">or</div>
+
                     <div class="form-footer">
                         <div class="back-link">
-                            <a href="{{ route('login') }}">
+                            <a href="{{ route('login') }}" class="btn-secondary">
                                 <i class="fas fa-arrow-left"></i>
                                 Back to sign in
                             </a>
@@ -59,7 +64,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
             background: #f5f5f5;
             color: #323130;
         }
@@ -69,69 +74,75 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
-            overflow-y: auto;
+            padding: 16px;
         }
 
         .forgot-container {
             background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 440px;
-            animation: fadeIn 0.4s ease;
-            margin: auto;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+            max-width: 400px;
+            padding: 32px 24px;
         }
 
         .forgot-header {
             text-align: center;
-            padding: 40px 40px 20px;
+            margin-bottom: 24px;
         }
 
         .ms-logo {
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             display: flex;
             justify-content: center;
         }
 
         .forgot-header h1 {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 600;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
+            color: #1a1a1a;
         }
 
         .forgot-header p {
-            font-size: 15px;
-            color: #605e5c;
-            line-height: 1.4;
+            font-size: 14px;
+            color: #666;
         }
 
-        .forgot-form { padding: 0 40px 40px; }
-        .form-group { margin-bottom: 24px; }
+        .forgot-form { width: 100%; }
+        .form-group { margin-bottom: 16px; }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            color: #0078d4;
+            font-size: 16px;
+            pointer-events: none;
+        }
 
         .ms-input {
             width: 100%;
-            padding: 11px 12px;
+            padding: 14px 14px 14px 44px;
             font-size: 15px;
-            border: 1px solid #605e5c;
-            border-radius: 2px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
             transition: all 0.2s ease;
             outline: none;
+            background: white;
         }
 
         .ms-input:focus {
             border-color: #0078d4;
-            box-shadow: 0 0 0 1px #0078d4;
         }
 
         .ms-input.error {
             border-color: #d13438;
-            box-shadow: 0 0 0 1px #d13438;
         }
 
         .error-msg {
@@ -139,21 +150,21 @@
             padding: 8px 12px;
             background: #fef0f0;
             border: 1px solid #d13438;
-            border-radius: 2px;
+            border-radius: 6px;
             color: #d13438;
-            font-size: 14px;
+            font-size: 13px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
 
         .btn-primary {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             background: #0078d4;
             color: white;
             border: none;
-            border-radius: 2px;
+            border-radius: 6px;
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
@@ -165,66 +176,48 @@
         }
 
         .btn-primary:hover { background: #106ebe; }
+        .btn-primary:active { background: #005a9e; }
 
-        .form-footer { margin-top: 32px; }
-
-        .back-link {
+        .divider {
             text-align: center;
-            margin-bottom: 24px;
+            color: #999;
+            font-size: 14px;
+            margin: 20px 0;
+            position: relative;
         }
 
-        .back-link a {
-            color: #0078d4;
-            text-decoration: none;
-            font-size: 15px;
+        .form-footer { margin-top: 0; }
+
+        .back-link { text-align: center; }
+
+        .btn-secondary {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
-            font-weight: 600;
-        }
-
-        .back-link a:hover { text-decoration: underline; }
-
-        .help-section {
-            border-top: 1px solid #edebe9;
-            padding-top: 24px;
-        }
-
-        .help-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            background: #f3f2f1;
-            padding: 16px;
-            border-radius: 2px;
-        }
-
-        .help-item i {
+            width: 100%;
+            padding: 14px;
+            background: white;
             color: #0078d4;
-            margin-top: 2px;
-            flex-shrink: 0;
+            border: 2px solid #0078d4;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
         }
 
-        .help-item strong {
-            display: block;
-            margin-bottom: 4px;
-            font-size: 14px;
+        .btn-secondary:hover {
+            background: #f0f7ff;
         }
 
-        .help-item p {
-            font-size: 14px;
-            color: #605e5c;
-            line-height: 1.3;
-            margin: 0;
-        }
-
-        .mb-4 { margin-bottom: 24px; }
+        .mb-4 { margin-bottom: 16px; }
 
         .mb-4 div {
-            padding: 16px;
+            padding: 12px 14px;
             background: #dff6dd;
             border: 1px solid #107c10;
-            border-radius: 2px;
+            border-radius: 6px;
             color: #107c10;
             font-size: 14px;
             display: flex;
@@ -238,30 +231,42 @@
             font-weight: 900;
         }
 
-        /* Responsive */
+        /* Mobile Responsive - NO SCROLLING */
         @media (max-width: 520px) {
-            .forgot-wrapper { padding: 0; }
+            .forgot-wrapper {
+                padding: 0;
+                align-items: stretch;
+            }
             
             .forgot-container {
                 border-radius: 0;
                 box-shadow: none;
-                min-height: auto;
+                min-height: 100vh;
+                max-width: 100%;
+                padding: 48px 24px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
             }
 
-            .forgot-header, .forgot-form { padding-left: 20px; padding-right: 20px; }
-            .forgot-header { padding-top: 48px; }
             .forgot-header h1 { font-size: 20px; }
-            .forgot-header p { font-size: 14px; }
+            .forgot-header p { font-size: 13px; }
             
-            .ms-input { font-size: 16px; padding: 12px; }
-            .btn-primary { padding: 14px 12px; font-size: 16px; }
-            .back-link a { font-size: 14px; }
+            .ms-input { 
+                font-size: 16px;
+                padding: 13px 13px 13px 42px;
+            }
+            
+            .btn-primary,
+            .btn-secondary { 
+                padding: 13px;
+                font-size: 16px;
+            }
         }
 
         @media (max-width: 375px) {
-            .forgot-header, .forgot-form { padding-left: 16px; padding-right: 16px; }
-            .forgot-header { padding-top: 40px; }
-            .forgot-header h1 { font-size: 18px; }
+            .forgot-container { padding: 40px 20px; }
+            .forgot-header h1 { font-size: 19px; }
         }
     </style>
 </x-guest-layout>
