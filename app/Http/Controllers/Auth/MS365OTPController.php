@@ -8,11 +8,11 @@ use App\Models\OtpVerification;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
-use App\Mail\PHPMailerService;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 class MS365OTPController extends Controller
 {
@@ -31,12 +31,10 @@ class MS365OTPController extends Controller
     {
         $request->validate([
             'email' => [
-        'required',
-        'email',
-        'max:255'
+                'required',
+                'email',
+                'max:255'
             ],
-        ], [
-            'email.regex' => 'Please use your official McLawis College email address (@mcclawis.edu.ph)',
         ]);
 
         // Check if email is already registered
@@ -52,7 +50,7 @@ class MS365OTPController extends Controller
     }
 
     /**
-     * Helper function to generate and send OTP
+     * Helper function to generate and send OTP via PHPMailer
      */
     private function sendOtp(string $email): RedirectResponse
     {
@@ -70,17 +68,47 @@ class MS365OTPController extends Controller
         );
 
         try {
-            // Send OTP email
-            Mail::send('emails.otp-verification', ['otp' => $otp, 'email' => $email], function ($message) use ($email) {
-                $message->to($email)
-                        ->subject('EventAps - Email Verification Code');
-            });
+            $mail = new PHPMailer(true);
+
+            // Server settings
+            $mail->isSMTP();
+            $mail->Host       = 'smtp.office365.com';
+            $mail->SMTPAuth   = true;
+            $mail->Username   = env('MAIL_USERNAME');
+            $mail->Password   = env('MAIL_PASSWORD');
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port       = 587;
+
+            // Sender & recipient
+            $mail->setFrom(env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME', 'EventAps'));
+            $mail->addAddress($email);
+
+            // Content
+            $mail->isHTML(true);
+            $mail->Subject = 'EventAps - Email Verification Code';
+
+            // Render Blade template to string
+            $body = view('emails.otp-verification', [
+                'otp' => $otp,
+                'email' => $email
+            ])->render();
+
+            $mail->Body = $body;
+
+            $mail->send();
+
+            Log::info("✅ PHPMailer sent OTP to: {$email}");
 
             return redirect()->route('otp.verify.form')
-                             ->with('status', 'Verification code sent to your McLawis email address.');
-        } catch (\Exception $e) {
-            Log::error('OTP email sending failed for email: ' . $email . ' (verifyMS365Account): ' . $e->getMessage());
-            return back()->withErrors(['email' => 'Failed to send verification code. Please try again.']);
+                ->with('status', 'Verification code sent to your McLawis email address.');
+        } catch (Exception $e) {
+            Log::error("❌ PHPMailer failed for {$email}: {$e->getMessage()}");
+
+            if (app()->environment('local')) {
+                return back()->withErrors(['email' => 'Mailer error: ' . $e->getMessage()]);
+            }
+
+            return back()->withErrors(['email' => 'Failed to send verification code. Please try again later.']);
         }
     }
 
@@ -89,7 +117,6 @@ class MS365OTPController extends Controller
      */
     public function showOTPForm(): View
     {
-        // Redirect to MS365 verification form if email is not in session
         if (!session('email')) {
             return redirect()->route('ms365.verify');
         }
@@ -113,29 +140,24 @@ class MS365OTPController extends Controller
             return back()->withErrors(['otp' => 'Invalid verification request.']);
         }
 
-        // Check if OTP has expired
         if (Carbon::now()->gt($otpRecord->expires_at)) {
             return back()->withErrors(['otp' => 'Verification code has expired.']);
         }
 
-        // Check if too many attempts were made
         if ($otpRecord->attempts >= 3) {
             return back()->withErrors(['otp' => 'Too many failed attempts. Please request a new code.']);
         }
 
-        // Check if OTP is correct
         if (!Hash::check($request->otp, $otpRecord->otp)) {
             $otpRecord->increment('attempts');
             return back()->withErrors(['otp' => 'Invalid verification code.']);
         }
 
-        // Mark as verified
         $otpRecord->update(['verified_at' => Carbon::now()]);
 
-        // Redirect to registration page
         return redirect()->route('register')
-                         ->with('verified_email', $request->email)
-                         ->with('status', 'Email verified successfully! Please complete your registration.');
+            ->with('verified_email', $request->email)
+            ->with('status', 'Email verified successfully! Please complete your registration.');
     }
 
     /**
@@ -149,12 +171,10 @@ class MS365OTPController extends Controller
 
         $otpRecord = OtpVerification::where('email', $request->email)->first();
 
-        // Prevent sending OTP too soon
         if ($otpRecord && Carbon::now()->lt($otpRecord->created_at->addMinutes(2))) {
             return back()->withErrors(['otp' => 'Please wait before requesting another code.']);
         }
 
-        // Send a new OTP
         return $this->sendOtp($request->email);
     }
 }
