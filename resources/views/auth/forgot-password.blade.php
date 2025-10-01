@@ -56,11 +56,7 @@
     </div>
 
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -74,6 +70,7 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
+            overflow-y: auto;
         }
 
         .forgot-container {
@@ -83,6 +80,7 @@
             width: 100%;
             max-width: 440px;
             animation: fadeIn 0.4s ease;
+            margin: auto;
         }
 
         @keyframes fadeIn {
@@ -92,7 +90,7 @@
 
         .forgot-header {
             text-align: center;
-            padding: 40px 40px 20px 40px;
+            padding: 40px 40px 20px;
         }
 
         .ms-logo {
@@ -104,7 +102,6 @@
         .forgot-header h1 {
             font-size: 24px;
             font-weight: 600;
-            color: #323130;
             margin-bottom: 12px;
         }
 
@@ -114,13 +111,8 @@
             line-height: 1.4;
         }
 
-        .forgot-form {
-            padding: 0 40px 40px 40px;
-        }
-
-        .form-group {
-            margin-bottom: 24px;
-        }
+        .forgot-form { padding: 0 40px 40px; }
+        .form-group { margin-bottom: 24px; }
 
         .ms-input {
             width: 100%;
@@ -128,7 +120,6 @@
             font-size: 15px;
             border: 1px solid #605e5c;
             border-radius: 2px;
-            background: white;
             transition: all 0.2s ease;
             outline: none;
         }
@@ -173,13 +164,9 @@
             gap: 8px;
         }
 
-        .btn-primary:hover {
-            background: #106ebe;
-        }
+        .btn-primary:hover { background: #106ebe; }
 
-        .form-footer {
-            margin-top: 32px;
-        }
+        .form-footer { margin-top: 32px; }
 
         .back-link {
             text-align: center;
@@ -196,9 +183,7 @@
             font-weight: 600;
         }
 
-        .back-link a:hover {
-            text-decoration: underline;
-        }
+        .back-link a:hover { text-decoration: underline; }
 
         .help-section {
             border-top: 1px solid #edebe9;
@@ -224,7 +209,6 @@
             display: block;
             margin-bottom: 4px;
             font-size: 14px;
-            color: #323130;
         }
 
         .help-item p {
@@ -234,9 +218,7 @@
             margin: 0;
         }
 
-        .mb-4 {
-            margin-bottom: 24px;
-        }
+        .mb-4 { margin-bottom: 24px; }
 
         .mb-4 div {
             padding: 16px;
@@ -256,27 +238,30 @@
             font-weight: 900;
         }
 
+        /* Responsive */
         @media (max-width: 520px) {
+            .forgot-wrapper { padding: 0; }
+            
             .forgot-container {
-                max-width: 100%;
                 border-radius: 0;
                 box-shadow: none;
-                min-height: 100vh;  
-            }   
-
-            .forgot-header,
-            .forgot-form {
-                padding-left: 24px;
-                padding-right: 24px;
+                min-height: auto;
             }
 
-            .forgot-header {
-                padding-top: 60px;
-            }
+            .forgot-header, .forgot-form { padding-left: 20px; padding-right: 20px; }
+            .forgot-header { padding-top: 48px; }
+            .forgot-header h1 { font-size: 20px; }
+            .forgot-header p { font-size: 14px; }
+            
+            .ms-input { font-size: 16px; padding: 12px; }
+            .btn-primary { padding: 14px 12px; font-size: 16px; }
+            .back-link a { font-size: 14px; }
+        }
 
-            .forgot-header h1 {
-                font-size: 22px;
-            }
+        @media (max-width: 375px) {
+            .forgot-header, .forgot-form { padding-left: 16px; padding-right: 16px; }
+            .forgot-header { padding-top: 40px; }
+            .forgot-header h1 { font-size: 18px; }
         }
     </style>
 </x-guest-layout>
