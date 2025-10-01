@@ -67,11 +67,7 @@
 </x-guest-layout>
 
 <style>
-    * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -103,7 +99,7 @@
 
     .ms365-header {
         text-align: center;
-        padding: 40px 40px 20px 40px;
+        padding: 40px 40px 20px;
     }
 
     .ms-logo {
@@ -115,8 +111,8 @@
     .ms365-header h1 {
         font-size: 24px;
         font-weight: 600;
-        color: #323130;
         margin-bottom: 8px;
+        line-height: 1.3;
     }
 
     .ms365-header p {
@@ -124,12 +120,16 @@
         color: #605e5c;
     }
 
-    .ms365-form {
-        padding: 0 40px 40px 40px;
-    }
+    .ms365-form { padding: 0 40px 40px; }
+    .form-group { margin-bottom: 24px; }
 
-    .form-group {
-        margin-bottom: 24px;
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
     }
 
     .ms-input {
@@ -138,7 +138,6 @@
         font-size: 15px;
         border: 1px solid #605e5c;
         border-radius: 2px;
-        background: white;
         transition: all 0.2s ease;
         outline: none;
     }
@@ -179,36 +178,10 @@
         transition: background 0.2s ease;
     }
 
-    .btn-primary:hover {
-        background: #106ebe;
-    }
+    .btn-primary:hover { background: #106ebe; }
+    .btn-primary:active { background: #005a9e; }
 
-    .btn-primary:active {
-        background: #005a9e;
-    }
-
-    .form-footer {
-        margin-top: 32px;
-    }
-
-    .help-text {
-        background: #f3f2f1;
-        border: 1px solid #edebe9;
-        border-radius: 2px;
-        padding: 16px;
-        font-size: 14px;
-        color: #605e5c;
-        display: flex;
-        align-items: flex-start;
-        gap: 8px;
-        margin-bottom: 24px;
-    }
-
-    .help-text i {
-        color: #0078d4;
-        margin-top: 2px;
-        flex-shrink: 0;
-    }
+    .form-footer { margin-top: 32px; }
 
     .auth-links {
         text-align: center;
@@ -227,13 +200,9 @@
         font-weight: 600;
     }
 
-    .auth-links a:hover {
-        text-decoration: underline;
-    }
+    .auth-links a:hover { text-decoration: underline; }
 
-    .mb-4 {
-        margin-bottom: 24px;
-    }
+    .mb-4 { margin-bottom: 24px; }
 
     .mb-4 div {
         padding: 16px;
@@ -244,26 +213,43 @@
         font-size: 14px;
     }
 
+    .debug-info {
+        margin-bottom: 24px;
+        padding: 16px;
+        background: #fff4ce;
+        border: 1px solid #fde300;
+        border-radius: 2px;
+        font-size: 14px;
+    }
+
+    .debug-info h3 { font-size: 16px; margin-bottom: 8px; }
+    .debug-info ul { margin-left: 20px; }
+    .debug-info li { margin-bottom: 4px; color: #605e5c; }
+
+    /* Responsive */
     @media (max-width: 520px) {
+        .ms365-wrapper { padding: 0; align-items: flex-start; }
+        
         .ms365-container {
-            max-width: 100%;
             border-radius: 0;
             box-shadow: none;
             min-height: 100vh;
         }
 
-        .ms365-header,
-        .ms365-form {
-            padding-left: 24px;
-            padding-right: 24px;
-        }
+        .ms365-header, .ms365-form { padding-left: 20px; padding-right: 20px; }
+        .ms365-header { padding-top: 48px; }
+        .ms365-header h1 { font-size: 20px; }
+        .ms365-header p { font-size: 14px; }
+        
+        .ms-input { font-size: 16px; padding: 12px; }
+        .btn-primary { padding: 14px 12px; font-size: 16px; }
+        .auth-links p { font-size: 14px; }
+        .form-footer { margin-top: 24px; }
+    }
 
-        .ms365-header {
-            padding-top: 60px;
-        }
-
-        .ms365-header h1 {
-            font-size: 22px;
-        }
+    @media (max-width: 375px) {
+        .ms365-header, .ms365-form { padding-left: 16px; padding-right: 16px; }
+        .ms365-header { padding-top: 40px; }
+        .ms365-header h1 { font-size: 18px; }
     }
 </style>
