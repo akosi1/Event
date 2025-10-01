@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -13,4 +13,5 @@
     <p>This OTP is valid for the next 10 minutes. Please use it to verify your account.</p>
     <p>If you did not request this, please ignore this email.</p>
 </body>
-</html>
+</html> -->
+test oa ka
