@@ -15,7 +15,7 @@ use App\Http\Controllers\{
 
 Route::get('/', fn() => view('welcome'));
 
-/
+// Routes protected by auth and email verification middleware
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
