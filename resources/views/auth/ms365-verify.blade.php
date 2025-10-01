@@ -81,6 +81,7 @@
         align-items: center;
         justify-content: center;
         padding: 20px;
+        overflow-y: auto;
     }
 
     .ms365-container {
@@ -90,6 +91,7 @@
         width: 100%;
         max-width: 440px;
         animation: fadeIn 0.4s ease;
+        margin: auto;
     }
 
     @keyframes fadeIn {
@@ -228,12 +230,12 @@
 
     /* Responsive */
     @media (max-width: 520px) {
-        .ms365-wrapper { padding: 0; align-items: flex-start; }
+        .ms365-wrapper { padding: 0; }
         
         .ms365-container {
             border-radius: 0;
             box-shadow: none;
-            min-height: 100vh;
+            min-height: auto;
         }
 
         .ms365-header, .ms365-form { padding-left: 20px; padding-right: 20px; }
