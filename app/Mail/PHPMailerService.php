@@ -4,7 +4,6 @@ namespace App\Mail;
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
-use Illuminate\Support\Facades\Log;
 
 class PHPMailerService
 {
@@ -14,9 +13,6 @@ class PHPMailerService
 
         try {
             $mail->SMTPDebug = 0;
-            $mail->Debugoutput = function ($str, $level) {
-                Log::info("PHPMailer debug level {$level}: {$str}");
-            };
 
             $mail->isSMTP();
             $mail->Host = env('MAIL_HOST', 'smtp.gmail.com');
@@ -41,15 +37,11 @@ class PHPMailerService
             $mail->Body = $body;
             $mail->AltBody = strip_tags($body);
 
-
             $mail->send();
 
-            Log::info("PHPMailer: Email sent to {$toEmail} with subject: {$subject}");
             return true;
 
         } catch (Exception $e) {
-            Log::error("PHPMailer Error sending to {$toEmail}: " . $mail->ErrorInfo);
-            Log::error("Exception: " . $e->getMessage());
             return false;
         }
     }
