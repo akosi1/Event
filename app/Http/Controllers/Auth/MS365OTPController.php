@@ -30,10 +30,9 @@ class MS365OTPController extends Controller
     {
         $request->validate([
             'email' => [
-                'required',
-                'email',
-                'regex:/^[a-zA-Z0-9._%+-]+@mcclawis\.edu\.ph$/',
-                'max:255'
+        'required',
+        'email',
+        'max:255'
             ],
         ], [
             'email.regex' => 'Please use your official McLawis College email address (@mcclawis.edu.ph)',
