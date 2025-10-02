@@ -136,7 +136,7 @@ class MS365OTPController extends Controller
         session(['verified_email' => $request->email]);
         // Redirect to registration page
         return redirect()->route('register')
-                         ->with('verified_email', $request->email)
+                        //  ->with('verified_email', $request->email)
                          ->with('status', 'Email verified successfully! Please complete your registration.');
     }
 
