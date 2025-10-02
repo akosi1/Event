@@ -132,7 +132,8 @@ class MS365OTPController extends Controller
 
         // Mark as verified
         $otpRecord->update(['verified_at' => Carbon::now()]);
-
+                  
+        session(['verified_email' => $request->email]);
         // Redirect to registration page
         return redirect()->route('register')
                          ->with('verified_email', $request->email)
