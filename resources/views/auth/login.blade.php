@@ -475,7 +475,7 @@
                     if (item.dataset.val === oldValue || item.dataset.full === oldValue) {
                         deptText.textContent = item.dataset.val;
                         deptText.style.color = '#323130';
-                        deptInput.value = item.dataset.full;
+                        deptInput.value = item.dataset.val;
                         deptIcon.className = 'fas ' + item.dataset.icon;
                     }
                 });
@@ -496,7 +496,7 @@
                     
                     deptText.textContent = val;
                     deptText.style.color = '#323130';
-                    deptInput.value = full;
+                    deptInput.value = val;
                     deptIcon.className = 'fas ' + icon;
                     
                     deptMenu.classList.remove('show');
