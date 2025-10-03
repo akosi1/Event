@@ -84,15 +84,18 @@
                                 Forgot your password?
                             </a>
                         </div>
-                        
+                        <div class="signup-link">
+                            <!-- <p>Don't have an account?</p> -->
+                            <a href="{{ route('ms365.verify') }}" class="btn-secondary">
+                                Create account with ms365 email
+                            </a>
+                        </div>
                         <div class="divider">
                             <span>or</span>
                         </div>
-                        
-                        <div class="signup-link">
-                            <p>Don't have an account?</p>
-                            <a href="{{ route('ms365.verify') }}" class="btn-secondary">
-                                Create account with McLawis email
+                       <div class="back-link">
+                            <a href="{{ url('/') }}" class="btn-secondary">
+                                Back to main page
                             </a>
                         </div>
                     </div>

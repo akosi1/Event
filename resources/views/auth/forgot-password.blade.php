@@ -3,7 +3,7 @@
         <div class="forgot-container">
             <div class="forgot-header">
                 <h1>Reset your password</h1>
-                <p>Enter your McLawis College email address and we'll send you a password reset link.</p>
+                <p>Enter your Ms365 College email and we'll send you a password reset link.</p>
             </div>
 
             <div class="forgot-form">

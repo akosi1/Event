@@ -25,7 +25,7 @@
                             <div class="input-wrapper">
                                 <input id="email" type="email" name="email" value="{{ old('email', '') }}" 
                                     class="form-control @error('email') input-error @enderror" placeholder=" " required autocomplete="username" autofocus>
-                                <label class="input-label">McLawis Email Address</label>
+                                <label class="input-label">Ms365 Email </label>
                                 <i class="fas fa-envelope input-icon"></i>
                             </div>
                             @error('email')

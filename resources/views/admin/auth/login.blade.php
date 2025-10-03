@@ -78,7 +78,7 @@
             <div class="back-link">
                 <a href="{{ url('/') }}">
                     <i class="fas fa-arrow-left"></i>
-                    Back to homepage
+                    Back to main page
                 </a>
             </div>
         </div>
