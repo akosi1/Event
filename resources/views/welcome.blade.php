@@ -341,23 +341,17 @@
 
         /* Mobile Responsive */
         @media (max-width: 480px) {
-            body {
-                overflow-y: auto;
-            }
-
             .welcome-wrapper {
                 padding: 20px 15px;
-                min-height: 100vh;
-                height: auto;
             }
 
             .welcome-container {
                 max-width: 100%;
-                padding: 30px 0;
+                padding: 20px 0;
             }
 
             .logo-section {
-                margin-bottom: 30px;
+                margin-bottom: 25px;
             }
 
             .logo-section img {
@@ -365,7 +359,7 @@
             }
 
             .welcome-header {
-                margin-bottom: 35px;
+                margin-bottom: 30px;
             }
 
             .welcome-header h1 {
