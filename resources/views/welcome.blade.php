@@ -6,191 +6,470 @@
     <title>MCC Event & Portfolio Organizer</title>
     
     <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Roboto+Condensed:wght@300;400;700&display=swap" rel="stylesheet">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Poppins', sans-serif;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
+            background: url("{{ asset('images/mcc background.jpg') }}") center/cover no-repeat fixed;
+            position: relative;
         }
-        
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(74, 26, 92, 0.85) 0%, rgba(107, 44, 145, 0.85) 50%, rgba(61, 26, 120, 0.85) 100%);
+            z-index: 1;
         }
-        
-        .glass-effect {
-            backdrop-filter: blur(10px);
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+
+        .welcome-wrapper {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            z-index: 2;
         }
-        
-        .hover-scale {
-            transition: transform 0.3s ease;
+
+        .welcome-container {
+            text-align: center;
+            max-width: 900px;
+            width: 100%;
+            animation: fadeIn 0.8s ease-out;
         }
-        
-        .hover-scale:hover {
-            transform: translateY(-2px);
+
+        @keyframes fadeIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
         }
-        
-        .floating-animation {
-            animation: floating 6s ease-in-out infinite;
+
+        .logo-section {
+            margin-bottom: 50px;
+            animation: fadeIn 1s ease-out 0.2s backwards;
         }
-        
-        @keyframes floating {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+
+        .logo-section img {
+            width: 150px;
+            height: auto;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 4px 30px rgba(0, 0, 0, 0.4));
+            animation: pulse 2s ease-in-out infinite;
         }
-        
-        .feature-card {
-            transition: all 0.3s ease;
+
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(1); 
+                opacity: 1;
+            }
+            50% { 
+                transform: scale(1.08); 
+                opacity: 0.9;
+            }
         }
-        
-        .feature-card:hover {
-            transform: scale(1.02);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+
+        .welcome-header {
+            margin-bottom: 70px;
+            animation: fadeIn 1s ease-out 0.4s backwards;
         }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+
+        .welcome-header h1 {
+            font-size: 64px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.6);
+            line-height: 1.2;
         }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+
+        .welcome-header h1 .white-text {
+            color: #ffffff;
         }
-        
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            transition: all 0.3s ease;
+
+        .welcome-header h1 .red-text {
+            color: #e85d5d;
+            display: inline;
         }
-        
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.5);
-            transform: translateY(-2px);
+
+        .welcome-header p {
+            font-size: 20px;
+            color: #e0e0e0;
+            font-weight: 400;
+            font-family: 'Roboto Condensed', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin-top: 20px;
         }
-        
+
         .button-group {
             display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
+            gap: 25px;
             justify-content: center;
-            align-items: center;
+            flex-wrap: wrap;
+            animation: fadeIn 1s ease-out 0.6s backwards;
         }
-        
+
+        .btn {
+            padding: 18px 50px;
+            border-radius: 0;
+            font-size: 17px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 14px;
+            transition: all 0.4s ease;
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            border: none;
+            min-width: 220px;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #e53e3e 0%, #d53f41 100%);
+            transition: left 0.4s ease;
+            z-index: -1;
+        }
+
+        .btn-dashboard {
+            background: linear-gradient(135deg, #e53e3e 0%, #d53f41 100%);
+            color: white;
+            box-shadow: 0 4px 20px rgba(229, 62, 62, 0.4);
+        }
+
+        .btn-dashboard:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(229, 62, 62, 0.6);
+        }
+
+        .btn-admin {
+            background: transparent;
+            color: #ffffff;
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
+            z-index: 1;
+        }
+
+        .btn-admin::before {
+            z-index: -1;
+        }
+
+        .btn-admin:hover {
+            color: #ffffff;
+            border-color: #e53e3e;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(229, 62, 62, 0.4);
+        }
+
+        .btn-admin:hover::before {
+            left: 0;
+        }
+
+        .btn-user {
+            background: transparent;
+            color: #ffffff;
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
+            z-index: 1;
+        }
+
+        .btn-user::before {
+            z-index: -1;
+        }
+
+        .btn-user:hover {
+            color: #ffffff;
+            border-color: #e53e3e;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(229, 62, 62, 0.4);
+        }
+
+        .btn-user:hover::before {
+            left: 0;
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn i {
+            font-size: 20px;
+        }
+
+        /* Floating Background Elements */
+        .bg-decoration {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .bg-decoration.circle-1 {
+            width: 350px;
+            height: 350px;
+            top: 10%;
+            left: 5%;
+            animation-delay: 0s;
+        }
+
+        .bg-decoration.circle-2 {
+            width: 250px;
+            height: 250px;
+            bottom: 15%;
+            right: 10%;
+            animation-delay: -2s;
+        }
+
+        .bg-decoration.circle-3 {
+            width: 180px;
+            height: 180px;
+            top: 60%;
+            left: 15%;
+            animation-delay: -4s;
+        }
+
+        /* Tablet Responsive */
         @media (max-width: 768px) {
-            .mobile-text {
-                font-size: 2rem;
-                line-height: 1.2;
+            .welcome-container {
+                max-width: 90%;
             }
-            
-            .mobile-subtitle {
-                font-size: 1.1rem;
+
+            .logo-section {
+                margin-bottom: 40px;
             }
-            
+
+            .logo-section img {
+                width: 100px;
+            }
+
+            .welcome-header {
+                margin-bottom: 50px;
+            }
+
+            .welcome-header h1 {
+                font-size: 42px;
+                letter-spacing: 1px;
+            }
+
+            .welcome-header p {
+                font-size: 16px;
+                letter-spacing: 2px;
+                margin-top: 15px;
+            }
+
+            .button-group {
+                gap: 18px;
+            }
+
+            .btn {
+                padding: 16px 40px;
+                font-size: 16px;
+                min-width: 200px;
+            }
+
+            .btn i {
+                font-size: 18px;
+            }
+
+            .bg-decoration.circle-1 {
+                width: 250px;
+                height: 250px;
+            }
+
+            .bg-decoration.circle-2 {
+                width: 180px;
+                height: 180px;
+            }
+
+            .bg-decoration.circle-3 {
+                width: 130px;
+                height: 130px;
+            }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 480px) {
+            .welcome-wrapper {
+                padding: 15px;
+            }
+
+            .welcome-container {
+                max-width: 100%;
+            }
+
+            .logo-section {
+                margin-bottom: 35px;
+            }
+
+            .logo-section img {
+                width: 80px;
+            }
+
+            .welcome-header {
+                margin-bottom: 40px;
+            }
+
+            .welcome-header h1 {
+                font-size: 32px;
+                letter-spacing: 0.5px;
+                margin-bottom: 15px;
+            }
+
+            .welcome-header p {
+                font-size: 14px;
+                letter-spacing: 1.5px;
+                margin-top: 12px;
+            }
+
             .button-group {
                 flex-direction: column;
+                gap: 15px;
                 width: 100%;
             }
-            
-            .button-group .btn {
+
+            .btn {
                 width: 100%;
-                max-width: 280px;
+                max-width: 300px;
+                padding: 15px 35px;
+                font-size: 15px;
+                letter-spacing: 1.5px;
+                min-width: unset;
+            }
+
+            .btn i {
+                font-size: 17px;
+            }
+
+            .bg-decoration.circle-1 {
+                width: 180px;
+                height: 180px;
+                top: 5%;
+                left: -60px;
+            }
+
+            .bg-decoration.circle-2 {
+                width: 140px;
+                height: 140px;
+                bottom: 10%;
+                right: -50px;
+            }
+
+            .bg-decoration.circle-3 {
+                width: 100px;
+                height: 100px;
+            }
+        }
+
+        /* Extra Small Mobile */
+        @media (max-width: 360px) {
+            .logo-section i {
+                font-size: 50px;
+            }
+
+            .welcome-header h1 {
+                font-size: 26px;
+            }
+
+            .welcome-header p {
+                font-size: 12px;
+            }
+
+            .btn {
+                padding: 14px 30px;
+                font-size: 14px;
             }
         }
     </style>
 </head>
-<body class="antialiased">
-    <!-- Hero Section -->
-    <section class="min-h-screen gradient-bg flex items-center justify-center relative overflow-hidden">
-        <!-- Background Elements -->
-        <div class="absolute inset-0">
-            <div class="absolute top-20 left-10 w-32 h-32 md:w-72 md:h-72 bg-white opacity-10 rounded-full floating-animation"></div>
-            <div class="absolute bottom-20 right-10 w-48 h-48 md:w-96 md:h-96 bg-white opacity-5 rounded-full floating-animation" style="animation-delay: -3s;"></div>
-        </div>
-        
-        <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <!-- Main Content -->
-            <div class="mb-8">
+<body>
+    <!-- Background Decorations -->
+    <div class="bg-decoration circle-1"></div>
+    <div class="bg-decoration circle-2"></div>
+    <div class="bg-decoration circle-3"></div>
 
-                
-                <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-4 sm:mb-6 leading-tight mobile-text">
-                    MCC Event & Portfolio
-                    <span class="bg-gradient-to-r from-yellow-400 to-pink-400 bg-clip-text text-transparent block sm:inline">
-                        Organizer
-                    </span>
-                </h1>
-                <!-- CTA Buttons -->
-                @if (Route::has('login'))
-                    <div class="button-group">
-                        @auth   
-                            <a href="{{ url('/dashboard') }}" class="btn btn-primary text-white px-8 py-4 rounded-full font-semibold text-lg inline-flex items-center space-x-3">
-                                <i class="fas fa-tachometer-alt text-xl"></i>
-                                <span>Go to Dashboard</span>
-                            </a>
-                        @else
-                            <a href="{{ route('login') }}" class="btn btn-secondary text-white px-8 py-4 rounded-full font-semibold text-lg inline-flex items-center space-x-3">
-                                <i class="fas fa-sign-in-alt text-xl"></i>
-                                <span>LOGIN</span>
-                            </a>
-                            @if (Route::has('register'))
-                                <a href="{{ route('register') }}" class="btn btn-primary text-white px-8 py-4 rounded-full font-semibold text-lg inline-flex items-center space-x-3">
-                                    <i class="fas fa-user-plus text-xl"></i>
-                                    <span>REGISTER</span>
-                                </a>
-                            @endif
-                        @endauth
-                    </div>
-                @endif
-                
-               
-                </div>
+    <!-- Welcome Section -->
+    <div class="welcome-wrapper">
+        <div class="welcome-container">
+            <!-- Logo -->
+            <div class="logo-section">
+                <img src="{{ asset('images/logo.png') }}" alt="MCC Logo">
             </div>
-        </div>
-    </section>
 
-    <script>
-        // Smooth scrolling for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth'
-                    });
-                }
-            });
-        });
-        
-        // Add click animation to buttons
-        document.querySelectorAll('.btn').forEach(button => {
-            button.addEventListener('click', function(e) {
-                let ripple = document.createElement('span');
-                ripple.classList.add('ripple');
-                this.appendChild(ripple);
-                
-                let x = e.clientX - e.target.offsetLeft;
-                let y = e.clientY - e.target.offsetTop;
-                
-                ripple.style.left = x + 'px';
-                ripple.style.top = y + 'px';
-                
-                setTimeout(() => {
-                    ripple.remove();
-                }, 600);
-            });
-        });
-    </script>
+            <!-- Header -->
+            <div class="welcome-header">
+                <h1>
+                    <span class="white-text">MCC Event & Portfolio</span><br>
+                    <span class="red-text">Organizer</span>
+                </h1>
+                <p>Streamline Your Academic Journey</p>
+            </div>
+
+            <!-- CTA Buttons -->
+            @if (Route::has('login'))
+                <div class="button-group">
+                    @auth   
+                        <a href="{{ url('/dashboard') }}" class="btn btn-dashboard">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Go to Dashboard</span>
+                        </a>
+                    @else
+                        <a href="{{ url('/admin') }}" class="btn btn-admin">
+                            <i class="fas fa-user-shield"></i>
+                            <span>Admin Login</span>
+                        </a>
+                        <a href="{{ route('login') }}" class="btn btn-user">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span>User Login</span>
+                        </a>
+                    @endauth
+                </div>
+            @endif
+        </div>
+    </div>
 </body>
 </html>

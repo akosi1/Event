@@ -2,11 +2,8 @@
     <div class="auth-wrapper">
         <div class="auth-container">
             <div class="auth-header">
-                <div class="ms-logo">
-                    <img src="images/logo.png" alt="Logo" width="32" height="32">
-                </div>
-                <h1>Sign in to E&P-O</h1>
-                <p>Use your ms365 email account</p>
+                <h1>Welcome Back</h1>
+                <p>Sign in to your E&P-O account</p>
             </div>
             <div class="auth-form" id="authForm">
                 <x-auth-session-status class="mb-4" :status="session('status')" />
@@ -14,26 +11,39 @@
                     @csrf
                     <div class="form-group">
                         <div class="input-wrapper">
-                            <i class="fas fa-envelope"></i>
                             <input id="email" type="email" name="email" value="{{ old('email') }}" 
-                                placeholder="someone@mcclawis.edu.ph" required autocomplete="username" autofocus>
+                                class="form-control @error('email') input-error @enderror" placeholder=" " required autocomplete="username" autofocus>
+                            <label class="input-label">Email Address</label>
+                            <i class="fas fa-envelope input-icon"></i>
                         </div>
-                        <x-input-error :messages="$errors->get('email')" class="error-msg" />
+                        @error('email')
+                            <div class="error-msg">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ $message }}
+                            </div>
+                        @enderror
                     </div>
                     <div class="form-group">
                         <div class="input-wrapper">
-                            <i class="fas fa-lock"></i>
                             <input id="password" type="password" name="password" 
-                                placeholder="Password" required autocomplete="current-password">
+                                class="form-control @error('password') input-error @enderror" placeholder=" " required autocomplete="current-password">
+                            <label class="input-label">Password</label>
+                            <i class="fas fa-lock input-icon"></i>
                         </div>
-                        <x-input-error :messages="$errors->get('password')" class="error-msg" />
+                        @error('password')
+                            <div class="error-msg">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ $message }}
+                            </div>
+                        @enderror
                     </div>
                     <div class="form-group">
                         <div class="dropdown-wrapper">
                             <div class="dropdown-btn" id="deptBtn">
-                                <div class="dropdown-text">
-                                    <i class="fas fa-graduation-cap" id="deptIcon"></i>
-                                    <span id="deptText">Select Your Department</span>
+                                <div class="dropdown-content">
+                                    <i class="fas fa-graduation-cap input-icon" id="deptIcon"></i>
+                                    <label class="select-label" id="deptLabel">Select Your Department</label>
+                                    <span id="deptText"></span>
                                 </div>
                                 <i class="fas fa-chevron-down arrow" id="deptArrow"></i>
                             </div>
@@ -56,14 +66,12 @@
                             </div>
                             <input type="hidden" name="department" id="department" value="{{ old('department') }}" required>
                         </div>
-                        <x-input-error :messages="$errors->get('department')" class="error-msg" />
-                    </div>
-                    <div class="form-options">
-                        <label class="remember-me">
-                            <input type="checkbox" name="remember" {{ old('remember') ? 'checked' : '' }}>
-                            <span class="checkmark"></span>
-                            Keep me signed in
-                        </label>
+                        @error('department')
+                            <div class="error-msg">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ $message }}
+                            </div>
+                        @enderror
                     </div>
                     <button type="submit" class="btn-submit">
                         <i class="fas fa-sign-in-alt"></i>
@@ -93,137 +101,372 @@
         </div>
     </div>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         html, body {
             height: 100%;
             overflow: hidden;
-            background: #f5f5f5;
-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+
+        body {
+            background: url("{{ asset('images/mcc background.jpg') }}") center/cover no-repeat;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(74, 26, 92, 0.8) 0%, rgba(107, 44, 145, 0.8) 50%, rgba(61, 26, 120, 0.8) 100%);
+            z-index: 1;
+        }
+
         .auth-wrapper {
             height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #f5f5f5;
             padding: 20px;
-            overflow: hidden;
+            position: relative;
+            z-index: 2;
         }
+
         .auth-container {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background: transparent;
             width: 100%;
-            max-width: 420px;
-            animation: fadeIn 0.4s ease;
-            overflow: hidden;
+            max-width: 450px;
+            animation: fadeIn 0.6s ease-out;
+            padding: 30px;
         }
+
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
+            from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
         .auth-header {
             text-align: center;
-            padding: 30px 25px 20px 25px;
-            border-bottom: 1px solid #edebe9;
+            margin-bottom: 30px;
         }
-        .ms-logo {
-            margin-bottom: 16px;
-            display: flex;
-            justify-content: center;
-        }
+
         .auth-header h1 {
-            font-size: 24px;
+            font-size: 38px;
             font-weight: 600;
+            color: #ffffff;
             margin-bottom: 8px;
-            color: #323130;
+            letter-spacing: 1px;
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
+
         .auth-header p {
-            opacity: 0.8;
+            color: #e0e0e0;
             font-size: 15px;
-            color: #605e5c;
+            font-weight: 400;
+            font-family: 'Roboto Condensed', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
         }
+
         .auth-form {
-            padding: 30px 25px;
             max-height: calc(100vh - 200px);
             overflow-y: auto;
             scrollbar-width: none;
+            padding-right: 5px;
         }
+
         .auth-form::-webkit-scrollbar {
             display: none;
         }
+
         .auth-form:hover,
         .auth-form:focus-within {
             scrollbar-width: auto;
         }
+
         .auth-form:hover::-webkit-scrollbar,
         .auth-form:focus-within::-webkit-scrollbar {
             width: 8px;
         }
+
         .auth-form:hover::-webkit-scrollbar-track,
         .auth-form:focus-within::-webkit-scrollbar-track {
-            background: #f1f1f1;
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
         }
+
         .auth-form:hover::-webkit-scrollbar-thumb,
         .auth-form:focus-within::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
+            background: rgba(255, 255, 255, 0.3);
             border-radius: 10px;
         }
-        .auth-form:hover::-webkit-scrollbar-thumb:hover,
-        .auth-form:focus-within::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8;
-        }
+
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 22px;
         }
+
         .input-wrapper {
             position: relative;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 18px 18px 8px 50px;
+            border: 2px solid #ddd;
+            border-radius: 0;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            font-family: 'Poppins', sans-serif;
+            font-weight: 400;
+            color: #000000;
+        }
+
+        .form-control:focus {
+            border-color: #6b2c91;
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 4px 15px rgba(107, 44, 145, 0.2);
+        }
+
+        .form-control.input-error {
+            border-color: #ff6b6b;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.2);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            color: #666;
+            transition: color 0.3s ease;
+            z-index: 3;
+        }
+
+        .form-control:focus ~ .input-icon {
+            color: #6b2c91;
+        }
+
+        .form-control.input-error ~ .input-icon {
+            color: #ff6b6b;
+        }
+
+        .input-label {
+            position: absolute;
+            left: 50px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-size: 16px;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            background: transparent;
+            padding: 0 5px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 400;
+        }
+
+        .form-control:focus + .input-label,
+        .form-control:not(:placeholder-shown) + .input-label {
+            top: 6px;
+            transform: translateY(0);
+            font-size: 11px;
+            color: #6b2c91;
+            background: rgba(255, 255, 255, 1);
+            left: 45px;
+            font-weight: 600;
+        }
+
+        .form-control.input-error:focus + .input-label,
+        .form-control.input-error:not(:placeholder-shown) + .input-label {
+            color: #ff6b6b;
+        }
+
+        /* Custom Dropdown Styles */
+        .dropdown-wrapper {
+            position: relative;
+        }
+
+        .dropdown-btn {
+            width: 100%;
+            padding: 18px 45px 8px 50px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #ddd;
+            border-radius: 0;
+            font-size: 16px;
+            color: #000;
+            cursor: pointer;
             display: flex;
             align-items: center;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            min-height: 54px;
         }
-        .input-wrapper i {
+
+        .dropdown-btn:hover {
+            border-color: #6b2c91;
+        }
+
+        .dropdown-btn.active {
+            border-color: #6b2c91;
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 4px 15px rgba(107, 44, 145, 0.2);
+        }
+
+        .dropdown-content {
+            display: flex;
+            align-items: center;
+            flex: 1;
+            position: relative;
+        }
+
+        .dropdown-content .input-icon {
+            position: absolute;
+            left: -34px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            transition: color 0.3s ease;
+        }
+
+        .dropdown-btn.active .input-icon,
+        .dropdown-btn.has-value .input-icon {
+            color: #6b2c91;
+        }
+
+        .select-label {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-size: 16px;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 400;
+        }
+
+        .dropdown-btn.active .select-label,
+        .dropdown-btn.has-value .select-label {
+            top: -14px;
+            transform: translateY(0);
+            font-size: 11px;
+            color: #6b2c91;
+            background: rgba(255, 255, 255, 1);
+            padding: 0 5px;
+            left: -5px;
+            font-weight: 600;
+        }
+
+        #deptText {
+            font-size: 16px;
+            color: #000;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 400;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .dropdown-btn.has-value #deptText {
+            opacity: 1;
+        }
+
+        .arrow {
+            color: #666;
+            transition: all 0.3s ease;
+            font-size: 12px;
+        }
+
+        .dropdown-btn.active .arrow {
+            transform: rotate(180deg);
+            color: #6b2c91;
+        }
+
+        .menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: white;
+            border: 2px solid #6b2c91;
+            border-top: none;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(107, 44, 145, 0.2);
+        }
+
+        .menu.show {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .item {
+            padding: 12px 15px 12px 45px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 16px;
+            color: #000;
+            position: relative;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .item:last-child {
+            border-bottom: none;
+        }
+
+        .item:hover {
+            background: rgba(107, 44, 145, 0.1);
+        }
+
+        .item:active {
+            background: rgba(107, 44, 145, 0.2);
+        }
+
+        .item i {
             position: absolute;
             left: 15px;
-            color: #0078d4;
-            z-index: 1;
+            color: #6b2c91;
+            font-size: 16px;
         }
-        .input-wrapper input {
-            width: 100%;
-            padding: 11px 15px 11px 45px;
-            border: 1px solid #605e5c;
-            border-radius: 2px;
-            font-size: 15px;
-            background: white;
-            transition: all 0.2s ease;
-            outline: none;
+
+        .menu::-webkit-scrollbar {
+            width: 6px;
         }
-        .input-wrapper input:focus {
-            border-color: #0078d4;
-            box-shadow: 0 0 0 1px #0078d4;
+
+        .menu::-webkit-scrollbar-thumb {
+            background: #6b2c91;
+            border-radius: 3px;
         }
-        .form-options {
-            margin-bottom: 20px;
-        }
-        .remember-me {
-            display: flex;
-            align-items: center;
-            font-size: 15px;
-            cursor: pointer;
-            color: #323130;
-        }
-        .remember-me input {
-            margin-right: 8px;
-            width: auto;
-        }
+
         .btn-submit {
             width: 100%;
-            padding: 12px;
-            background: #0078d4;
+            padding: 16px;
+            background: linear-gradient(135deg, #e53e3e 0%, #d53f41 100%);
             color: white;
             border: none;
-            border-radius: 2px;
-            font-size: 15px;
+            border-radius: 0;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             display: flex;
@@ -231,53 +474,84 @@
             justify-content: center;
             gap: 8px;
             margin-bottom: 20px;
-            transition: background 0.2s ease;
+            transition: all 0.3s ease;
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 4px 15px rgba(229, 62, 62, 0.3);
         }
+
         .btn-submit:hover {
-            background: #106ebe;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(229, 62, 62, 0.4);
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
         }
+
+        .btn-submit:active {
+            transform: translateY(-1px);
+        }
+
         .btn-secondary {
             display: inline-block;
             width: 100%;
-            padding: 10px 16px;
-            background: white;
-            color: #0078d4;
-            border: 1px solid #0078d4;
-            border-radius: 2px;
-            font-size: 15px;
-            font-weight: 600;
+            padding: 12px 20px;
+            background: transparent;
+            color: #ffffff;
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            border-radius: 0;
+            font-size: 16px;
+            font-weight: 500;
             text-decoration: none;
             text-align: center;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             margin-top: 8px;
+            font-family: 'Poppins', sans-serif;
+            letter-spacing: 0.5px;
         }
+
         .btn-secondary:hover {
-            background: #0078d4;
-            color: white;
+            background: rgba(107, 44, 145, 0.3);
+            border-color: rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
         }
+
+        .btn-secondary:active {
+            background: rgba(107, 44, 145, 0.5);
+            transform: translateY(0);
+        }
+
         .form-footer {
             text-align: center;
         }
+
         .forgot-password {
             margin-bottom: 20px;
         }
+
         .forgot-password a {
-            color: #0078d4;
+            color: #ffffff;
             text-decoration: none;
             font-size: 15px;
             display: inline-flex;
             align-items: center;
             gap: 8px;
             font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
         }
+
         .forgot-password a:hover {
             text-decoration: underline;
+            color: #e0e0e0;
         }
+
         .divider {
             position: relative;
             margin: 20px 0;
             text-align: center;
         }
+
         .divider::before {
             content: '';
             position: absolute;
@@ -285,176 +559,250 @@
             left: 0;
             right: 0;
             height: 1px;
-            background: #edebe9;
-        }
-        .divider span {
-            background: white;
-            padding: 0 15px;
-            color: #605e5c;
-            font-size: 14px;
-            position: relative;
-        }
-        .signup-link p {
-            color: #605e5c;
-            font-size: 15px;
-            margin-bottom: 8px;
-        }
-        .error-msg {
-            color: #d13438;
-            font-size: 13px;
-            margin-top: 5px;
-            display: block;
-            min-height: 16px;
-        }
-        .mb-4 div {
-            padding: 16px;
-            background: #dff6dd;
-            border: 1px solid #107c10;
-            border-radius: 2px;
-            color: #107c10;
-            font-size: 14px;
-            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.3);
         }
 
-        /* Custom Dropdown Styles */
-        .dropdown-wrapper {
+        .divider span {
+            background: transparent;
+            padding: 0 15px;
+            color: #ffffff;
+            font-size: 14px;
             position: relative;
+            font-family: 'Poppins', sans-serif;
         }
-        .dropdown-btn {
-            width: 100%;
-            padding: 11px 45px 11px 45px;
-            background: white;
-            border: 1px solid #605e5c;
-            border-radius: 2px;
+
+        .signup-link p {
+            color: #ffffff;
             font-size: 15px;
-            color: #323130;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: all 0.2s ease;
-            -webkit-tap-highlight-color: transparent;
+            margin-bottom: 8px;
+            font-family: 'Poppins', sans-serif;
         }
-        .dropdown-btn:hover {
-            border-color: #0078d4;
-        }
-        .dropdown-btn.active {
-            border-color: #0078d4;
-            box-shadow: 0 0 0 1px #0078d4;
-            border-bottom-left-radius: 0;
-            border-bottom-right-radius: 0;
-        }
-        .dropdown-text {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: #605e5c;
-            flex: 1;
-        }
-        .dropdown-text i {
-            position: absolute;
-            left: 15px;
-            color: #0078d4;
-            font-size: 16px;
-        }
-        .dropdown-text span {
-            text-align: left;
-        }
-        .arrow {
-            color: #0078d4;
-            transition: transform 0.2s;
+
+        .error-msg {
+            color: #ff6b6b;
             font-size: 12px;
-            margin-left: auto;
-        }
-        .arrow.rotate {
-            transform: rotate(180deg);
-        }
-        .menu {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            width: 100%;
-            background: white;
-            border: 1px solid #0078d4;
-            border-top: none;
-            border-radius: 0 0 2px 2px;
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s;
-            z-index: 1000;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        .menu.show {
-            max-height: 250px;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        .item {
-            padding: 12px 15px 12px 45px;
-            cursor: pointer;
+            margin-top: 6px;
+            font-family: 'Poppins', sans-serif;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            padding: 8px 12px;
+            background: rgba(255, 107, 107, 0.15);
+            border-left: 3px solid #ff6b6b;
             display: flex;
             align-items: center;
-            gap: 12px;
-            border-bottom: 1px solid #edebe9;
-            font-size: 15px;
-            color: #323130;
-            position: relative;
-            -webkit-tap-highlight-color: transparent;
+            gap: 6px;
         }
-        .item:last-child {
-            border-bottom: none;
+
+        .mb-4 div {
+            padding: 10px 14px;
+            background: rgba(217, 237, 247, 0.95);
+            border: 1px solid #bee5eb;
+            border-radius: 4px;
+            color: #0c5460;
+            font-size: 13px;
+            margin-bottom: 18px;
         }
-        .item:hover {
-            background: #f3f2f1;
-        }
-        .item:active {
-            background: #deecf9;
-        }
-        .item i {
-            position: absolute;
-            left: 15px;
-            color: #0078d4;
-            font-size: 16px;
-        }
-        .menu::-webkit-scrollbar {
-            width: 6px;
-        }
-        .menu::-webkit-scrollbar-thumb {
-            background: #0078d4;
-            border-radius: 3px;
+
+        @media (max-width: 768px) {
+            .auth-wrapper {
+                padding: 15px;
+            }
+
+            .auth-container {
+                padding: 20px 15px;
+                max-width: 100%;
+            }
+
+            .auth-header {
+                margin-bottom: 25px;
+            }
+
+            .auth-header h1 {
+                font-size: 28px;
+            }
+
+            .auth-header p {
+                font-size: 13px;
+            }
+
+            .form-group {
+                margin-bottom: 18px;
+            }
+
+            .form-control {
+                padding: 16px 14px 6px 45px;
+                font-size: 15px;
+            }
+
+            .dropdown-btn {
+                padding: 16px 40px 6px 45px;
+                font-size: 15px;
+            }
+
+            .dropdown-content .input-icon {
+                left: -31px;
+            }
+
+            .input-icon {
+                left: 14px;
+                width: 16px;
+                height: 16px;
+            }
+
+            .input-label {
+                left: 45px;
+                font-size: 15px;
+            }
+
+            .form-control:focus + .input-label,
+            .form-control:not(:placeholder-shown) + .input-label {
+                font-size: 10px;
+                left: 40px;
+            }
+
+            .dropdown-btn.active .select-label,
+            .dropdown-btn.has-value .select-label {
+                left: -5px;
+                font-size: 10px;
+            }
+
+            #deptText {
+                font-size: 15px;
+            }
+
+            .item {
+                padding: 12px 12px 12px 40px;
+                font-size: 15px;
+            }
+
+            .item i {
+                left: 12px;
+                font-size: 15px;
+            }
+
+            .btn-submit {
+                padding: 14px;
+                font-size: 15px;
+                margin-bottom: 18px;
+            }
+
+            .btn-secondary {
+                padding: 11px 18px;
+                font-size: 15px;
+            }
+
+            .forgot-password a {
+                font-size: 14px;
+            }
+
+            .divider {
+                margin: 18px 0;
+            }
+
+            .signup-link p {
+                font-size: 14px;
+                margin-bottom: 6px;
+            }
+
+            .error-msg {
+                font-size: 11px;
+                padding: 7px 10px;
+            }
         }
 
         @media (max-width: 480px) {
-            .auth-wrapper { padding: 15px; }
-            .auth-container { max-width: 100%; }
-            .auth-header, .auth-form { padding: 25px 20px; }
-            .input-wrapper input {
-                padding: 10px 12px 10px 40px;
+            .auth-container {
+                padding: 20px 12px;
+            }
+
+            .auth-header h1 {
+                font-size: 26px;
+                letter-spacing: 0.5px;
+            }
+
+            .auth-header p {
+                font-size: 12px;
+            }
+
+            .form-control {
+                padding: 14px 12px 5px 40px;
                 font-size: 14px;
             }
-            .input-wrapper i {
-                left: 12px;
-            }
+
             .dropdown-btn {
-                padding: 10px 40px 10px 40px;
+                padding: 14px 35px 5px 40px;
                 font-size: 14px;
             }
-            .dropdown-text i {
-                left: 12px;
+
+            .dropdown-content .input-icon {
+                left: -28px;
             }
+
+            .input-icon {
+                left: 12px;
+                width: 14px;
+                height: 14px;
+            }
+
+            .input-label {
+                left: 40px;
+                font-size: 14px;
+            }
+
+            .form-control:focus + .input-label,
+            .form-control:not(:placeholder-shown) + .input-label {
+                font-size: 10px;
+                left: 35px;
+            }
+
+            .dropdown-btn.active .select-label,
+            .dropdown-btn.has-value .select-label {
+                font-size: 10px;
+                left: -5px;
+            }
+
+            #deptText {
+                font-size: 14px;
+            }
+
             .item {
-                padding: 12px 12px 12px 40px;
+                padding: 11px 10px 11px 38px;
                 font-size: 14px;
             }
+
             .item i {
-                left: 12px;
-            }
-            .btn-submit,
-            .btn-secondary {
+                left: 10px;
                 font-size: 14px;
             }
-            .auth-form {
-                max-height: calc(100vh - 220px);
+
+            .btn-submit {
+                padding: 13px;
+                font-size: 14px;
+                letter-spacing: 1.5px;
+            }
+
+            .btn-secondary {
+                padding: 10px 16px;
+                font-size: 14px;
+            }
+
+            .forgot-password {
+                margin-bottom: 16px;
+            }
+
+            .forgot-password a {
+                font-size: 13px;
+            }
+
+            .divider {
+                margin: 16px 0;
+            }
+
+            .divider span {
+                font-size: 13px;
+            }
+
+            .signup-link p {
+                font-size: 13px;
             }
         }
     </style>
@@ -474,9 +822,9 @@
                 items.forEach(item => {
                     if (item.dataset.val === oldValue || item.dataset.full === oldValue) {
                         deptText.textContent = item.dataset.val;
-                        deptText.style.color = '#323130';
                         deptInput.value = item.dataset.val;
-                        deptIcon.className = 'fas ' + item.dataset.icon;
+                        deptIcon.className = 'fas ' + item.dataset.icon + ' input-icon';
+                        deptBtn.classList.add('has-value');
                     }
                 });
             }
@@ -485,45 +833,26 @@
                 e.stopPropagation();
                 deptMenu.classList.toggle('show');
                 deptBtn.classList.toggle('active');
-                deptArrow.classList.toggle('rotate');
             });
 
             items.forEach(item => {
                 item.addEventListener('click', function() {
                     const val = this.dataset.val;
-                    const full = this.dataset.full;
                     const icon = this.dataset.icon;
                     
                     deptText.textContent = val;
-                    deptText.style.color = '#323130';
                     deptInput.value = val;
-                    deptIcon.className = 'fas ' + icon;
+                    deptIcon.className = 'fas ' + icon + ' input-icon';
+                    deptBtn.classList.add('has-value');
                     
                     deptMenu.classList.remove('show');
                     deptBtn.classList.remove('active');
-                    deptArrow.classList.remove('rotate');
                 });
             });
 
             document.addEventListener('click', function() {
                 deptMenu.classList.remove('show');
                 deptBtn.classList.remove('active');
-                deptArrow.classList.remove('rotate');
-            });
-
-            // Mobile touch support
-            const authForm = document.getElementById('authForm');
-            authForm.addEventListener('touchstart', function() {
-                this.classList.add('show-scrollbar');
-            });
-            authForm.addEventListener('touchend', function() {
-                this.classList.remove('show-scrollbar');
-            });
-            authForm.addEventListener('mouseenter', function() {
-                this.classList.add('show-scrollbar');
-            });
-            authForm.addEventListener('mouseleave', function() {
-                this.classList.remove('show-scrollbar');
             });
         });
     </script>

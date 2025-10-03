@@ -2,9 +2,6 @@
     <div class="forgot-wrapper">
         <div class="forgot-container">
             <div class="forgot-header">
-                <div class="ms-logo">
-                    <img src="images/logo.png" alt="Logo" width="32" height="32">
-                </div>
                 <h1>Reset your password</h1>
                 <p>Enter your McLawis College email address and we'll send you a password reset link.</p>
             </div>
@@ -16,17 +13,21 @@
                     @csrf
 
                     <div class="form-group">
-                        <input 
-                            id="email" 
-                            type="email" 
-                            name="email" 
-                            value="{{ old('email') }}" 
-                            placeholder="someone@mcclawis.edu.ph"
-                            required 
-                            autofocus
-                            autocomplete="username"
-                            class="ms-input @error('email') error @enderror"
-                        >
+                        <div class="input-wrapper">
+                            <input 
+                                id="email" 
+                                type="email" 
+                                name="email" 
+                                value="{{ old('email') }}" 
+                                placeholder=" "
+                                required 
+                                autofocus
+                                autocomplete="username"
+                                class="form-control @error('email') input-error @enderror"
+                            >
+                            <label class="input-label">McLawis Email Address</label>
+                            <i class="fas fa-envelope input-icon"></i>
+                        </div>
                         @error('email')
                             <div class="error-msg">
                                 <i class="fas fa-exclamation-circle"></i>
@@ -36,16 +37,19 @@
                     </div>
 
                     <div class="form-actions">
-                        <button type="submit" class="btn-primary">
-                            <i class="fas fa-paper-plane"></i>
-                            Send password reset link
+                        <button type="submit" class="btn-submit">
+                            <i class="fas fa-key"></i>
+                            Reset password
                         </button>
                     </div>
 
                     <div class="form-footer">
+                        <div class="divider">
+                            <span>or</span>
+                        </div>
+                        
                         <div class="back-link">
-                            <a href="{{ route('login') }}">
-                                <i class="fas fa-arrow-left"></i>
+                            <a href="{{ route('login') }}" class="btn-secondary">
                                 Back to sign in
                             </a>
                         </div>
@@ -56,212 +60,467 @@
     </div>
 
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
         body {
-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f5f5;
-            color: #323130;
+            background: url("{{ asset('images/mcc background.jpg') }}") center/cover no-repeat;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(74, 26, 92, 0.8) 0%, rgba(107, 44, 145, 0.8) 50%, rgba(61, 26, 120, 0.8) 100%);
+            z-index: 1;
         }
 
         .forgot-wrapper {
-            min-height: 100vh;
+            height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
-            overflow-y: auto;
+            position: relative;
+            z-index: 2;
         }
 
         .forgot-container {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background: transparent;
             width: 100%;
-            max-width: 440px;
-            animation: fadeIn 0.4s ease;
-            margin: auto;
+            max-width: 420px;
+            animation: fadeIn 0.6s ease-out;
+            padding: 40px;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
+            from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
         .forgot-header {
             text-align: center;
-            padding: 40px 40px 20px;
-        }
-
-        .ms-logo {
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: center;
+            margin-bottom: 30px;
         }
 
         .forgot-header h1 {
-            font-size: 24px;
+            font-size: 38px;
             font-weight: 600;
+            color: #ffffff;
             margin-bottom: 12px;
+            letter-spacing: 1px;
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
 
         .forgot-header p {
+            color: #e0e0e0;
             font-size: 15px;
-            color: #605e5c;
-            line-height: 1.4;
+            font-weight: 400;
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.5;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
         }
 
-        .forgot-form { padding: 0 40px 40px; }
-        .form-group { margin-bottom: 24px; }
+        .forgot-form {
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+            scrollbar-width: none;
+            padding-right: 5px;
+        }
 
-        .ms-input {
+        .forgot-form::-webkit-scrollbar {
+            display: none;
+        }
+
+        .forgot-form:hover,
+        .forgot-form:focus-within {
+            scrollbar-width: auto;
+        }
+
+        .forgot-form:hover::-webkit-scrollbar,
+        .forgot-form:focus-within::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .forgot-form:hover::-webkit-scrollbar-track,
+        .forgot-form:focus-within::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .forgot-form:hover::-webkit-scrollbar-thumb,
+        .forgot-form:focus-within::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-control {
             width: 100%;
-            padding: 11px 12px;
-            font-size: 15px;
-            border: 1px solid #605e5c;
-            border-radius: 2px;
-            transition: all 0.2s ease;
+            padding: 18px 18px 8px 50px;
+            border: 2px solid #ddd;
+            border-radius: 0;
+            font-size: 16px;
             outline: none;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            font-family: 'Poppins', sans-serif;
+            font-weight: 400;
+            color: #000000;
         }
 
-        .ms-input:focus {
-            border-color: #0078d4;
-            box-shadow: 0 0 0 1px #0078d4;
+        .form-control:focus {
+            border-color: #6b2c91;
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 4px 15px rgba(107, 44, 145, 0.2);
         }
 
-        .ms-input.error {
-            border-color: #d13438;
-            box-shadow: 0 0 0 1px #d13438;
+        .form-control.input-error {
+            border-color: #ff6b6b;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.2);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            color: #666;
+            transition: color 0.3s ease;
+            z-index: 3;
+        }
+
+        .form-control:focus ~ .input-icon {
+            color: #6b2c91;
+        }
+
+        .form-control.input-error ~ .input-icon {
+            color: #ff6b6b;
+        }
+
+        .input-label {
+            position: absolute;
+            left: 50px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-size: 16px;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            background: transparent;
+            padding: 0 5px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 400;
+        }
+
+        .form-control:focus + .input-label,
+        .form-control:not(:placeholder-shown) + .input-label {
+            top: 6px;
+            transform: translateY(0);
+            font-size: 11px;
+            color: #6b2c91;
+            background: rgba(255, 255, 255, 1);
+            left: 45px;
+            font-weight: 600;
+        }
+
+        .form-control.input-error:focus + .input-label,
+        .form-control.input-error:not(:placeholder-shown) + .input-label {
+            color: #ff6b6b;
         }
 
         .error-msg {
-            margin-top: 8px;
+            color: #ff6b6b;
+            font-size: 12px;
+            margin-top: 6px;
+            font-family: 'Poppins', sans-serif;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
             padding: 8px 12px;
-            background: #fef0f0;
-            border: 1px solid #d13438;
-            border-radius: 2px;
-            color: #d13438;
-            font-size: 14px;
+            background: rgba(255, 107, 107, 0.15);
+            border-left: 3px solid #ff6b6b;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
 
-        .btn-primary {
+        .btn-submit {
             width: 100%;
-            padding: 12px;
-            background: #0078d4;
+            padding: 16px;
+            background: linear-gradient(135deg, #e53e3e 0%, #d53f41 100%);
             color: white;
             border: none;
-            border-radius: 2px;
-            font-size: 15px;
+            border-radius: 0;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 4px 15px rgba(229, 62, 62, 0.3);
         }
 
-        .btn-primary:hover { background: #106ebe; }
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(229, 62, 62, 0.4);
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+        }
 
-        .form-footer { margin-top: 32px; }
+        .btn-submit:active {
+            transform: translateY(-1px);
+        }
+
+        .form-footer {
+            text-align: center;
+        }
+
+        .divider {
+            position: relative;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .divider span {
+            background: transparent;
+            padding: 0 15px;
+            color: #ffffff;
+            font-size: 14px;
+            position: relative;
+            font-family: 'Poppins', sans-serif;
+        }
 
         .back-link {
             text-align: center;
-            margin-bottom: 24px;
         }
 
-        .back-link a {
-            color: #0078d4;
-            text-decoration: none;
+        .btn-secondary {
+            display: inline-block;
+            width: 100%;
+            padding: 10px 16px;
+            background: transparent;
+            color: #ffffff;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 0;
             font-size: 15px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
             font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+            font-family: 'Poppins', sans-serif;
         }
 
-        .back-link a:hover { text-decoration: underline; }
-
-        .help-section {
-            border-top: 1px solid #edebe9;
-            padding-top: 24px;
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.8);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
         }
 
-        .help-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            background: #f3f2f1;
-            padding: 16px;
-            border-radius: 2px;
+        .btn-secondary:active {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: white;
+            color: #6b2c91;
+            transform: translateY(0);
         }
-
-        .help-item i {
-            color: #0078d4;
-            margin-top: 2px;
-            flex-shrink: 0;
-        }
-
-        .help-item strong {
-            display: block;
-            margin-bottom: 4px;
-            font-size: 14px;
-        }
-
-        .help-item p {
-            font-size: 14px;
-            color: #605e5c;
-            line-height: 1.3;
-            margin: 0;
-        }
-
-        .mb-4 { margin-bottom: 24px; }
 
         .mb-4 div {
-            padding: 16px;
-            background: #dff6dd;
-            border: 1px solid #107c10;
-            border-radius: 2px;
-            color: #107c10;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            padding: 10px 14px;
+            background: rgba(217, 237, 247, 0.95);
+            border: 1px solid #bee5eb;
+            border-radius: 4px;
+            color: #0c5460;
+            font-size: 13px;
+            margin-bottom: 18px;
         }
 
-        .mb-4 div::before {
-            content: "\f00c";
-            font-family: "Font Awesome 5 Free";
-            font-weight: 900;
-        }
-
-        /* Responsive */
-        @media (max-width: 520px) {
-            .forgot-wrapper { padding: 0; }
-            
+        @media (max-width: 768px) {
             .forgot-container {
-                border-radius: 0;
-                box-shadow: none;
-                min-height: auto;
+                padding: 30px 25px;
+                max-width: 100%;
             }
 
-            .forgot-header, .forgot-form { padding-left: 20px; padding-right: 20px; }
-            .forgot-header { padding-top: 48px; }
-            .forgot-header h1 { font-size: 20px; }
-            .forgot-header p { font-size: 14px; }
-            
-            .ms-input { font-size: 16px; padding: 12px; }
-            .btn-primary { padding: 14px 12px; font-size: 16px; }
-            .back-link a { font-size: 14px; }
+            .forgot-header h1 {
+                font-size: 28px;
+            }
+
+            .forgot-header p {
+                font-size: 13px;
+            }
+
+            .form-control {
+                padding: 16px 14px 6px 45px;
+                font-size: 15px;
+            }
+
+            .input-icon {
+                left: 14px;
+                width: 16px;
+                height: 16px;
+            }
+
+            .input-label {
+                left: 45px;
+                font-size: 15px;
+            }
+
+            .form-control:focus + .input-label,
+            .form-control:not(:placeholder-shown) + .input-label {
+                font-size: 10px;
+                left: 40px;
+            }
+
+            .btn-submit {
+                padding: 14px;
+                font-size: 15px;
+            }
+
+            .btn-secondary {
+                font-size: 14px;
+            }
         }
 
-        @media (max-width: 375px) {
-            .forgot-header, .forgot-form { padding-left: 16px; padding-right: 16px; }
-            .forgot-header { padding-top: 40px; }
-            .forgot-header h1 { font-size: 18px; }
+        @media (max-width: 480px) {
+            .forgot-wrapper {
+                padding: 15px;
+            }
+
+            .forgot-container {
+                padding: 25px 20px;
+            }
+
+            .forgot-header {
+                margin-bottom: 25px;
+            }
+
+            .forgot-header h1 {
+                font-size: 24px;
+                margin-bottom: 10px;
+            }
+
+            .forgot-header p {
+                font-size: 12px;
+                line-height: 1.4;
+            }
+
+            .form-control {
+                padding: 14px 12px 5px 40px;
+                font-size: 14px;
+            }
+
+            .input-icon {
+                left: 12px;
+                width: 14px;
+                height: 14px;
+            }
+
+            .input-label {
+                left: 40px;
+                font-size: 14px;
+            }
+
+            .form-control:focus + .input-label,
+            .form-control:not(:placeholder-shown) + .input-label {
+                font-size: 10px;
+                left: 36px;
+            }
+
+            .btn-submit {
+                padding: 12px;
+                font-size: 14px;
+                letter-spacing: 1.5px;
+            }
+
+            .btn-secondary {
+                padding: 9px 14px;
+                font-size: 13px;
+            }
+
+            .divider {
+                margin: 16px 0;
+            }
+
+            .divider span {
+                font-size: 13px;
+            }
+
+            .form-footer {
+                margin-top: 24px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .forgot-container {
+                padding: 20px 16px;
+            }
+
+            .forgot-header h1 {
+                font-size: 20px;
+            }
+
+            .forgot-header p {
+                font-size: 11px;
+            }
+
+            .form-control {
+                padding: 12px 10px 4px 36px;
+                font-size: 13px;
+            }
+
+            .input-icon {
+                left: 10px;
+                width: 12px;
+                height: 12px;
+            }
+
+            .input-label {
+                left: 36px;
+                font-size: 13px;
+            }
+
+            .btn-submit {
+                font-size: 13px;
+            }
         }
     </style>
 </x-guest-layout>

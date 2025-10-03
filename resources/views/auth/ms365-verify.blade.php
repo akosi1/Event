@@ -1,257 +1,460 @@
-<x-guest-layout>
-    <div class="ms365-wrapper">
-        <div class="ms365-container">
-            <div class="ms365-header">
-                <div class="ms-logo">
-                    <img src="images/logo.png" alt="Logo" width="32" height="32">
+    <x-guest-layout>
+        <div class="auth-wrapper">
+            <div class="auth-container">
+                <div class="auth-header">
+                    <h1>Sign Up</h1>
+                    <p>Create your E&P-O account</p>
                 </div>
-                <h1>Sign up for E&P-O</h1>
-                <p>Use your ms365 email account</p>
-            </div>
+                <div class="auth-form" id="authForm">
+                    <x-auth-session-status class="mb-4" :status="session('status')" />
 
-            <div class="ms365-form">
-                <x-auth-session-status class="mb-4" :status="session('status')" />
+                    @if($errors->any())
+                        <div class="debug-info">
+                            <strong>Validation Errors:</strong>
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
 
-                @if($errors->any())
-                    <div class="debug-info">
-                        <h3>Validation Errors:</h3>
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-
-                <form method="POST" action="{{ route('ms365.verify.store') }}">
-                    @csrf
-
-                    <div class="form-group">
-                        <label for="email" class="sr-only">Email Address</label>
-                        <input 
-                            id="email" 
-                            type="email" 
-                            name="email" 
-                            value="{{ old('email', '') }}" 
-                            placeholder="someone@mcclawis.edu.ph"
-                            required 
-                            autocomplete="username"
-                            autofocus
-                            class="ms-input @error('email') error @enderror"
-                        >
-                        @error('email')
-                            <div class="error-msg">
-                                <i class="fas fa-exclamation-circle"></i>
-                                {{ $message }}
+                    <form method="POST" action="{{ route('ms365.verify.store') }}">
+                        @csrf
+                        <div class="form-group">
+                            <div class="input-wrapper">
+                                <input id="email" type="email" name="email" value="{{ old('email', '') }}" 
+                                    class="form-control @error('email') input-error @enderror" placeholder=" " required autocomplete="username" autofocus>
+                                <label class="input-label">McLawis Email Address</label>
+                                <i class="fas fa-envelope input-icon"></i>
                             </div>
-                        @enderror
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="submit" class="btn-primary">
+                            @error('email')
+                                <div class="error-msg">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+                        
+                        <button type="submit" class="btn-submit">
+                            <i class="fas fa-paper-plane"></i>
                             Send verification code
                         </button>
-                    </div>
-
-                    <div class="form-footer">
-                        <div class="auth-links">
-                            <p>Already have an account? 
-                               <a href="{{ route('login') }}">Sign in here</a>
-                            </p>
+                        
+                        <div class="form-footer">
+                            <div class="divider">
+                                <span>or</span>
+                            </div>
+                            
+                            <div class="signup-link">
+                                <p>Already have an account?</p>
+                                <a href="{{ route('login') }}" class="btn-secondary">
+                                    Sign in here
+                                </a>
+                            </div>
                         </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
-</x-guest-layout>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
 
-<style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+            html, body {
+                height: 100%;
+                overflow: hidden;
+                font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
 
-    body {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background: #f5f5f5;
-        color: #323130;
-    }
+            body {
+                background: url("{{ asset('images/mcc background.jpg') }}") center/cover no-repeat;
+                position: relative;
+            }
 
-    .ms365-wrapper {
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-        overflow-y: auto;
-    }
+            body::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(135deg, rgba(74, 26, 92, 0.8) 0%, rgba(107, 44, 145, 0.8) 50%, rgba(61, 26, 120, 0.8) 100%);
+                z-index: 1;
+            }
 
-    .ms365-container {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        width: 100%;
-        max-width: 440px;
-        animation: fadeIn 0.4s ease;
-        margin: auto;
-    }
+            .auth-wrapper {
+                height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+                position: relative;
+                z-index: 2;
+            }
 
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
+            .auth-container {
+                background: transparent;
+                width: 100%;
+                max-width: 420px;
+                animation: fadeIn 0.6s ease-out;
+                padding: 40px;
+            }
 
-    .ms365-header {
-        text-align: center;
-        padding: 40px 40px 20px;
-    }
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(15px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
 
-    .ms-logo {
-        margin-bottom: 20px;
-        display: flex;
-        justify-content: center;
-    }
+            .auth-header {
+                text-align: center;
+                margin-bottom: 30px;
+            }
 
-    .ms365-header h1 {
-        font-size: 24px;
-        font-weight: 600;
-        margin-bottom: 8px;
-        line-height: 1.3;
-    }
+            .auth-header h1 {
+                font-size: 38px;
+                font-weight: 600;
+                color: #ffffff;
+                margin-bottom: 8px;
+                letter-spacing: 1px;
+                font-family: 'Oswald', sans-serif;
+                text-transform: uppercase;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            }
 
-    .ms365-header p {
-        font-size: 15px;
-        color: #605e5c;
-    }
+            .auth-header p {
+                color: #e0e0e0;
+                font-size: 15px;
+                font-weight: 400;
+                font-family: 'Roboto Condensed', sans-serif;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            }
 
-    .ms365-form { padding: 0 40px 40px; }
-    .form-group { margin-bottom: 24px; }
+            .auth-form {
+                max-height: calc(100vh - 200px);
+                overflow-y: auto;
+                scrollbar-width: none;
+                padding-right: 5px;
+            }
 
-    .sr-only {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-    }
+            .auth-form::-webkit-scrollbar {
+                display: none;
+            }
 
-    .ms-input {
-        width: 100%;
-        padding: 11px 12px;
-        font-size: 15px;
-        border: 1px solid #605e5c;
-        border-radius: 2px;
-        transition: all 0.2s ease;
-        outline: none;
-    }
+            .auth-form:hover,
+            .auth-form:focus-within {
+                scrollbar-width: auto;
+            }
 
-    .ms-input:focus {
-        border-color: #0078d4;
-        box-shadow: 0 0 0 1px #0078d4;
-    }
+            .auth-form:hover::-webkit-scrollbar,
+            .auth-form:focus-within::-webkit-scrollbar {
+                width: 8px;
+            }
 
-    .ms-input.error {
-        border-color: #d13438;
-        box-shadow: 0 0 0 1px #d13438;
-    }
+            .auth-form:hover::-webkit-scrollbar-track,
+            .auth-form:focus-within::-webkit-scrollbar-track {
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 10px;
+            }
 
-    .error-msg {
-        margin-top: 8px;
-        padding: 8px 12px;
-        background: #fef0f0;
-        border: 1px solid #d13438;
-        border-radius: 2px;
-        color: #d13438;
-        font-size: 14px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
+            .auth-form:hover::-webkit-scrollbar-thumb,
+            .auth-form:focus-within::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.3);
+                border-radius: 10px;
+            }
 
-    .btn-primary {
-        width: 100%;
-        padding: 12px;
-        background: #0078d4;
-        color: white;
-        border: none;
-        border-radius: 2px;
-        font-size: 15px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background 0.2s ease;
-    }
+            .form-group {
+                margin-bottom: 22px;
+            }
 
-    .btn-primary:hover { background: #106ebe; }
-    .btn-primary:active { background: #005a9e; }
+            .input-wrapper {
+                position: relative;
+            }
 
-    .form-footer { margin-top: 32px; }
+            .form-control {
+                width: 100%;
+                padding: 18px 18px 8px 50px;
+                border: 2px solid #ddd;
+                border-radius: 0;
+                font-size: 16px;
+                outline: none;
+                transition: all 0.3s ease;
+                background: rgba(255, 255, 255, 0.95);
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+                font-family: 'Poppins', sans-serif;
+                font-weight: 400;
+                color: #000000;
+            }
 
-    .auth-links {
-        text-align: center;
-        padding-top: 16px;
-        border-top: 1px solid #edebe9;
-    }
+            .form-control:focus {
+                border-color: #6b2c91;
+                background: rgba(255, 255, 255, 1);
+                box-shadow: 0 4px 15px rgba(107, 44, 145, 0.2);
+            }
 
-    .auth-links p {
-        font-size: 15px;
-        color: #605e5c;
-    }
+            .form-control.input-error {
+                border-color: #ff6b6b;
+                box-shadow: 0 4px 15px rgba(255, 107, 107, 0.2);
+            }
 
-    .auth-links a {
-        color: #0078d4;
-        text-decoration: none;
-        font-weight: 600;
-    }
+            .input-icon {
+                position: absolute;
+                left: 16px;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 18px;
+                height: 18px;
+                color: #666;
+                transition: color 0.3s ease;
+                z-index: 3;
+            }
 
-    .auth-links a:hover { text-decoration: underline; }
+            .form-control:focus ~ .input-icon {
+                color: #6b2c91;
+            }
 
-    .mb-4 { margin-bottom: 24px; }
+            .form-control.input-error ~ .input-icon {
+                color: #ff6b6b;
+            }
 
-    .mb-4 div {
-        padding: 16px;
-        background: #dff6dd;
-        border: 1px solid #107c10;
-        border-radius: 2px;
-        color: #107c10;
-        font-size: 14px;
-    }
+            .input-label {
+                position: absolute;
+                left: 50px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #666;
+                font-size: 16px;
+                pointer-events: none;
+                transition: all 0.3s ease;
+                background: transparent;
+                padding: 0 5px;
+                font-family: 'Poppins', sans-serif;
+                font-weight: 400;
+            }
 
-    .debug-info {
-        margin-bottom: 24px;
-        padding: 16px;
-        background: #fff4ce;
-        border: 1px solid #fde300;
-        border-radius: 2px;
-        font-size: 14px;
-    }
+            .form-control:focus + .input-label,
+            .form-control:not(:placeholder-shown) + .input-label {
+                top: 6px;
+                transform: translateY(0);
+                font-size: 11px;
+                color: #6b2c91;
+                background: rgba(255, 255, 255, 1);
+                left: 45px;
+                font-weight: 600;
+            }
 
-    .debug-info h3 { font-size: 16px; margin-bottom: 8px; }
-    .debug-info ul { margin-left: 20px; }
-    .debug-info li { margin-bottom: 4px; color: #605e5c; }
+            .form-control.input-error:focus + .input-label,
+            .form-control.input-error:not(:placeholder-shown) + .input-label {
+                color: #ff6b6b;
+            }
 
-    /* Responsive */
-    @media (max-width: 520px) {
-        .ms365-wrapper { padding: 0; }
-        
-        .ms365-container {
-            border-radius: 0;
-            box-shadow: none;
-            min-height: auto;
-        }
+            .btn-submit {
+                width: 100%;
+                padding: 16px;
+                background: linear-gradient(135deg, #e53e3e 0%, #d53f41 100%);
+                color: white;
+                border: none;
+                border-radius: 0;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                margin-bottom: 20px;
+                transition: all 0.3s ease;
+                font-family: 'Oswald', sans-serif;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                box-shadow: 0 4px 15px rgba(229, 62, 62, 0.3);
+            }
 
-        .ms365-header, .ms365-form { padding-left: 20px; padding-right: 20px; }
-        .ms365-header { padding-top: 48px; }
-        .ms365-header h1 { font-size: 20px; }
-        .ms365-header p { font-size: 14px; }
-        
-        .ms-input { font-size: 16px; padding: 12px; }
-        .btn-primary { padding: 14px 12px; font-size: 16px; }
-        .auth-links p { font-size: 14px; }
-        .form-footer { margin-top: 24px; }
-    }
+            .btn-submit:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(229, 62, 62, 0.4);
+                background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+            }
 
-    @media (max-width: 375px) {
-        .ms365-header, .ms365-form { padding-left: 16px; padding-right: 16px; }
-        .ms365-header { padding-top: 40px; }
-        .ms365-header h1 { font-size: 18px; }
-    }
-</style>
+            .btn-submit:active {
+                transform: translateY(-1px);
+            }
+
+            .btn-secondary {
+                display: inline-block;
+                width: 100%;
+                padding: 10px 16px;
+                background: transparent;
+                color: #ffffff;
+                border: 2px solid rgba(255, 255, 255, 0.5);
+                border-radius: 0;
+                font-size: 15px;
+                font-weight: 600;
+                text-decoration: none;
+                text-align: center;
+                transition: all 0.3s ease;
+                margin-top: 8px;
+                font-family: 'Poppins', sans-serif;
+            }
+
+            .btn-secondary:hover {
+                background: rgba(255, 255, 255, 0.1);
+                border-color: rgba(255, 255, 255, 0.8);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+            }
+
+            .btn-secondary:active {
+                background: rgba(255, 255, 255, 0.95);
+                border-color: white;
+                color: #6b2c91;
+                transform: translateY(0);
+            }
+
+            .form-footer {
+                text-align: center;
+            }
+
+            .divider {
+                position: relative;
+                margin: 20px 0;
+                text-align: center;
+            }
+
+            .divider::before {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 0;
+                right: 0;
+                height: 1px;
+                background: rgba(255, 255, 255, 0.3);
+            }
+
+            .divider span {
+                background: transparent;
+                padding: 0 15px;
+                color: #ffffff;
+                font-size: 14px;
+                position: relative;
+                font-family: 'Poppins', sans-serif;
+            }
+
+            .signup-link p {
+                color: #ffffff;
+                font-size: 15px;
+                margin-bottom: 8px;
+                font-family: 'Poppins', sans-serif;
+            }
+
+            .error-msg {
+                color: #ff6b6b;
+                font-size: 12px;
+                margin-top: 6px;
+                font-family: 'Poppins', sans-serif;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+                padding: 8px 12px;
+                background: rgba(255, 107, 107, 0.15);
+                border-left: 3px solid #ff6b6b;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .mb-4 div {
+                padding: 10px 14px;
+                background: rgba(217, 237, 247, 0.95);
+                border: 1px solid #bee5eb;
+                border-radius: 4px;
+                color: #0c5460;
+                font-size: 13px;
+                margin-bottom: 18px;
+            }
+
+            .debug-info {
+                margin-bottom: 20px;
+                padding: 12px 16px;
+                background: rgba(255, 243, 205, 0.95);
+                border: 1px solid #fde300;
+                border-radius: 4px;
+                font-size: 13px;
+                color: #856404;
+            }
+
+            .debug-info strong {
+                display: block;
+                margin-bottom: 8px;
+                font-size: 14px;
+            }
+
+            .debug-info ul {
+                margin-left: 20px;
+                margin-top: 8px;
+            }
+
+            .debug-info li {
+                margin-bottom: 4px;
+            }
+
+            @media (max-width: 768px) {
+                .auth-container {
+                    padding: 30px 25px;
+                }
+
+                .auth-header h1 {
+                    font-size: 32px;
+                }
+
+                .auth-header p {
+                    font-size: 13px;
+                }
+
+                .form-control {
+                    padding: 16px 14px 6px 45px;
+                    font-size: 15px;
+                }
+
+                .input-icon {
+                    left: 14px;
+                    width: 16px;
+                    height: 16px;
+                }
+
+                .input-label {
+                    left: 45px;
+                    font-size: 15px;
+                }
+
+                .form-control:focus + .input-label,
+                .form-control:not(:placeholder-shown) + .input-label {
+                    font-size: 10px;
+                    left: 40px;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .auth-container {
+                    padding: 25px 20px;
+                }
+
+                .auth-header h1 {
+                    font-size: 28px;
+                }
+
+                .form-control {
+                    padding: 14px 12px 5px 40px;
+                }
+
+                .input-icon {
+                    left: 12px;
+                    width: 14px;
+                    height: 14px;
+                }
+            }
+        </style>
+    </x-guest-layout>
