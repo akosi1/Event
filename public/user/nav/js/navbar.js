@@ -1,4 +1,4 @@
-// Enhanced Navigation JavaScript with Mobile Toggle
+// Enhanced Navigation JavaScript with Mobile Toggle - Fixed Version
 
 // Initialize navbar functionality
 document.addEventListener('DOMContentLoaded', function() {
@@ -49,21 +49,39 @@ function setupEventListeners() {
     // Mobile toggle functionality
     const mobileToggle = document.querySelector('.mobile-toggle');
     if (mobileToggle) {
-        mobileToggle.addEventListener('click', toggleMobileMenu);
+        mobileToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            toggleMobileMenu();
+        });
     }
     
-    // Desktop dropdown functionality
+    // Dropdown functionality - works for both mobile and desktop
     const dropdownBtns = document.querySelectorAll('.dropdown-btn');
     dropdownBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', function(e) {
             e.stopPropagation();
+            e.preventDefault();
             const dropdown = btn.closest('.dropdown');
-            toggleDropdown(dropdown);
+            const isMobile = window.innerWidth <= 768;
+            
+            if (isMobile) {
+                toggleMobileDropdown(dropdown);
+            } else {
+                toggleDesktopDropdown(dropdown);
+            }
         });
     });
     
-    // Close dropdowns when clicking outside
-    document.addEventListener('click', closeAllDropdowns);
+    // Close dropdowns when clicking outside (desktop only)
+    document.addEventListener('click', function(e) {
+        const isMobile = window.innerWidth <= 768;
+        if (!isMobile) {
+            const clickedInsideDropdown = e.target.closest('.dropdown');
+            if (!clickedInsideDropdown) {
+                closeAllDropdowns();
+            }
+        }
+    });
     
     // Mobile overlay click
     const overlay = document.querySelector('.mobile-overlay');
@@ -72,10 +90,31 @@ function setupEventListeners() {
     }
     
     // Handle window resize
-    window.addEventListener('resize', handleResize);
+    let resizeTimer;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(handleResize, 250);
+    });
     
     // Handle escape key
     document.addEventListener('keydown', handleEscapeKey);
+    
+    // Prevent dropdown menu clicks from closing on mobile
+    const dropdownMenus = document.querySelectorAll('.dropdown-menu');
+    dropdownMenus.forEach(menu => {
+        menu.addEventListener('click', function(e) {
+            const isMobile = window.innerWidth <= 768;
+            // Allow clicks on links to go through
+            if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') {
+                if (isMobile) {
+                    // Close mobile menu after clicking a link
+                    setTimeout(() => {
+                        closeMobileMenu();
+                    }, 300);
+                }
+            }
+        });
+    });
 }
 
 // Toggle mobile menu
@@ -108,13 +147,11 @@ function openMobileMenu() {
     toggleBtn?.classList.add('active');
     body.style.overflow = 'hidden';
     
-    // Close any open dropdowns first
-    closeAllDropdowns();
-    
-    // Add animation delay for better UX
-    setTimeout(() => {
-        navContent?.style.setProperty('--nav-delay', '0.1s');
-    }, 100);
+    // Update toggle icon
+    const icon = toggleBtn?.querySelector('i');
+    if (icon) {
+        icon.className = 'fas fa-times';
+    }
 }
 
 // Close mobile menu
@@ -129,17 +166,22 @@ function closeMobileMenu() {
     toggleBtn?.classList.remove('active');
     body.style.overflow = '';
     
+    // Update toggle icon back to bars
+    const icon = toggleBtn?.querySelector('i');
+    if (icon) {
+        icon.className = 'fas fa-bars';
+    }
+    
     // Close all dropdowns when closing mobile menu
     closeAllDropdowns();
 }
 
-// Enhanced dropdown toggle functionality
-function toggleDropdown(dropdown) {
+// Toggle mobile dropdown
+function toggleMobileDropdown(dropdown) {
     if (!dropdown) return;
     
     const menu = dropdown.querySelector('.dropdown-menu');
-    const isOpen = menu?.classList.contains('show');
-    const isMobile = window.innerWidth <= 768;
+    const isOpen = dropdown.classList.contains('show');
     
     // Close all other dropdowns first
     document.querySelectorAll('.dropdown').forEach(d => {
@@ -151,20 +193,35 @@ function toggleDropdown(dropdown) {
     });
     
     // Toggle current dropdown
-    if (!isOpen && menu) {
-        menu.classList.add('show');
+    if (!isOpen) {
+        menu?.classList.add('show');
         dropdown.classList.add('show');
-        
-        // Add entrance animation
-        if (!isMobile) {
-            menu.style.animation = 'dropdownEnter 0.3s ease';
+    } else {
+        menu?.classList.remove('show');
+        dropdown.classList.remove('show');
+    }
+}
+
+// Toggle desktop dropdown (hover-based with click support)
+function toggleDesktopDropdown(dropdown) {
+    if (!dropdown) return;
+    
+    const menu = dropdown.querySelector('.dropdown-menu');
+    const isOpen = menu?.classList.contains('show');
+    
+    // Close all other dropdowns
+    document.querySelectorAll('.dropdown').forEach(d => {
+        if (d !== dropdown) {
+            const m = d.querySelector('.dropdown-menu');
+            m?.classList.remove('show');
+            d.classList.remove('show');
         }
-        
-        // Focus management for accessibility
-        const firstItem = menu.querySelector('.dropdown-item');
-        if (firstItem && !isMobile) {
-            setTimeout(() => firstItem.focus(), 100);
-        }
+    });
+    
+    // Toggle current dropdown
+    if (!isOpen) {
+        menu?.classList.add('show');
+        dropdown.classList.add('show');
     } else {
         menu?.classList.remove('show');
         dropdown.classList.remove('show');
@@ -188,11 +245,6 @@ function handleResize() {
     if (!isMobile) {
         closeMobileMenu();
         // Reset mobile-specific dropdown states
-        document.querySelectorAll('.dropdown-menu').forEach(menu => {
-            menu.style.maxHeight = '';
-        });
-    } else {
-        // Close desktop dropdowns on mobile
         closeAllDropdowns();
     }
 }
@@ -213,12 +265,12 @@ function handleEscapeKey(e) {
 
 // Add smooth animations and hover effects
 function addSmoothAnimations() {
-    // Enhanced hover effects for navigation elements
+    // Enhanced hover effects for navigation elements (desktop only)
     const navBtns = document.querySelectorAll('.nav-btn');
     navBtns.forEach(btn => {
         btn.addEventListener('mouseenter', function() {
             if (window.innerWidth > 768) {
-                this.style.transform = 'translateY(-2px) scale(1.02)';
+                this.style.transform = 'translateY(-2px)';
             }
         });
         
@@ -227,25 +279,8 @@ function addSmoothAnimations() {
         });
     });
     
-    // Enhanced hover effects for dropdown buttons
-    const dropdownBtns = document.querySelectorAll('.dropdown-btn');
-    dropdownBtns.forEach(btn => {
-        btn.addEventListener('mouseenter', function() {
-            if (window.innerWidth > 768) {
-                this.style.transform = 'translateY(-2px) scale(1.02)';
-            }
-        });
-        
-        btn.addEventListener('mouseleave', function() {
-            this.style.transform = '';
-        });
-    });
-    
-    // Add ripple effect to buttons
+    // Add ripple effect
     addRippleEffect();
-    
-    // Add loading state to nav items
-    addLoadingStates();
 }
 
 // Add ripple effect to interactive elements
@@ -265,7 +300,7 @@ function addRippleEffect() {
             ripple.style.cssText = `
                 position: absolute;
                 border-radius: 50%;
-                background: rgba(255, 255, 255, 0.5);
+                background: rgba(255, 255, 255, 0.3);
                 width: ${size}px;
                 height: ${size}px;
                 left: ${x}px;
@@ -312,65 +347,8 @@ function addRippleEffect() {
     }
 }
 
-// Add loading states for navigation items
-function addLoadingStates() {
-    const navLinks = document.querySelectorAll('.nav-btn, .dropdown-item[href]');
-    
-    navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            // Skip if it's a dropdown toggle or external link
-            if (this.classList.contains('dropdown-btn') || 
-                this.getAttribute('href')?.startsWith('http') ||
-                this.getAttribute('href')?.startsWith('mailto:')) {
-                return;
-            }
-            
-            // Add loading state
-            const originalContent = this.innerHTML;
-            const loadingSpinner = '<i class="fas fa-spinner fa-spin"></i>';
-            
-            // Only add loading state if it's not a form submission
-            if (!this.closest('form')) {
-                this.innerHTML = loadingSpinner + ' Loading...';
-                this.style.pointerEvents = 'none';
-                
-                // Reset after a delay (in case navigation is cancelled)
-                setTimeout(() => {
-                    this.innerHTML = originalContent;
-                    this.style.pointerEvents = '';
-                }, 3000);
-            }
-        });
-    });
-}
-
 // Handle responsive behavior changes
 function handleResponsiveBehavior() {
-    let resizeTimer;
-    
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => {
-            const isMobile = window.innerWidth <= 768;
-            const navContent = document.querySelector('.nav-content');
-            
-            // Smooth transition between desktop and mobile layouts
-            if (navContent) {
-                navContent.style.transition = 'all 0.3s ease';
-            }
-            
-            // Update mobile toggle visibility
-            const mobileToggle = document.querySelector('.mobile-toggle');
-            if (mobileToggle) {
-                mobileToggle.style.display = isMobile ? 'block' : 'none';
-            }
-            
-        }, 250);
-    });
-}
-
-// Accessibility improvements
-document.addEventListener('DOMContentLoaded', function() {
     // Add ARIA labels and roles
     const navbar = document.querySelector('.navbar');
     if (navbar) {
@@ -402,11 +380,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
-});
+}
 
-// Export functions for external use if needed
+// Export functions for external use
 window.navbarUtils = {
-    toggleDropdown,
+    toggleMobileMenu,
     closeMobileMenu,
     openMobileMenu,
     closeAllDropdowns

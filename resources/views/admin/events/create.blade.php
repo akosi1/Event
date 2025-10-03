@@ -224,9 +224,9 @@
                     <div class="mb-4">
                         <label for="image" class="form-label fw-semibold">Event Image</label>
                         <input type="file" class="form-control @error('image') is-invalid @enderror" 
-                            id="image" name="image" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp">
+                            id="image" name="image" accept="image/jpeg,image/png,image/jpg,image/">
                         @error('image')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        <div class="form-text">Supported: JPG, PNG, GIF, WebP. Max size: 2MB</div>
+                        <div class="form-text">Supported: JPG, PNG, JPEG. Max size: 2MB</div>
                         
                         <!-- Preview -->
                         <div id="imagePreview" class="mt-3" style="display: none;">

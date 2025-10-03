@@ -1,39 +1,45 @@
 <?php
 
-use App\Http\Controllers\Admin\AdminController;
-use App\Http\Controllers\Admin\AuthController;
-use App\Http\Controllers\Admin\EventController;
-use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\NotificationController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\File;
+use App\Http\Controllers\{
+    ProfileController,
+    EventJoinController,
+    DashboardController,
+    EmailController,
+    Auth\MS365OTPController
+};
 
-// Admin Authentication Routes
-Route::get('/', [AuthController::class, 'showLoginForm'])->name('admin.login');
-Route::post('/login', [AuthController::class, 'login'])->name('admin.login.post');
+Route::get('/', fn() => view('welcome'));
 
-// Admin Protected Routes
-Route::middleware(['admin'])->group(function () {
-    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-    
-    // Logout routes - support both GET and POST
-    Route::get('/logout', [AuthController::class, 'logout'])->name('admin.logout.get');
-    Route::post('/logout', [AuthController::class, 'logout'])->name('admin.logout');
-    
-    // Print summary route - MUST be before resource routes
-    Route::get('/events/print/summary', [EventController::class, 'printSummary'])->name('admin.events.print-summary');
-    
-    // Events resource routes
-    Route::resource('/events', EventController::class)->names('admin.events');
-    
-    // Users resource routes
-    Route::resource('/users', UserController::class)->names('admin.users');
-    
-    Route::get('/certificates', [AdminController::class, 'certificates'])->name('admin.certificates');
-    
-    // Notification routes
-    Route::get('/notifications', [NotificationController::class, 'index'])->name('admin.notifications.index');
-    Route::get('/notifications/count', [NotificationController::class, 'getUnreadCount'])->name('admin.notifications.count');
-    Route::patch('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('admin.notifications.read');
-    Route::patch('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('admin.notifications.read-all');
-    Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])->name('admin.notifications.destroy');
+// Routes protected by auth and email verification middleware
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', [ProfileController::class, 'edit'])->name('edit');
+        Route::patch('/', [ProfileController::class, 'update'])->name('update');
+        Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('events/{event}')->name('events.')->group(function () {
+        Route::post('join', [EventJoinController::class, 'join'])->name('join');
+        Route::delete('leave', [EventJoinController::class, 'leave'])->name('leave');
+    });
 });
+
+//routes for ms365
+Route::get('ms365-verify', [MS365OTPController::class, 'showMS365Form'])->name('ms365.verify');
+Route::post('ms365-verify', [MS365OTPController::class, 'verifyMS365Account']);
+
+Route::get('otp-verify', [MS365OTPController::class, 'showOTPForm'])->name('otp.verify.form');
+Route::post('otp-verify', [MS365OTPController::class, 'verifyOTP']);
+Route::post('resend-otp', [MS365OTPController::class, 'resendOTP']);
+
+Route::get('/send-email', [EmailController::class, 'sendEmail'])->name('email.send');
+
+
+require __DIR__.'/auth.php';

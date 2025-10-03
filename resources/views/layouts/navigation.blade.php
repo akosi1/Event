@@ -6,16 +6,18 @@
             EventAps
         </a>
         
+        <!-- Mobile toggle will be inserted here by JavaScript -->
+        
         <div class="nav-content">
             <!-- Dashboard Button -->
             <a href="{{ route('dashboard') }}" class="nav-btn">
                 <i class="fas fa-tachometer-alt"></i>
-                Dashboard
+                Home
             </a>
             
             <!-- Department Filter -->
             <div class="dropdown" id="deptDropdown">
-                <button class="dropdown-btn" onclick="toggleDropdown('deptDropdown')">
+                <button class="dropdown-btn" type="button">
                     <i class="fas fa-graduation-cap"></i>
                     <span id="deptLabel">
                         @if(request('department'))
@@ -49,9 +51,9 @@
                         </a>
                     @endforeach
                     
-                    <div style="height: 1px; background: #e2e8f0; margin: 0.5rem 0;"></div>
+                    <div style="height: 1px; background: #1a1a1a; margin: 0.5rem 0;"></div>
                     <a href="{{ route('dashboard', request()->except('department')) }}" 
-                       class="dropdown-item logout">
+                       class="dropdown-item">
                         <i class="fas fa-times"></i>
                         Clear Filter
                     </a>
@@ -60,7 +62,7 @@
             
             <!-- User Menu -->
             <div class="dropdown" id="userDropdown">
-                <button class="dropdown-btn user-btn" onclick="toggleDropdown('userDropdown')">
+                <button class="dropdown-btn user-btn" type="button">
                     <i class="fas fa-user-circle"></i>
                     {{ auth()->user()->first_name }}
                     <i class="fas fa-chevron-down"></i>
@@ -70,7 +72,7 @@
                         <i class="fas fa-user"></i>
                         Profile
                     </a>
-                    <form method="POST" action="{{ route('logout') }}">
+                    <form method="POST" action="{{ route('logout') }}" style="margin: 0;">
                         @csrf
                         <button type="submit" class="dropdown-item logout">
                             <i class="fas fa-sign-out-alt"></i>
