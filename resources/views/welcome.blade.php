@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -50,6 +50,8 @@
             padding: 20px;
             position: relative;
             z-index: 2;
+            overflow-y: auto;
+            overflow-x: hidden;
         }
 
         .welcome-container {
@@ -57,6 +59,7 @@
             max-width: 900px;
             width: 100%;
             animation: fadeIn 0.8s ease-out;
+            padding: 20px 0;
         }
 
         @keyframes fadeIn {
@@ -100,7 +103,7 @@
         }
 
         .welcome-header h1 {
-            font-size: 64px;
+            font-size: clamp(28px, 6vw, 64px);
             font-weight: 700;
             margin-bottom: 20px;
             letter-spacing: 2px;
@@ -120,12 +123,12 @@
         }
 
         .welcome-header p {
-            font-size: 20px;
+            font-size: clamp(14px, 3vw, 20px);
             color: #e0e0e0;
             font-weight: 400;
             font-family: 'Roboto Condensed', sans-serif;
             text-transform: uppercase;
-            letter-spacing: 3px;
+            letter-spacing: clamp(1.5px, 0.5vw, 3px);
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
             margin-top: 20px;
         }
@@ -242,6 +245,7 @@
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.05);
             animation: float 6s ease-in-out infinite;
+            pointer-events: none;
         }
 
         @keyframes float {
@@ -275,30 +279,32 @@
 
         /* Tablet Responsive */
         @media (max-width: 768px) {
+            .welcome-wrapper {
+                padding: 15px;
+            }
+
             .welcome-container {
-                max-width: 90%;
+                max-width: 95%;
+                padding: 15px 0;
             }
 
             .logo-section {
-                margin-bottom: 40px;
+                margin-bottom: 35px;
             }
 
             .logo-section img {
-                width: 100px;
+                width: 110px;
             }
 
             .welcome-header {
-                margin-bottom: 50px;
+                margin-bottom: 45px;
             }
 
             .welcome-header h1 {
-                font-size: 42px;
-                letter-spacing: 1px;
+                margin-bottom: 15px;
             }
 
             .welcome-header p {
-                font-size: 16px;
-                letter-spacing: 2px;
                 margin-top: 15px;
             }
 
@@ -310,6 +316,7 @@
                 padding: 16px 40px;
                 font-size: 16px;
                 min-width: 200px;
+                letter-spacing: 1.5px;
             }
 
             .btn i {
@@ -334,35 +341,42 @@
 
         /* Mobile Responsive */
         @media (max-width: 480px) {
+            body {
+                overflow-y: auto;
+            }
+
             .welcome-wrapper {
-                padding: 15px;
+                padding: 20px 15px;
+                min-height: 100vh;
+                height: auto;
             }
 
             .welcome-container {
                 max-width: 100%;
+                padding: 30px 0;
             }
 
             .logo-section {
-                margin-bottom: 35px;
+                margin-bottom: 30px;
             }
 
             .logo-section img {
-                width: 80px;
+                width: 90px;
             }
 
             .welcome-header {
-                margin-bottom: 40px;
+                margin-bottom: 35px;
             }
 
             .welcome-header h1 {
-                font-size: 32px;
-                letter-spacing: 0.5px;
-                margin-bottom: 15px;
+                margin-bottom: 12px;
+            }
+
+            .welcome-header h1 br {
+                display: block;
             }
 
             .welcome-header p {
-                font-size: 14px;
-                letter-spacing: 1.5px;
                 margin-top: 12px;
             }
 
@@ -370,15 +384,20 @@
                 flex-direction: column;
                 gap: 15px;
                 width: 100%;
+                align-items: center;
             }
 
             .btn {
                 width: 100%;
-                max-width: 300px;
-                padding: 15px 35px;
+                max-width: 320px;
+                padding: 16px 35px;
                 font-size: 15px;
                 letter-spacing: 1.5px;
                 min-width: unset;
+            }
+
+            .btn:active {
+                transform: translateY(-3px);
             }
 
             .btn i {
@@ -386,41 +405,105 @@
             }
 
             .bg-decoration.circle-1 {
-                width: 180px;
-                height: 180px;
+                width: 200px;
+                height: 200px;
                 top: 5%;
-                left: -60px;
+                left: -70px;
             }
 
             .bg-decoration.circle-2 {
-                width: 140px;
-                height: 140px;
+                width: 150px;
+                height: 150px;
                 bottom: 10%;
-                right: -50px;
+                right: -60px;
             }
 
             .bg-decoration.circle-3 {
-                width: 100px;
-                height: 100px;
+                width: 110px;
+                height: 110px;
+                top: 50%;
+                left: -40px;
             }
         }
 
         /* Extra Small Mobile */
         @media (max-width: 360px) {
-            .logo-section i {
-                font-size: 50px;
+            .welcome-wrapper {
+                padding: 15px 10px;
             }
 
-            .welcome-header h1 {
-                font-size: 26px;
+            .welcome-container {
+                padding: 20px 0;
             }
 
-            .welcome-header p {
-                font-size: 12px;
+            .logo-section {
+                margin-bottom: 25px;
+            }
+
+            .logo-section img {
+                width: 75px;
+            }
+
+            .welcome-header {
+                margin-bottom: 30px;
             }
 
             .btn {
                 padding: 14px 30px;
+                font-size: 14px;
+                max-width: 280px;
+                gap: 10px;
+            }
+
+            .btn i {
+                font-size: 16px;
+            }
+
+            .bg-decoration.circle-1 {
+                width: 160px;
+                height: 160px;
+            }
+
+            .bg-decoration.circle-2 {
+                width: 120px;
+                height: 120px;
+            }
+
+            .bg-decoration.circle-3 {
+                width: 90px;
+                height: 90px;
+            }
+        }
+
+        /* Landscape Mobile */
+        @media (max-height: 600px) and (orientation: landscape) {
+            .welcome-wrapper {
+                padding: 15px;
+                overflow-y: auto;
+            }
+
+            .logo-section {
+                margin-bottom: 20px;
+            }
+
+            .logo-section img {
+                width: 70px;
+            }
+
+            .welcome-header {
+                margin-bottom: 25px;
+            }
+
+            .welcome-header h1 {
+                font-size: clamp(24px, 5vw, 48px);
+            }
+
+            .button-group {
+                gap: 12px;
+            }
+
+            .btn {
+                padding: 12px 35px;
                 font-size: 14px;
             }
         }
