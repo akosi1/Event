@@ -92,7 +92,7 @@
             </div>
         </div>
     </div>
-    <link rel="stylesheet" href="{{ asset('resetpass/resetpass/resetpass.css') }}">
+    <link rel="stylesheet" href="{{ asset('user/resetpass/resetpass.css') }}">
     <style>
         body {
             background: url("{{ asset('images/mcc background.jpg') }}") center/cover no-repeat;
