@@ -84,7 +84,7 @@
         </div>
     </div>
 </nav>
-
+<link href="{{ asset('user/nav/css/navbar.css') }}" rel="stylesheet">
 <!-- Filter Status Banner -->
 <!-- @if(request('department'))
     <div class="filter-status">

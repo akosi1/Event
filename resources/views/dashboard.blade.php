@@ -6,7 +6,6 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'EventAP') }} - Dashboard</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="{{ asset('user/nav/css/navbar.css') }}" rel="stylesheet">
     <link href="{{ asset('user/css/dashboard.css') }}" rel="stylesheet">
 </head>
 <body>
@@ -192,7 +191,7 @@
             </div>
         </div>
     </div>
-
+<script src="{{ asset('user/nav/js/navbar.js') }}"></script>
     <!-- Toast container -->
     <div id="toastContainer"></div>
 
@@ -210,7 +209,6 @@
             </div>
         </div>
     </div>
-    <script src="{{ asset('user/nav/js/navbar.js') }}"></script>
     <script src="{{ asset('user/js/dashboard.js') }}"></script>
 </body>
 </html>
