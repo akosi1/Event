@@ -22,35 +22,35 @@ class RegisteredUserController extends Controller
      */
     public function create(): View|RedirectResponse
     {
-        // Check if email is verified in session
+        // Retrieve verified email and OTP status from session
         $verifiedEmail = session('verified_email');
         $otpVerified = session('otp_verified');
 
-        // Log for debugging
         Log::info('Registration page accessed', [
             'verified_email' => $verifiedEmail,
             'otp_verified' => $otpVerified,
-            'all_session' => session()->all()
+            'session_data' => session()->all(),
         ]);
 
+        // Redirect if email or OTP not verified
         if (!$verifiedEmail || !$otpVerified) {
             Log::warning('Registration access denied - email not verified');
             return redirect()->route('ms365.verify')
                              ->withErrors(['email' => 'Please verify your McLawis College email first.']);
         }
 
-        // Verify OTP record is valid (not expired, and verified within 1 hour)
+        // Check OTP verification record (verified within last 60 minutes)
         $otpRecord = OtpVerification::where('email', $verifiedEmail)
-                                    ->whereNotNull('verified_at')
-                                    ->where('verified_at', '>=', Carbon::now()->subHour())
-                                    ->first();
+            ->whereNotNull('verified_at')
+            ->where('verified_at', '>=', Carbon::now()->subHour())
+            ->first();
 
         if (!$otpRecord) {
             Log::warning('OTP verification expired or not found', ['email' => $verifiedEmail]);
-            
-            // Clear invalid session data
+
+            // Clear verification-related session keys
             session()->forget(['verified_email', 'email', 'otp_verified', 'email_verified']);
-            
+
             return redirect()->route('ms365.verify')
                              ->withErrors(['email' => 'Email verification has expired. Please verify again.']);
         }
@@ -68,11 +68,11 @@ class RegisteredUserController extends Controller
         $verifiedEmail = session('verified_email');
         $otpVerified = session('otp_verified');
 
-        // Log registration attempt
         Log::info('Registration attempt', [
             'verified_email' => $verifiedEmail,
             'otp_verified' => $otpVerified,
-            'request_email' => $request->email
+            'request_email' => $request->email,
+            'request_data' => $request->except('password', 'password_confirmation'),
         ]);
 
         if (!$verifiedEmail || !$otpVerified) {
@@ -81,23 +81,22 @@ class RegisteredUserController extends Controller
                              ->withErrors(['email' => 'Please verify your McLawis College email first.']);
         }
 
-        // Verify OTP record is still valid
+        // Check if OTP verification is still valid
         $otpRecord = OtpVerification::where('email', $verifiedEmail)
-                                    ->whereNotNull('verified_at')
-                                    ->where('verified_at', '>=', Carbon::now()->subHour())
-                                    ->first();
+            ->whereNotNull('verified_at')
+            ->where('verified_at', '>=', Carbon::now()->subHour())
+            ->first();
 
         if (!$otpRecord) {
             Log::warning('OTP record expired during registration', ['email' => $verifiedEmail]);
-            
-            // Clear session data
+
             session()->forget(['verified_email', 'email', 'otp_verified', 'email_verified']);
-            
+
             return redirect()->route('ms365.verify')
                              ->withErrors(['email' => 'Email verification has expired. Please verify again.']);
         }
 
-        // Validate registration data
+        // Validate registration input
         $validated = $request->validate([
             'id_number'    => ['required', 'string', 'max:255', 'unique:' . User::class],
             'first_name'   => ['required', 'string', 'max:255'],
@@ -106,58 +105,55 @@ class RegisteredUserController extends Controller
             'email'        => [
                 'required',
                 'string',
-                'lowercase',
                 'email',
                 'max:255',
                 'unique:' . User::class,
                 function ($attribute, $value, $fail) use ($verifiedEmail) {
-                    if ($value !== $verifiedEmail) {
+                    if (strtolower($value) !== strtolower($verifiedEmail)) {
                         $fail('The email must match your verified McLawis College email.');
                     }
                 },
             ],
             'department'   => ['required', 'string', 'in:BSIT,BSBA,BSED,BEED,BSHM'],
             'password'     => ['required', 'confirmed', Rules\Password::defaults()],
-            'role'         => ['required', 'in:student'],
-            'status'       => ['required', 'in:active'],
         ]);
 
         try {
-            // Create the user
+            // Create the user with the verified email (forced)
             $user = User::create([
                 'id_number'         => $validated['id_number'],
                 'first_name'        => $validated['first_name'],
-                'middle_name'       => $validated['middle_name'],
+                'middle_name'       => $validated['middle_name'] ?? null,
                 'last_name'         => $validated['last_name'],
-                'email'             => $verifiedEmail, // Force verified email
+                'email'             => $verifiedEmail,
                 'department'        => $validated['department'],
                 'password'          => Hash::make($validated['password']),
-                'role'              => $validated['role'],
-                'status'            => $validated['status'],
+                'role'              => 'user',
+                'status'            => 'active',
                 'email_verified_at' => now(),
             ]);
 
             Log::info('User registered successfully', [
                 'user_id' => $user->id,
-                'email' => $user->email
+                'email' => $user->email,
             ]);
 
-            // Remove OTP record after successful registration
+            // Delete OTP record after successful registration
             $otpRecord->delete();
 
-            // Fire registered event
+            // Fire the Registered event
             event(new Registered($user));
 
             // Log the user in
             Auth::login($user);
 
-            // Clear all verification session data
+            // Clear verification-related session data
             session()->forget([
                 'verified_email',
                 'email',
                 'otp_verified',
                 'email_verified',
-                'ms365_verification_started'
+                'ms365_verification_started',
             ]);
 
             return redirect()->route('dashboard')
@@ -166,7 +162,8 @@ class RegisteredUserController extends Controller
         } catch (\Exception $e) {
             Log::error('Registration failed', [
                 'error' => $e->getMessage(),
-                'email' => $verifiedEmail
+                'email' => $verifiedEmail,
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return back()
