@@ -23,8 +23,8 @@
                     </h2>
                     
                     <div class="search-container">
-                        <i class="fas fa-search search-icon"></i>
                         <form method="GET" action="{{ route('dashboard') }}">
+                            <i class="fas fa-search search-icon"></i>
                             @foreach(request()->except('search') as $key => $value)
                                 <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                             @endforeach
@@ -32,8 +32,9 @@
                                    name="search" 
                                    class="search-input" 
                                    placeholder="Search events..." 
-                                   value="{{ request('search') }}"
-                                   onchange="this.form.submit()">
+                                   value="{{ e(request('search')) }}"
+                                   maxlength="100"
+                                   autocomplete="off">
                         </form>
                     </div>
                 </div>
@@ -47,7 +48,7 @@
                             <div class="event-image-container">
                                 @if($event->image && Storage::disk('public')->exists($event->image))
                                     <img src="{{ Storage::url($event->image) }}" 
-                                         alt="{{ $event->title }}" 
+                                         alt="{{ e($event->title) }}" 
                                          class="event-image">
                                 @else
                                     <div class="no-image-placeholder">
@@ -73,12 +74,13 @@
                             <button class="info-btn" 
                                     onclick="showEventInfo({{ $event->id }})" 
                                     title="Event Details"
-                                    data-event-title="{{ $event->title }}"
-                                    data-event-location="{{ $event->location }}"
+                                    data-event-title="{{ e($event->title) }}"
+                                    data-event-location="{{ e($event->location) }}"
                                     data-event-date="{{ $event->date->format('F d, Y') }}"
-                                    data-event-time="{{ $event->time ?? 'TBA' }}"
-                                    data-event-department="{{ $event->is_exclusive ? ($event->department ?? 'BSIT') : 'All Departments' }}"
-                                    data-event-description="{{ $event->description ?? 'No description available.' }}">
+                                    data-event-time="{{ e($event->time ?? 'TBA') }}"
+                                    data-event-department="{{ e($event->is_exclusive ? ($event->department ?? 'BSIT') : 'All Departments') }}"
+                                    data-event-description="{{ e($event->description ?? 'No description available.') }}"
+                                    data-event-image="{{ ($event->image && Storage::disk('public')->exists($event->image)) ? Storage::url($event->image) : '' }}">
                                 <i class="fas fa-info"></i>
                             </button>
                             
@@ -86,7 +88,7 @@
                             @if($event->is_exclusive)
                                 <div class="exclusivity-badge exclusive">
                                     <i class="fas fa-graduation-cap"></i>
-                                    {{ $event->department ?? 'BSIT' }}
+                                    {{ e($event->department ?? 'BSIT') }}
                                 </div>
                             @else
                                 <div class="exclusivity-badge open">
@@ -100,11 +102,11 @@
                                 <!-- Location Badge -->
                                 <div class="location-badge">
                                     <i class="fas fa-map-marker-alt"></i>
-                                    <span>{{ Str::limit($event->location, 25) }}</span>
+                                    <span>{{ e(Str::limit($event->location, 25)) }}</span>
                                 </div>
                                 
                                 <!-- Event Title -->
-                                <h3 class="event-title">{{ $event->title }}</h3>
+                                <h3 class="event-title">{{ e($event->title) }}</h3>
                                 
                                 <!-- Register Button -->
                                 <button class="register-btn {{ $event->is_joined ? 'joined' : '' }}" 
@@ -191,7 +193,10 @@
             </div>
         </div>
     </div>
-<script src="{{ asset('user/nav/js/navbar.js') }}"></script>
+
+    <!-- Include Navigation Script -->
+    <script src="{{ asset('user/nav/js/navbar.js') }}"></script>
+    
     <!-- Toast container -->
     <div id="toastContainer"></div>
 
@@ -209,6 +214,8 @@
             </div>
         </div>
     </div>
+    
+    <!-- Dashboard JavaScript -->
     <script src="{{ asset('user/js/dashboard.js') }}"></script>
 </body>
 </html>

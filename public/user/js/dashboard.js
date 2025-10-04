@@ -1,6 +1,25 @@
 // Get CSRF token from meta tag
 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
+// Sanitize input to prevent XSS
+function sanitizeInput(input) {
+    const div = document.createElement('div');
+    div.textContent = input;
+    return div.innerHTML;
+}
+
+// Escape HTML entities
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+}
+
 // Toast notification system
 function showToast(message, type = 'success') {
     const toast = document.createElement('div');
@@ -8,7 +27,7 @@ function showToast(message, type = 'success') {
     toast.innerHTML = `
         <div style="display: flex; align-items: center; gap: 0.5rem;">
             <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
-            <span>${message}</span>
+            <span>${escapeHtml(message)}</span>
         </div>
     `;
     
@@ -93,7 +112,7 @@ async function toggleEventJoin(button) {
     }
 }
 
-// Event info modal functionality
+// Event info modal functionality with sanitized data and event image
 function showEventInfo(eventId) {
     // Get event data from the info button's data attributes
     const infoBtn = document.querySelector(`button[onclick="showEventInfo(${eventId})"]`);
@@ -103,18 +122,33 @@ function showEventInfo(eventId) {
         return;
     }
     
-    const title = infoBtn.getAttribute('data-event-title');
-    const location = infoBtn.getAttribute('data-event-location');
-    const date = infoBtn.getAttribute('data-event-date');
-    const time = infoBtn.getAttribute('data-event-time');
-    const department = infoBtn.getAttribute('data-event-department');
-    const description = infoBtn.getAttribute('data-event-description');
+    // Get and sanitize all data attributes
+    const title = escapeHtml(infoBtn.getAttribute('data-event-title') || 'Event');
+    const location = escapeHtml(infoBtn.getAttribute('data-event-location') || 'TBA');
+    const date = escapeHtml(infoBtn.getAttribute('data-event-date') || 'TBA');
+    const time = escapeHtml(infoBtn.getAttribute('data-event-time') || 'TBA');
+    const department = escapeHtml(infoBtn.getAttribute('data-event-department') || 'All Departments');
+    const description = escapeHtml(infoBtn.getAttribute('data-event-description') || 'No description available.');
+    const imageUrl = infoBtn.getAttribute('data-event-image') || '';
     
     // Set modal title
-    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalTitle').textContent = infoBtn.getAttribute('data-event-title') || 'Event';
     
-    // Create modal content
+    // Create event image header
+    let imageHTML = '';
+    if (imageUrl) {
+        imageHTML = `<img src="${imageUrl}" alt="${title}" class="modal-event-image">`;
+    } else {
+        imageHTML = `
+            <div class="modal-event-image-placeholder">
+                <i class="fas fa-calendar-alt"></i>
+            </div>
+        `;
+    }
+    
+    // Create modal content with sanitized data
     const modalContent = `
+        ${imageHTML}
         <div class="info-item">
             <div class="info-icon">
                 <i class="fas fa-map-marker-alt"></i>
@@ -183,7 +217,10 @@ document.getElementById('eventInfoModal')?.addEventListener('click', function(e)
 // Close modal on escape key
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
-        closeEventInfo();
+        const modal = document.getElementById('eventInfoModal');
+        if (modal && modal.style.display === 'flex') {
+            closeEventInfo();
+        }
     }
 });
 
@@ -274,8 +311,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Auto-submit search with debounce
-let searchTimeout;
+// Search input sanitization
 const searchInput = document.querySelector('.search-input');
 
 if (searchInput) {
@@ -288,8 +324,36 @@ if (searchInput) {
         this.placeholder = 'Search events...';
     });
     
+    // Sanitize input on form submit
+    const searchForm = searchInput.closest('form');
+    if (searchForm) {
+        searchForm.addEventListener('submit', function(e) {
+            const input = searchInput.value.trim();
+            // Remove potentially dangerous characters
+            const sanitized = input.replace(/[<>'"]/g, '');
+            searchInput.value = sanitized;
+        });
+    }
+    
+    // Optional: Real-time input sanitization
+    searchInput.addEventListener('input', function(e) {
+        const cursorPos = this.selectionStart;
+        const originalLength = this.value.length;
+        
+        // Remove dangerous characters in real-time
+        this.value = this.value.replace(/[<>'"]/g, '');
+        
+        // Adjust cursor position if characters were removed
+        const newLength = this.value.length;
+        const diff = originalLength - newLength;
+        if (diff > 0) {
+            this.setSelectionRange(cursorPos - diff, cursorPos - diff);
+        }
+    });
+    
     // Optional: Debounced auto-search (uncomment if needed)
     /*
+    let searchTimeout;
     searchInput.addEventListener('input', function(e) {
         clearTimeout(searchTimeout);
         
@@ -373,8 +437,8 @@ document.querySelectorAll('.info-btn').forEach(btn => {
 });
 
 // Console log for developers
-console.log('%c🎉 EventAP Dashboard Loaded Successfully!', 'color: #667eea; font-size: 16px; font-weight: bold;');
-console.log('%cKeyboard Shortcuts:', 'color: #764ba2; font-size: 14px; font-weight: bold;');
+console.log('%c🎉 EventAP Dashboard Loaded Successfully!', 'color: #dc2626; font-size: 16px; font-weight: bold;');
+console.log('%cKeyboard Shortcuts:', 'color: #b91c1c; font-size: 14px; font-weight: bold;');
 console.log('%c• Ctrl/Cmd + K: Focus search', 'color: #4a5568; font-size: 12px;');
 console.log('%c• Escape: Close search/modal', 'color: #4a5568; font-size: 12px;');
 console.log('%c• Click info icon: View event details', 'color: #4a5568; font-size: 12px;');
