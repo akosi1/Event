@@ -73,7 +73,7 @@
                     <div class="form-actions">
                         <button type="submit" class="btn-submit">
                             <i class="fas fa-check-circle"></i>
-                            {{ __('Reset Password') }}
+                            {{ __('Confirm Password') }}
                         </button>
                     </div>
 
