@@ -44,6 +44,7 @@
                     <div class="events-grid">
                         @foreach($events as $event)
                         <div class="event-card">
+                            <!-- Background Image -->
                             <div class="event-image-container">
                                 @if($event->image && Storage::disk('public')->exists($event->image))
                                     <img src="{{ Storage::url($event->image) }}" 
@@ -51,83 +52,70 @@
                                          class="event-image">
                                 @else
                                     <div class="no-image-placeholder">
-                                        <i class="fas fa-image" style="font-size: 3rem; color: #a0aec0;"></i>
-                                    </div>
-                                @endif
-                                <div class="event-badge">
-                                    @if($event->created_at >= now()->subWeek())
-                                        NEW
-                                    @elseif($event->date >= now() && $event->date <= now()->addWeek())
-                                        UPCOMING
-                                    @elseif($event->is_recurring)
-                                        RECURRING
-                                    @else
-                                        EVENT
-                                    @endif
-                                </div>
-                                
-                                <!-- Exclusivity Badge -->
-                                @if($event->is_exclusive)
-                                    <div class="exclusivity-badge exclusive">
-                                        <i class="fas fa-lock"></i>
-                                        EXCLUSIVE
-                                    </div>
-                                @else
-                                    <div class="exclusivity-badge open">
-                                        <i class="fas fa-globe"></i>
-                                        OPEN
+                                        <i class="fas fa-calendar-alt"></i>
                                     </div>
                                 @endif
                             </div>
+                            
+                            <!-- Status Badge (Top Left) -->
+                            <div class="event-badge {{ $event->created_at >= now()->subWeek() ? 'new' : ($event->date >= now() && $event->date <= now()->addWeek() ? 'upcoming' : 'event') }}">
+                                @if($event->created_at >= now()->subWeek())
+                                    NEW
+                                @elseif($event->date >= now() && $event->date <= now()->addWeek())
+                                    Early Bird
+                                @elseif($event->is_recurring)
+                                    Popular
+                                @else
+                                    EVENT
+                                @endif
+                            </div>
+                            
+                            <!-- Info Button -->
+                            <button class="info-btn" 
+                                    onclick="showEventInfo({{ $event->id }})" 
+                                    title="Event Details"
+                                    data-event-title="{{ $event->title }}"
+                                    data-event-location="{{ $event->location }}"
+                                    data-event-date="{{ $event->date->format('F d, Y') }}"
+                                    data-event-time="{{ $event->time ?? 'TBA' }}"
+                                    data-event-department="{{ $event->is_exclusive ? ($event->department ?? 'BSIT') : 'All Departments' }}"
+                                    data-event-description="{{ $event->description ?? 'No description available.' }}">
+                                <i class="fas fa-info"></i>
+                            </button>
+                            
+                            <!-- Department/Exclusivity Badge (Top Right) -->
+                            @if($event->is_exclusive)
+                                <div class="exclusivity-badge exclusive">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    {{ $event->department ?? 'BSIT' }}
+                                </div>
+                            @else
+                                <div class="exclusivity-badge open">
+                                    <i class="fas fa-globe"></i>
+                                    ALL
+                                </div>
+                            @endif
+                            
+                            <!-- Event Content (Bottom Overlay) -->
                             <div class="event-content">
+                                <!-- Location Badge -->
+                                <div class="location-badge">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>{{ Str::limit($event->location, 25) }}</span>
+                                </div>
+                                
+                                <!-- Event Title -->
                                 <h3 class="event-title">{{ $event->title }}</h3>
-                                <p class="event-description">{{ Str::limit($event->description, 120) }}</p>
                                 
-                                <div class="event-details">
-                                    <div class="event-detail-item">
-                                        <i class="fas fa-calendar" style="width: 16px; color: #667eea;"></i>
-                                        <span>{{ $event->date->format('F d, Y') }}</span>
-                                    </div>
-                                    @if($event->start_time)
-                                    <div class="event-detail-item">
-                                        <i class="fas fa-clock" style="width: 16px; color: #667eea;"></i>
-                                        <span>{{ $event->start_time->format('g:i A') }}@if($event->end_time) - {{ $event->end_time->format('g:i A') }}@endif</span>
-                                    </div>
-                                    @endif
-                                    <div class="event-detail-item">
-                                        <i class="fas fa-map-marker-alt" style="width: 16px; color: #667eea;"></i>
-                                        <span>{{ $event->location }}</span>
-                                    </div>
-                                    <div class="event-detail-item">
-                                        <i class="fas fa-graduation-cap" style="width: 16px; color: #667eea;"></i>
-                                        <span>{{ $event->department_display }}</span>
-                                    </div>
-                                    @if($event->is_recurring)
-                                    <div class="event-detail-item">
-                                        <i class="fas fa-repeat" style="width: 16px; color: #667eea;"></i>
-                                        <span>{{ $event->recurrence_display }}</span>
-                                    </div>
-                                    @endif
-                                </div>
-                                
-                                <div class="event-footer">
-                                    <div class="event-date-badge">{{ $event->date->format('M d') }}</div>
-                                    <button class="join-event-btn {{ $event->is_joined ? 'joined' : '' }}" 
-                                            data-event-id="{{ $event->id }}" 
-                                            data-joined="{{ $event->is_joined ? 'true' : 'false' }}"
-                                            onclick="toggleEventJoin(this)">
-                                        <span class="btn-icon">
-                                            @if($event->is_joined)
-                                                <i class="fas fa-minus"></i>
-                                            @else
-                                                <i class="fas fa-plus"></i>
-                                            @endif
-                                        </span>
-                                        <span class="btn-text">
-                                            {{ $event->is_joined ? 'Leave Event' : 'Join Event' }}
-                                        </span>
-                                    </button>
-                                </div>
+                                <!-- Register Button -->
+                                <button class="register-btn {{ $event->is_joined ? 'joined' : '' }}" 
+                                        data-event-id="{{ $event->id }}" 
+                                        data-joined="{{ $event->is_joined ? 'true' : 'false' }}"
+                                        onclick="toggleEventJoin(this)">
+                                    <span class="btn-text">
+                                        {{ $event->is_joined ? 'Leave Event' : 'Register Now' }}
+                                    </span>
+                                </button>
                             </div>
                         </div>
                         @endforeach
@@ -142,21 +130,21 @@
                                     @if ($events->onFirstPage())
                                         <span class="pagination-btn prev-next disabled">
                                             <i class="fas fa-chevron-left"></i>
-                                            Previous
+                                            <span>Previous</span>
                                         </span>
                                     @else
                                         <a href="{{ $events->previousPageUrl() }}" class="pagination-btn prev-next">
                                             <i class="fas fa-chevron-left"></i>
-                                            Previous
+                                            <span>Previous</span>
                                         </a>
                                     @endif
 
                                     {{-- Pagination Elements --}}
                                     @foreach ($events->getUrlRange(1, $events->lastPage()) as $page => $url)
                                         @if ($page == $events->currentPage())
-                                            <span class="pagination-btn active">{{ $page }}</span>
+                                            <span class="pagination-btn active"><span>{{ $page }}</span></span>
                                         @elseif ($page == 1 || $page == $events->lastPage() || ($page >= $events->currentPage() - 2 && $page <= $events->currentPage() + 2))
-                                            <a href="{{ $url }}" class="pagination-btn">{{ $page }}</a>
+                                            <a href="{{ $url }}" class="pagination-btn"><span>{{ $page }}</span></a>
                                         @elseif ($page == $events->currentPage() - 3 || $page == $events->currentPage() + 3)
                                             <span class="pagination-dots">...</span>
                                         @endif
@@ -165,12 +153,12 @@
                                     {{-- Next Page Link --}}
                                     @if ($events->hasMorePages())
                                         <a href="{{ $events->nextPageUrl() }}" class="pagination-btn prev-next">
-                                            Next
+                                            <span>Next</span>
                                             <i class="fas fa-chevron-right"></i>
                                         </a>
                                     @else
                                         <span class="pagination-btn prev-next disabled">
-                                            Next
+                                            <span>Next</span>
                                             <i class="fas fa-chevron-right"></i>
                                         </span>
                                     @endif
@@ -190,9 +178,9 @@
                 @else
                     <!-- Empty State -->
                     <div class="empty-state">
-                        <i class="fas fa-calendar-times" style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.5;"></i>
-                        <h3 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem;">No events available</h3>
-                        <p style="opacity: 0.8;">
+                        <i class="fas fa-calendar-times"></i>
+                        <h3>No events available</h3>
+                        <p>
                             @if(request('department') || request('search'))
                                 No events match your current filters. Try adjusting your search criteria.
                             @else
@@ -207,6 +195,21 @@
 
     <!-- Toast container -->
     <div id="toastContainer"></div>
+
+    <!-- Event Info Modal (Hidden by default) -->
+    <div id="eventInfoModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Event Title</h2>
+                <button class="modal-close" onclick="closeEventInfo()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="eventInfoContent">
+                <!-- Dynamic content will be inserted here -->
+            </div>
+        </div>
+    </div>
 
     <script src="{{ asset('user/nav/js/navbar.js') }}"></script>
     <script src="{{ asset('user/js/dashboard.js') }}"></script>

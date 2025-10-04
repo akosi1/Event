@@ -103,6 +103,7 @@
             </div>
         </div>
     </div>
+    
     <link rel="stylesheet" href="{{ asset('user/login/login.css') }}">
     <style>
          body {
@@ -110,6 +111,8 @@
             position: relative;
         }
     </style>
+    <script>
+  </script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const deptBtn = document.getElementById('deptBtn');

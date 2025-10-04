@@ -63,6 +63,6 @@
         body {
             background: url("{{ asset('images/mcc background.jpg') }}") center/cover no-repeat;
             position: relative;
-        } f
+        } 
     </style>
 </x-guest-layout>
