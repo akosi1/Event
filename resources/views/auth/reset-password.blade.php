@@ -20,11 +20,12 @@
                                 id="email" 
                                 type="email" 
                                 name="email" 
-                                :value="old('email', $request->email)"
+                                value="{{ old('email', $request->email) }}"
                                 placeholder=" "
                                 required 
                                 autofocus
                                 autocomplete="username"
+                                readonly
                                 class="form-control"
                             >
                             <label class="input-label" for="email">{{ __('Email') }}</label>
