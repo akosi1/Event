@@ -86,7 +86,7 @@
 </nav>
 
 <!-- Filter Status Banner -->
-@if(request('department'))
+<!-- @if(request('department'))
     <div class="filter-status">
         <div style="display: flex; align-items: center; gap: 0.75rem;">
             <i class="fas fa-filter"></i>
@@ -96,4 +96,4 @@
             <i class="fas fa-times"></i>
         </a>
     </div>
-@endif
+@endif -->
