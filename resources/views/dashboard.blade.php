@@ -11,7 +11,7 @@
 <body>
     <!-- Include Navigation -->
     @include('layouts.navigation')
-
+;ASKDAJS[DOAJSD[OASKDP]ASKD]PASKD][ASLD[]ASKLD][SADKA]SDKAS]DPKSAP]DKASP]DKASPDKASPDKASD
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Events Section -->
@@ -21,7 +21,7 @@
                         <i class="fas fa-fire"></i>
                         Latest Events
                     </h2>
-                    
+                MD;ASDMPASDKSAP[DKSA[PDKASPDKASDP[ADPS[DKASPD[KSDPAKSPDASKDASKASDK]]]]]    
                     <div class="search-container">
                         <form method="GET" action="{{ route('dashboard') }}">
                             <i class="fas fa-search search-icon"></i>
