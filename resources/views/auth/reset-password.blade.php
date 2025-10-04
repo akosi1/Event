@@ -81,7 +81,6 @@
                         <!-- <div class="divider">
                             <span>or</span>
                         </div> -->
-                        
                         <div class="back-link">
                             <a href="{{ route('login') }}" class="btn-secondary">
                                 Back to sign in
