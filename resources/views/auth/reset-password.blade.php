@@ -78,9 +78,9 @@
                     </div>
 
                     <div class="form-footer">
-                        <div class="divider">
+                        <!-- <div class="divider">
                             <span>or</span>
-                        </div>
+                        </div> -->
                         
                         <div class="back-link">
                             <a href="{{ route('login') }}" class="btn-secondary">
