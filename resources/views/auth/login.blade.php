@@ -55,10 +55,10 @@
                                     <i class="fas fa-briefcase"></i><span>BSBA</span>
                                 </div>
                                 <div class="item" data-val="BSEd" data-full="Bachelor of Science in Education" data-icon="fa-chalkboard-teacher">
-                                    <i class="fas fa-chalkboard-teacher"></i><span>BSEd</span>
+                                    <i class="fas fa-chalkboard-teacher"></i><span>BSED</span>
                                 </div>
                                 <div class="item" data-val="BEEd" data-full="Bachelor of Elementary Education" data-icon="fa-school">
-                                    <i class="fas fa-school"></i><span>BEEd</span>
+                                    <i class="fas fa-school"></i><span>BEED</span>
                                 </div>
                                 <div class="item" data-val="BSHM" data-full="Bachelor of Science in Hospitality Management" data-icon="fa-hotel">
                                     <i class="fas fa-hotel"></i><span>BSHM</span>
