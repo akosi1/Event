@@ -59,7 +59,8 @@
                         <a href="{{ route('login') }}" class="btn btn-user">
                             <i class="fas fa-sign-in-alt"></i>
                             <span>User Login</span>
-                        </a>
+                        </a>MCC Event & Portfolio
+Organizer
                     @endauth
                 </div>
             @endif
@@ -67,4 +68,4 @@
     </div>
     
 </body>
-</html>sdsaasdsad
+</html>
