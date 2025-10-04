@@ -31,7 +31,7 @@
         <div class="welcome-container">
             <!-- Logo -->
             <div class="logo-section">
-                <img src="{{ asset('images/logo.png') }}" alt="MCC Logo">
+                <img src="{{ asset('images/logoa.png') }}" alt="MCC Logo">
             </div>
 
             <!-- Header -->
