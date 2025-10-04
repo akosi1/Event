@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
-use App\Mail\PHPMailerService;
 
 class MS365OTPController extends Controller
 {
@@ -46,7 +45,8 @@ class MS365OTPController extends Controller
         }
 
         // Store the email in the session for OTP verification
-        session(['email' => $request->email]);
+        $request->session()->put('email', $request->email);
+        $request->session()->put('ms365_verification_started', true);
 
         // Generate OTP and send it
         return $this->sendOtp($request->email);
@@ -67,6 +67,7 @@ class MS365OTPController extends Controller
                 'otp' => Hash::make($otp),
                 'expires_at' => Carbon::now()->addMinutes(10),
                 'attempts' => 0,
+                'verified_at' => null, // Reset verification status
             ]
         );
 
@@ -92,7 +93,7 @@ class MS365OTPController extends Controller
     {
         // Redirect to MS365 verification form if email is not in session
         if (!session('email')) {
-            return redirect()->route('ms365.verify');
+            return redirect()->route('ms365.verify')->withErrors(['email' => 'Session expired. Please start verification again.']);
         }
 
         return view('auth.otp-verify');
@@ -115,29 +116,38 @@ class MS365OTPController extends Controller
         }
 
         // Check if OTP has expired
-        if (Carbon::now()->gt($otpRecord->expires_at)) {
-            return back()->withErrors(['otp' => 'Verification code has expired.']);
+        if ($otpRecord->isExpired()) {
+            return back()->withErrors(['otp' => 'Verification code has expired. Please request a new code.']);
         }
 
         // Check if too many attempts were made
-        if ($otpRecord->attempts >= 3) {
+        if ($otpRecord->maxAttemptsReached()) {
             return back()->withErrors(['otp' => 'Too many failed attempts. Please request a new code.']);
         }
 
         // Check if OTP is correct
         if (!Hash::check($request->otp, $otpRecord->otp)) {
-            $otpRecord->increment('attempts');
+            $otpRecord->incrementAttempts();
             return back()->withErrors(['otp' => 'Invalid verification code.']);
         }
 
         // Mark as verified
         $otpRecord->update(['verified_at' => Carbon::now()]);
-                  
-        session(['verified_email' => $request->email]);
-        // Redirect to registration page
+        
+        // Store verified email in session with multiple keys for redundancy
+        $request->session()->put('verified_email', $request->email);
+        $request->session()->put('email_verified', true);
+        $request->session()->put('otp_verified', true);
+        
+        // Save session explicitly
+        $request->session()->save();
+        
+        // Log for debugging
+        Log::info('OTP verified successfully for: ' . $request->email);
+        
+        // Redirect to registration page with success message
         return redirect()->route('register')
-                        //  ->with('verified_email', $request->email)
-                         ->with('status', 'Email verified successfully! Please complete your registration.');
+                         ->with('success', 'Email verified successfully! Please complete your registration.');
     }
 
     /**
@@ -151,9 +161,9 @@ class MS365OTPController extends Controller
 
         $otpRecord = OtpVerification::where('email', $request->email)->first();
 
-        // Prevent sending OTP too soon
-        if ($otpRecord && Carbon::now()->lt($otpRecord->created_at->addMinutes(2))) {
-            return back()->withErrors(['otp' => 'Please wait before requesting another code.']);
+        // Prevent sending OTP too soon (rate limiting)
+        if ($otpRecord && Carbon::now()->lt($otpRecord->updated_at->addMinutes(1))) {
+            return back()->withErrors(['otp' => 'Please wait 1 minute before requesting another code.']);
         }
 
         // Send a new OTP
