@@ -25,7 +25,7 @@
                                 autocomplete="username"
                                 class="form-control @error('email') input-error @enderror"
                             >
-                            <label class="input-label">McLawis Email Address</label>
+                            <label class="input-label">Ms365 Email</label>
                             <i class="fas fa-envelope input-icon"></i>
                         </div>
                         @error('email')
