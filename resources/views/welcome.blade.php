@@ -40,7 +40,7 @@
                     <span class="white-text">MCC Event & Portfolio</span><br>
                     <span class="red-text">Organizer</span>
                 </h1>
-                <p>Streamline Your Academic Journey</p>
+                <p>madridejos commuty college</p>
             </div>
 
             <!-- CTA Buttons -->
