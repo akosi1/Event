@@ -350,20 +350,6 @@ if (searchInput) {
             this.setSelectionRange(cursorPos - diff, cursorPos - diff);
         }
     });
-    
-    // Optional: Debounced auto-search (uncomment if needed)
-    /*
-    let searchTimeout;
-    searchInput.addEventListener('input', function(e) {
-        clearTimeout(searchTimeout);
-        
-        searchTimeout = setTimeout(() => {
-            if (e.target.value.length >= 3 || e.target.value.length === 0) {
-                this.form.submit();
-            }
-        }, 500);
-    });
-    */
 }
 
 // Add ripple effect to buttons
@@ -437,8 +423,8 @@ document.querySelectorAll('.info-btn').forEach(btn => {
 });
 
 // Console log for developers
-console.log('%c🎉 EventAP Dashboard Loaded Successfully!', 'color: #dc2626; font-size: 16px; font-weight: bold;');
-console.log('%cKeyboard Shortcuts:', 'color: #b91c1c; font-size: 14px; font-weight: bold;');
+console.log('%c🎉 EventAP Dashboard Loaded Successfully!', 'color: #8b5cf6; font-size: 16px; font-weight: bold;');
+console.log('%cKeyboard Shortcuts:', 'color: #7c3aed; font-size: 14px; font-weight: bold;');
 console.log('%c• Ctrl/Cmd + K: Focus search', 'color: #4a5568; font-size: 12px;');
 console.log('%c• Escape: Close search/modal', 'color: #4a5568; font-size: 12px;');
 console.log('%c• Click info icon: View event details', 'color: #4a5568; font-size: 12px;');

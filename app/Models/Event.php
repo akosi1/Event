@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\{Factories\HasFactory, Model, Relations\HasMany, Relations\BelongsToMany, Relations\BelongsTo};
+use Illuminate\Support\Facades\Storage;
 
 class Event extends Model
 {
@@ -46,20 +47,64 @@ class Event extends Model
         'custom' => 'Custom'
     ];
 
+    /**
+     * Check if event has an image
+     */
     public function hasImage(): bool
     {
-        return !empty($this->image);
+        return !empty($this->image) && Storage::disk('public')->exists($this->image);
     }
 
+    /**
+     * Get the image URL accessor
+     */
     public function getImageUrlAttribute(): string
     {
-        if ($this->hasImage()) {
-            if (filter_var($this->image, FILTER_VALIDATE_URL)) {
-                return $this->image;
-            }
+        if (!$this->image) {
+            return asset('images/default-event.jpg');
+        }
+
+        // If image is already a full URL, return as is
+        if (filter_var($this->image, FILTER_VALIDATE_URL)) {
+            return $this->image;
+        }
+
+        // Check if file exists in storage
+        if (Storage::disk('public')->exists($this->image)) {
             return asset('storage/' . $this->image);
         }
+
+        // Return default image if file doesn't exist
         return asset('images/default-event.jpg');
+    }
+
+    /**
+     * Get image path for display with fallback
+     */
+    public function getImagePath(): string
+    {
+        if ($this->hasImage()) {
+            return asset('storage/' . $this->image);
+        }
+        
+        // Return a placeholder image
+        return asset('images/default-event.jpg');
+    }
+
+    /**
+     * Delete the event image from storage
+     */
+    public function deleteImage(): bool
+    {
+        if ($this->image && Storage::disk('public')->exists($this->image)) {
+            try {
+                return Storage::disk('public')->delete($this->image);
+            } catch (\Exception $e) {
+                \Log::error('Failed to delete event image: ' . $e->getMessage());
+                return false;
+            }
+        }
+        return true;
     }
 
     public function joins(): HasMany
@@ -257,5 +302,18 @@ class Event extends Model
                               ->orWhere('department', $user->department)
                               ->orWhereJsonContains('allowed_departments', $user->department);
                     });
+    }
+
+    /**
+     * Boot method to handle model events
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Delete image when event is deleted
+        static::deleting(function ($event) {
+            $event->deleteImage();
+        });
     }
 }

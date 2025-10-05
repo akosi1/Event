@@ -92,12 +92,32 @@ class EventController extends Controller
     {
         $validated = $this->validateEventData($request);
 
-        // Handle image upload
+        // Handle image upload with improved error handling
         if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $imageName = Str::random(20) . '.' . $image->getClientOriginalExtension();
-            $imagePath = $image->storeAs('events', $imageName, 'public');
-            $validated['image'] = $imagePath;
+            try {
+                $image = $request->file('image');
+                
+                // Validate the file is actually an image
+                if (!$image->isValid()) {
+                    return back()->withErrors(['image' => 'Invalid image file.'])->withInput();
+                }
+
+                // Create a unique filename with timestamp
+                $imageName = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
+                
+                // Store the image in public disk
+                $imagePath = $image->storeAs('events', $imageName, 'public');
+                
+                // Verify the file was actually stored
+                if (!Storage::disk('public')->exists($imagePath)) {
+                    return back()->withErrors(['image' => 'Failed to store image.'])->withInput();
+                }
+                
+                $validated['image'] = $imagePath;
+            } catch (\Exception $e) {
+                \Log::error('Image upload failed: ' . $e->getMessage());
+                return back()->withErrors(['image' => 'Failed to upload image: ' . $e->getMessage()])->withInput();
+            }
         }
 
         // Process department exclusivity
@@ -153,22 +173,50 @@ class EventController extends Controller
         // Handle image removal
         if ($request->filled('remove_image') && $request->remove_image == '1') {
             if ($event->image && Storage::disk('public')->exists($event->image)) {
-                Storage::disk('public')->delete($event->image);
+                try {
+                    Storage::disk('public')->delete($event->image);
+                } catch (\Exception $e) {
+                    \Log::error('Failed to delete old image: ' . $e->getMessage());
+                }
             }
             $validated['image'] = null;
         }
 
         // Handle new image upload
         if ($request->hasFile('image')) {
-            // Delete old image if exists
-            if ($event->image && Storage::disk('public')->exists($event->image)) {
-                Storage::disk('public')->delete($event->image);
-            }
+            try {
+                $image = $request->file('image');
+                
+                // Validate the file is actually an image
+                if (!$image->isValid()) {
+                    return back()->withErrors(['image' => 'Invalid image file.'])->withInput();
+                }
 
-            $image = $request->file('image');
-            $imageName = Str::random(20) . '.' . $image->getClientOriginalExtension();
-            $imagePath = $image->storeAs('events', $imageName, 'public');
-            $validated['image'] = $imagePath;
+                // Delete old image if exists
+                if ($event->image && Storage::disk('public')->exists($event->image)) {
+                    try {
+                        Storage::disk('public')->delete($event->image);
+                    } catch (\Exception $e) {
+                        \Log::error('Failed to delete old image: ' . $e->getMessage());
+                    }
+                }
+
+                // Create a unique filename with timestamp
+                $imageName = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
+                
+                // Store the image
+                $imagePath = $image->storeAs('events', $imageName, 'public');
+                
+                // Verify the file was actually stored
+                if (!Storage::disk('public')->exists($imagePath)) {
+                    return back()->withErrors(['image' => 'Failed to store image.'])->withInput();
+                }
+                
+                $validated['image'] = $imagePath;
+            } catch (\Exception $e) {
+                \Log::error('Image upload failed: ' . $e->getMessage());
+                return back()->withErrors(['image' => 'Failed to upload image: ' . $e->getMessage()])->withInput();
+            }
         }
 
         // Process department exclusivity
@@ -200,7 +248,11 @@ class EventController extends Controller
         } else {
             // Delete associated image
             if ($event->image && Storage::disk('public')->exists($event->image)) {
-                Storage::disk('public')->delete($event->image);
+                try {
+                    Storage::disk('public')->delete($event->image);
+                } catch (\Exception $e) {
+                    \Log::error('Failed to delete image: ' . $e->getMessage());
+                }
             }
             $event->delete();
             $message = 'Event deleted successfully!';

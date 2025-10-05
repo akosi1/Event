@@ -46,10 +46,11 @@
                         <div class="event-card">
                             <!-- Background Image -->
                             <div class="event-image-container">
-                                @if($event->image && Storage::disk('public')->exists($event->image))
-                                    <img src="{{ Storage::url($event->image) }}" 
+                                @if($event->hasImage())
+                                    <img src="{{ $event->image_url }}" 
                                          alt="{{ e($event->title) }}" 
-                                         class="event-image">
+                                         class="event-image"
+                                         onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'no-image-placeholder\'><i class=\'fas fa-calendar-alt\'></i></div>';">
                                 @else
                                     <div class="no-image-placeholder">
                                         <i class="fas fa-calendar-alt"></i>
@@ -77,10 +78,11 @@
                                     data-event-title="{{ e($event->title) }}"
                                     data-event-location="{{ e($event->location) }}"
                                     data-event-date="{{ $event->date->format('F d, Y') }}"
-                                    data-event-time="{{ e($event->time ?? 'TBA') }}"
-                                    data-event-department="{{ e($event->is_exclusive ? ($event->department ?? 'BSIT') : 'All Departments') }}"
+                                    data-event-time="{{ e($event->start_time ? $event->start_time->format('g:i A') : 'TBA') }}"
+                                    data-event-department="{{ e($event->department_display) }}"
                                     data-event-description="{{ e($event->description ?? 'No description available.') }}"
-                                    data-event-image="{{ ($event->image && Storage::disk('public')->exists($event->image)) ? Storage::url($event->image) : '' }}">
+                                    data-event-image="{{ $event->hasImage() ? $event->image_url : '' }}"
+                                    data-event-status="{{ e($event->status) }}">
                                 <i class="fas fa-info"></i>
                             </button>
                             
@@ -214,8 +216,99 @@
             </div>
         </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h3><i class="fas fa-calendar-alt"></i> MCC E&PO</h3>
+                    <p>Your premier platform for discovering and managing university events. Stay connected with your campus community.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link" title="Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="social-link" title="Twitter">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="social-link" title="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="social-link" title="LinkedIn">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h3><i class="fas fa-link"></i> Quick Links</h3>
+                    <div class="footer-links">
+                        <a href="{{ route('dashboard') }}">
+                            <i class="fas fa-home"></i> Home
+                        </a>
+                        <a href="#">
+                            <i class="fas fa-calendar-check"></i> My Events
+                        </a>
+                        <a href="#">
+                            <i class="fas fa-graduation-cap"></i> Departments
+                        </a>
+                        <a href="#">
+                            <i class="fas fa-info-circle"></i> About Us
+                        </a>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h3><i class="fas fa-question-circle"></i> Support</h3>
+                    <div class="footer-links">
+                        <a href="#">
+                            <i class="fas fa-life-ring"></i> Help Center
+                        </a>
+                        <a href="#">
+                            <i class="fas fa-file-alt"></i> Terms of Service
+                        </a>
+                        <a href="#">
+                            <i class="fas fa-shield-alt"></i> Privacy Policy
+                        </a>
+                        <a href="#">
+                            <i class="fas fa-envelope"></i> Contact Us
+                        </a>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h3><i class="fas fa-map-marker-alt"></i> Contact Info</h3>
+                    <div class="footer-links">
+                        <p><i class="fas fa-map-pin"></i>Bunakan, Madridejos Community College</p>
+                        <p><i class="fas fa-phone"></i> +63 XXX XXX XXXX</p>
+                        <p><i class="fas fa-envelope"></i> events-org.com</p>
+                        <p><i class="fas fa-clock"></i> Mon - Fri: 8:00 AM - 5:00 PM</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; {{ date('Y') }} MCC E&PO. All rights reserved. | Designed with <i class="fas fa-heart" style="color: #ef4444;"></i> for students</p>
+            </div>
+        </div>
+    </footer>
     
     <!-- Dashboard JavaScript -->
     <script src="{{ asset('user/js/dashboard.js') }}"></script>
+    
+    <script>
+        // Enhanced image error handling
+        document.addEventListener('DOMContentLoaded', function() {
+            const images = document.querySelectorAll('.event-image');
+            images.forEach(img => {
+                img.addEventListener('error', function() {
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'no-image-placeholder';
+                    placeholder.innerHTML = '<i class="fas fa-calendar-alt"></i>';
+                    this.parentElement.replaceChild(placeholder, this);
+                });
+            });
+        });
+    </script>
 </body>
 </html>
