@@ -2,9 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{
-    ProfileController, 
-    EventJoinController, 
-    DashboardController, 
+    ProfileController,
+    EventJoinController,
+    DashboardController,
     Auth\MS365OTPController
 };
 
@@ -14,14 +14,14 @@ use App\Http\Controllers\{
 |--------------------------------------------------------------------------
 */
 
-// Welcome page
+// Welcome page (public)
 Route::get('/', fn() => view('welcome'))->name('welcome');
 
 /*
 |--------------------------------------------------------------------------
 | Guest Routes (MS365 & OTP Verification)
 |--------------------------------------------------------------------------
-| These routes should be accessible only to guests (non-authenticated users)
+| Accessible only to non-authenticated users
 */
 Route::middleware('guest')->group(function () {
     // MS365 Email verification
@@ -36,22 +36,21 @@ Route::middleware('guest')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Authenticated Routes
+| Authenticated Routes (require login + email verification)
 |--------------------------------------------------------------------------
-| These routes require authentication and email verification
 */
 Route::middleware(['auth', 'verified'])->group(function () {
-    // Dashboard
+    // Dashboard (this is your HOME route)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    
-    // Profile routes
+
+    // Profile management
     Route::prefix('profile')->name('profile.')->group(function () {
         Route::get('/', [ProfileController::class, 'edit'])->name('edit');
         Route::patch('/', [ProfileController::class, 'update'])->name('update');
         Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
     });
-    
-    // Event join/leave routes
+
+    // Event participation
     Route::prefix('events/{event}')->name('events.')->group(function () {
         Route::post('join', [EventJoinController::class, 'join'])->name('join');
         Route::delete('leave', [EventJoinController::class, 'leave'])->name('leave');
@@ -60,9 +59,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Default Auth Routes
+| Authentication Routes (login, logout, password reset, etc.)
 |--------------------------------------------------------------------------
-| This includes login, register, password reset, etc.
-| Note: Register route is included here from auth.php
 */
 require __DIR__.'/auth.php';
