@@ -7,8 +7,10 @@
             </div>
             <div class="auth-form" id="authForm">
                 <x-auth-session-status class="mb-4" :status="session('status')" />
-                <form method="POST" action="{{ route('login') }}">
+                <form method="POST" action="{{ route('login') }}" id="loginForm">
                     @csrf
+
+                    <!-- Email -->
                     <div class="form-group">
                         <div class="input-wrapper">
                             <input id="email" type="email" name="email" value="{{ old('email') }}" 
@@ -23,6 +25,8 @@
                             </div>
                         @enderror
                     </div>
+
+                    <!-- Password -->
                     <div class="form-group">
                         <div class="input-wrapper">
                             <input id="password" type="password" name="password" 
@@ -37,6 +41,8 @@
                             </div>
                         @enderror
                     </div>
+
+                    <!-- Department Dropdown -->
                     <div class="form-group">
                         <div class="dropdown-wrapper">
                             <div class="dropdown-btn" id="deptBtn">
@@ -73,10 +79,16 @@
                             </div>
                         @enderror
                     </div>
-                    <button type="submit" class="btn-submit">
+
+                    <!-- Hidden reCAPTCHA v3 Token Field -->
+                    <input type="hidden" name="g-recaptcha-response" id="recaptchaResponse">
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn-submit" id="submitBtn" disabled>
                         <i class="fas fa-sign-in-alt"></i>
                         Sign in
                     </button>
+
                     <div class="form-footer">
                         <div class="forgot-password">
                             <a href="{{ route('password.request') }}">
@@ -85,7 +97,6 @@
                             </a>
                         </div>
                         <div class="signup-link">
-                            <!-- <p>Don't have an account?</p> -->
                             <a href="{{ route('ms365.verify') }}" class="btn-secondary">
                                 Create account with ms365 email
                             </a>
@@ -93,7 +104,7 @@
                         <div class="divider">
                             <span>or</span>
                         </div>
-                       <div class="back-link">
+                        <div class="back-link">
                             <a href="{{ url('/') }}" class="btn-secondary">
                                 Back to main page
                             </a>
@@ -103,18 +114,20 @@
             </div>
         </div>
     </div>
-    
+
     <link rel="stylesheet" href="{{ asset('user/login/login.css') }}">
     <style>
-         body {
+        body {
             background: url("{{ asset('images/mcc background.jpg') }}") center/cover no-repeat;
             position: relative;
         }
     </style>
+
+    <!-- Google reCAPTCHA v3 Script -->
+    <script src="https://www.google.com/recaptcha/api.js?render={{ env('RECAPTCHA_SITE_KEY') }}"></script>
+
     <script>
-  </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const deptBtn = document.getElementById('deptBtn');
             const deptMenu = document.getElementById('deptMenu');
             const deptText = document.getElementById('deptText');
@@ -123,7 +136,7 @@
             const deptIcon = document.getElementById('deptIcon');
             const items = document.querySelectorAll('.item');
 
-            // Set old value if exists
+            // Restore old department selection
             const oldValue = deptInput.value;
             if (oldValue) {
                 items.forEach(item => {
@@ -136,30 +149,62 @@
                 });
             }
 
-            deptBtn.addEventListener('click', function(e) {
+            deptBtn.addEventListener('click', function (e) {
                 e.stopPropagation();
                 deptMenu.classList.toggle('show');
                 deptBtn.classList.toggle('active');
             });
 
             items.forEach(item => {
-                item.addEventListener('click', function() {
+                item.addEventListener('click', function () {
                     const val = this.dataset.val;
                     const icon = this.dataset.icon;
-                    
                     deptText.textContent = val;
                     deptInput.value = val;
                     deptIcon.className = 'fas ' + icon + ' input-icon';
                     deptBtn.classList.add('has-value');
-                    
                     deptMenu.classList.remove('show');
                     deptBtn.classList.remove('active');
                 });
             });
 
-            document.addEventListener('click', function() {
+            document.addEventListener('click', function () {
                 deptMenu.classList.remove('show');
                 deptBtn.classList.remove('active');
+            });
+
+            // ===== reCAPTCHA v3 Integration =====
+            const submitBtn = document.getElementById('submitBtn');
+            const recaptchaResponseInput = document.getElementById('recaptchaResponse');
+            const loginForm = document.getElementById('loginForm');
+
+            // Initialize reCAPTCHA and get token
+            grecaptcha.ready(function () {
+                // Get initial token on page load
+                grecaptcha.execute('{{ env("RECAPTCHA_SITE_KEY") }}', { action: 'login' })
+                    .then(function (token) {
+                        recaptchaResponseInput.value = token;
+                        submitBtn.disabled = false; // Enable button
+                    })
+                    .catch(function () {
+                        console.error('reCAPTCHA v3 failed to load.');
+                    });
+            });
+
+            // On form submit: get FRESH token (best practice)
+            loginForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                grecaptcha.ready(function () {
+                    grecaptcha.execute('{{ env("RECAPTCHA_SITE_KEY") }}', { action: 'login' })
+                        .then(function (token) {
+                            recaptchaResponseInput.value = token;
+                            loginForm.submit();
+                        })
+                        .catch(function () {
+                            alert('reCAPTCHA verification failed. Please try again.');
+                        });
+                });
             });
         });
     </script>

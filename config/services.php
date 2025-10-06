@@ -2,7 +2,36 @@
 
 return [
 
+  /*
+    |--------------------------------------------------------------------------
+    | reCAPTCHA Site Key
+    |--------------------------------------------------------------------------
+    |
+    | The site key for reCAPTCHA v3
+    |
+    */
+    'site_key' => env('6LeVhOArAAAAAOniB4kol7R10b0UkjZ9X7UhkPdm', ''),
 
+    /*
+    |--------------------------------------------------------------------------
+    | reCAPTCHA Secret Key
+    |--------------------------------------------------------------------------
+    |
+    | The secret key for reCAPTCHA v3
+    |
+    */
+    'secret_key' => env('6LeVhOArAAAAAGB9JbjWQfQcVKtrpxZZ9RiNiiBH', ''),
+
+    /*
+    |--------------------------------------------------------------------------
+    | reCAPTCHA Minimum Score
+    |--------------------------------------------------------------------------
+    |
+    | The minimum score required to pass reCAPTCHA validation (0.0 - 1.0)
+    | Default: 0.5
+    |
+    */
+    'min_score' => env('RECAPTCHA_MIN_SCORE', 0.5),
 
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),
