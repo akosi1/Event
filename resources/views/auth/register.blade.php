@@ -3,19 +3,28 @@
         <div class="auth-container">
             <div class="auth-header">
                 <h1>Complete Registration</h1>
-                <p>Create your E&P-O account</p>
+                <p>Create your E&amp;P-O account</p>
             </div>
 
             <div class="auth-form">
-                <form method="POST" action="{{ route('register') }}">
+                <form method="POST" action="{{ route('register') }}" id="registrationForm">
                     @csrf
 
                     <!-- Student ID -->
                     <div class="form-group">
                         <div class="input-wrapper">
-                            <input id="id_number" type="text" name="id_number" 
-                                   value="{{ old('id_number') }}" 
-                                   placeholder=" " required autocomplete="off" class="form-control">
+                            <input 
+                                id="id_number" 
+                                type="text" 
+                                name="id_number" 
+                                value="{{ old('id_number') }}" 
+                                placeholder=" " 
+                                required 
+                                autocomplete="off" 
+                                class="form-control"
+                                oninput="this.value = this.value.replace(/\s+/g, '')"
+                                onblur="this.value = this.value.trim()"
+                            >
                             <label class="input-label">Student ID Number</label>
                             <i class="fas fa-id-card input-icon"></i>
                         </div>
@@ -26,9 +35,19 @@
                     <div class="form-row">
                         <div class="form-group">
                             <div class="input-wrapper">
-                                <input id="first_name" type="text" name="first_name" 
-                                       value="{{ old('first_name') }}" 
-                                       placeholder=" " required autofocus autocomplete="given-name" class="form-control">
+                                <input 
+                                    id="first_name" 
+                                    type="text" 
+                                    name="first_name" 
+                                    value="{{ old('first_name') }}" 
+                                    placeholder=" " 
+                                    required 
+                                    autofocus 
+                                    autocomplete="given-name" 
+                                    class="form-control"
+                                    oninput="this.value = this.value.replace(/\s+/g, '')"
+                                    onblur="this.value = this.value.trim()"
+                                >
                                 <label class="input-label">First Name</label>
                                 <i class="fas fa-user input-icon"></i>
                             </div>
@@ -37,9 +56,18 @@
 
                         <div class="form-group">
                             <div class="input-wrapper">
-                                <input id="last_name" type="text" name="last_name" 
-                                       value="{{ old('last_name') }}" 
-                                       placeholder=" " required autocomplete="family-name" class="form-control">
+                                <input 
+                                    id="last_name" 
+                                    type="text" 
+                                    name="last_name" 
+                                    value="{{ old('last_name') }}" 
+                                    placeholder=" " 
+                                    required 
+                                    autocomplete="family-name" 
+                                    class="form-control"
+                                    oninput="this.value = this.value.replace(/\s+/g, '')"
+                                    onblur="this.value = this.value.trim()"
+                                >
                                 <label class="input-label">Last Name</label>
                                 <i class="fas fa-user input-icon"></i>
                             </div>
@@ -50,25 +78,38 @@
                     <!-- Middle Name -->
                     <div class="form-group">
                         <div class="input-wrapper">
-                            <input id="middle_name" type="text" name="middle_name" 
-                                   value="{{ old('middle_name') }}" 
-                                   placeholder=" " autocomplete="additional-name" class="form-control">
+                            <input 
+                                id="middle_name" 
+                                type="text" 
+                                name="middle_name" 
+                                value="{{ old('middle_name') }}" 
+                                placeholder=" " 
+                                autocomplete="additional-name" 
+                                class="form-control"
+                                oninput="this.value = this.value.replace(/\s+/g, '')"
+                                onblur="this.value = this.value.trim()"
+                            >
                             <label class="input-label">Middle Name (Optional)</label>
                             <i class="fas fa-user-circle input-icon"></i>
                         </div>
                         <x-input-error :messages="$errors->get('middle_name')" class="error-msg" />
                     </div>
 
-                    <!-- Email -->
+                    <!-- Email (Read-only) -->
                     <div class="form-group">
                         <div class="input-wrapper">
-                            <input id="email" type="email" name="email" 
-                                   value="{{ old('email', session('verified_email')) }}" 
-                                   placeholder=" " required 
-                                   autocomplete="username"
-                                   readonly
-                                   class="form-control"
-                                   style="background-color: rgba(245, 245, 245, 0.95); cursor: not-allowed;">
+                            <input 
+                                id="email" 
+                                type="email" 
+                                name="email" 
+                                value="{{ old('email', session('verified_email')) }}" 
+                                placeholder=" " 
+                                required 
+                                autocomplete="username"
+                                readonly
+                                class="form-control"
+                                style="background-color: rgba(245, 245, 245, 0.95); cursor: not-allowed;"
+                            >
                             <label class="input-label">McLawis College Email</label>
                             <i class="fas fa-envelope input-icon"></i>
                         </div>
@@ -112,8 +153,17 @@
                     <div class="form-row">
                         <div class="form-group">
                             <div class="input-wrapper">
-                                <input id="password" type="password" name="password" 
-                                       placeholder=" " required autocomplete="new-password" class="form-control">
+                                <input 
+                                    id="password" 
+                                    type="password" 
+                                    name="password" 
+                                    placeholder=" " 
+                                    required 
+                                    autocomplete="new-password" 
+                                    class="form-control"
+                                    oninput="this.value = this.value.replace(/\s+/g, '')"
+                                    onblur="this.value = this.value.trim()"
+                                >
                                 <label class="input-label">Password</label>
                                 <i class="fas fa-lock input-icon"></i>
                             </div>
@@ -122,9 +172,17 @@
 
                         <div class="form-group">
                             <div class="input-wrapper">
-                                <input id="password_confirmation" type="password" 
-                                       name="password_confirmation" 
-                                       placeholder=" " required autocomplete="new-password" class="form-control">
+                                <input 
+                                    id="password_confirmation" 
+                                    type="password" 
+                                    name="password_confirmation" 
+                                    placeholder=" " 
+                                    required 
+                                    autocomplete="new-password" 
+                                    class="form-control"
+                                    oninput="this.value = this.value.replace(/\s+/g, '')"
+                                    onblur="this.value = this.value.trim()"
+                                >
                                 <label class="input-label">Confirm Password</label>
                                 <i class="fas fa-check-circle input-icon"></i>
                             </div>
@@ -145,7 +203,6 @@
                         <div class="divider">
                             <span>or</span>
                         </div>
-                        
                         <div class="signup-link">
                             <p>Already registered?</p>
                             <a href="{{ route('login') }}" class="btn-signin">
@@ -168,7 +225,7 @@
             const deptIcon = document.getElementById('deptIcon');
             const items = document.querySelectorAll('.item');
 
-            // Set old value if exists
+            // Restore old department selection
             const oldValue = deptInput.value;
             if (oldValue) {
                 items.forEach(item => {
@@ -202,15 +259,32 @@
                 });
             });
 
-            document.addEventListener('click', function() {
-                deptMenu.classList.remove('show');
-                deptBtn.classList.remove('active');
+            document.addEventListener('click', function(e) {
+                if (!deptBtn.contains(e.target)) {
+                    deptMenu.classList.remove('show');
+                    deptBtn.classList.remove('active');
+                }
+            });
+
+            // Extra: Prevent form submission if any field contains spaces (defense-in-depth)
+            document.getElementById('registrationForm').addEventListener('submit', function(e) {
+                const textFields = ['id_number', 'first_name', 'last_name', 'middle_name', 'password', 'password_confirmation'];
+                for (const fieldId of textFields) {
+                    const field = document.getElementById(fieldId);
+                    if (field && /\s/.test(field.value)) {
+                        e.preventDefault();
+                        alert(`"${field.previousElementSibling?.textContent || fieldId}" must not contain spaces.`);
+                        field.focus();
+                        return false;
+                    }
+                }
             });
         });
     </script>
- <link rel="stylesheet" href="{{ asset('user/register/register.css') }}">
+
+    <link rel="stylesheet" href="{{ asset('user/register/register.css') }}">
     <style>
-body {
+        body {
             background: url("{{ asset('images/mcc background.jpg') }}") center/cover no-repeat;
             position: relative;
         }

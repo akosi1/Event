@@ -27,6 +27,7 @@
                                 autocomplete="username"
                                 readonly
                                 class="form-control"
+                                style="background-color: rgba(245, 245, 245, 0.95); cursor: not-allowed;"
                             >
                             <label class="input-label" for="email">{{ __('Email') }}</label>
                             <i class="fas fa-envelope input-icon"></i>
@@ -107,7 +108,7 @@
             const passwordInput = document.getElementById('password');
             const confirmPasswordInput = document.getElementById('password_confirmation');
 
-            // Optional: Real-time validation feedback (not required, but user-friendly)
+            // Real-time password match validation
             confirmPasswordInput.addEventListener('input', function () {
                 if (passwordInput.value !== confirmPasswordInput.value) {
                     confirmPasswordInput.setCustomValidity("Passwords do not match");
@@ -116,14 +117,29 @@
                 }
             });
 
-            // Prevent form submission if spaces were somehow injected (extra safety)
+            // Final space check on submit (defense-in-depth)
             form.addEventListener('submit', function (e) {
                 const pass = passwordInput.value;
                 const confirmPass = confirmPasswordInput.value;
 
+                // Block if any space exists (including non-breaking spaces)
                 if (/\s/.test(pass) || /\s/.test(confirmPass)) {
                     e.preventDefault();
-                    alert("Password must not contain spaces.");
+                    alert("Password must not contain any spaces.");
+                    // Focus first invalid field
+                    if (/\s/.test(pass)) {
+                        passwordInput.focus();
+                    } else {
+                        confirmPasswordInput.focus();
+                    }
+                    return false;
+                }
+
+                // Optional: Enforce min length or strength (if not done server-side)
+                if (pass.length < 8) {
+                    e.preventDefault();
+                    alert("Password must be at least 8 characters long.");
+                    passwordInput.focus();
                     return false;
                 }
             });

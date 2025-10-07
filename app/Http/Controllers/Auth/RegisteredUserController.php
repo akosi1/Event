@@ -22,7 +22,6 @@ class RegisteredUserController extends Controller
      */
     public function create(): View|RedirectResponse
     {
-        // Retrieve verified email and OTP status from session
         $verifiedEmail = session('verified_email');
         $otpVerified = session('otp_verified');
 
@@ -32,14 +31,12 @@ class RegisteredUserController extends Controller
             'session_data' => session()->all(),
         ]);
 
-        // Redirect if email or OTP not verified
         if (!$verifiedEmail || !$otpVerified) {
             Log::warning('Registration access denied - email not verified');
             return redirect()->route('ms365.verify')
-                             ->withErrors(['email' => 'Please verify your McLawis College email first.']);
+                ->withErrors(['email' => 'Please verify your McLawis College email first.']);
         }
 
-        // Check OTP verification record (verified within last 60 minutes)
         $otpRecord = OtpVerification::where('email', $verifiedEmail)
             ->whereNotNull('verified_at')
             ->where('verified_at', '>=', Carbon::now()->subHour())
@@ -47,12 +44,9 @@ class RegisteredUserController extends Controller
 
         if (!$otpRecord) {
             Log::warning('OTP verification expired or not found', ['email' => $verifiedEmail]);
-
-            // Clear verification-related session keys
             session()->forget(['verified_email', 'email', 'otp_verified', 'email_verified']);
-
             return redirect()->route('ms365.verify')
-                             ->withErrors(['email' => 'Email verification has expired. Please verify again.']);
+                ->withErrors(['email' => 'Email verification has expired. Please verify again.']);
         }
 
         return view('auth.register');
@@ -78,10 +72,9 @@ class RegisteredUserController extends Controller
         if (!$verifiedEmail || !$otpVerified) {
             Log::warning('Registration denied - email not verified in session');
             return redirect()->route('ms365.verify')
-                             ->withErrors(['email' => 'Please verify your McLawis College email first.']);
+                ->withErrors(['email' => 'Please verify your McLawis College email first.']);
         }
 
-        // Check if OTP verification is still valid
         $otpRecord = OtpVerification::where('email', $verifiedEmail)
             ->whereNotNull('verified_at')
             ->where('verified_at', '>=', Carbon::now()->subHour())
@@ -89,47 +82,130 @@ class RegisteredUserController extends Controller
 
         if (!$otpRecord) {
             Log::warning('OTP record expired during registration', ['email' => $verifiedEmail]);
-
             session()->forget(['verified_email', 'email', 'otp_verified', 'email_verified']);
-
             return redirect()->route('ms365.verify')
-                             ->withErrors(['email' => 'Email verification has expired. Please verify again.']);
+                ->withErrors(['email' => 'Email verification has expired. Please verify again.']);
         }
 
-        // Validate registration input
+        // ✅ Step 1: Sanitize ALL text inputs (trim + remove internal spaces)
+        $inputs = $request->only([
+            'id_number',
+            'first_name',
+            'middle_name',
+            'last_name',
+            'email',
+            'department',
+            'password',
+            'password_confirmation'
+        ]);
+
+        // Sanitize text fields: trim and enforce no spaces
+        $sanitized = [];
+        foreach (['id_number', 'first_name', 'middle_name', 'last_name'] as $field) {
+            $value = trim($inputs[$field] ?? '');
+            if ($field !== 'middle_name' || $value !== '') { // middle_name can be null
+                if (preg_match('/\s/', $inputs[$field] ?? '')) {
+                    return back()
+                        ->withInput($request->except('password', 'password_confirmation'))
+                        ->withErrors([$field => ucfirst(str_replace('_', ' ', $field)) . ' must not contain spaces.']);
+                }
+                $sanitized[$field] = $value;
+            } else {
+                $sanitized[$field] = null;
+            }
+        }
+
+        // Password: enforce no spaces
+        $password = trim($inputs['password'] ?? '');
+        $passwordConfirmation = trim($inputs['password_confirmation'] ?? '');
+
+        if (preg_match('/\s/', $inputs['password'] ?? '') || preg_match('/\s/', $inputs['password_confirmation'] ?? '')) {
+            return back()
+                ->withInput($request->except('password', 'password_confirmation'))
+                ->withErrors(['password' => 'Password must not contain spaces.']);
+        }
+
+        // Email: must match verified email (case-insensitive)
+        $requestEmail = trim($inputs['email'] ?? '');
+        if (strtolower($requestEmail) !== strtolower($verifiedEmail)) {
+            return back()
+                ->withInput($request->except('password', 'password_confirmation'))
+                ->withErrors(['email' => 'The email must match your verified McLawis College email.']);
+        }
+
+        // Department: allow only predefined values
+        $allowedDepts = ['BSIT', 'BSBA', 'BSED', 'BEED', 'BSHM'];
+        if (!in_array($inputs['department'], $allowedDepts)) {
+            return back()
+                ->withInput($request->except('password', 'password_confirmation'))
+                ->withErrors(['department' => 'Invalid department selected.']);
+        }
+
+        // ✅ Step 2: Validate with sanitized data
+        $request->merge(array_merge($sanitized, [
+            'email' => $verifiedEmail,
+            'department' => $inputs['department'],
+            'password' => $password,
+            'password_confirmation' => $passwordConfirmation,
+        ]));
+
         $validated = $request->validate([
-            'id_number'    => ['required', 'string', 'max:255', 'unique:' . User::class],
-            'first_name'   => ['required', 'string', 'max:255'],
-            'middle_name'  => ['nullable', 'string', 'max:255'],
-            'last_name'    => ['required', 'string', 'max:255'],
-            'email'        => [
+            'id_number' => [
+                'required',
+                'string',
+                'max:255',
+                'unique:' . User::class,
+                'regex:/^\S*$/',
+            ],
+            'first_name' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^\S*$/',
+            ],
+            'middle_name' => [
+                'nullable',
+                'string',
+                'max:255',
+                'regex:/^\S*$/',
+            ],
+            'last_name' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^\S*$/',
+            ],
+            'email' => [
                 'required',
                 'string',
                 'email',
                 'max:255',
                 'unique:' . User::class,
-                function ($attribute, $value, $fail) use ($verifiedEmail) {
-                    if (strtolower($value) !== strtolower($verifiedEmail)) {
-                        $fail('The email must match your verified McLawis College email.');
-                    }
-                },
             ],
-            'department'   => ['required', 'string', 'in:BSIT,BSBA,BSED,BEED,BSHM'],
-            'password'     => ['required', 'confirmed', Rules\Password::defaults()],
+            'department' => [
+                'required',
+                'string',
+                'in:' . implode(',', $allowedDepts),
+            ],
+            'password' => [
+                'required',
+                'confirmed',
+                'regex:/^\S*$/',
+                Rules\Password::defaults(),
+            ],
         ]);
 
         try {
-            // Create the user with the verified email (forced)
             $user = User::create([
-                'id_number'         => $validated['id_number'],
-                'first_name'        => $validated['first_name'],
-                'middle_name'       => $validated['middle_name'] ?? null,
-                'last_name'         => $validated['last_name'],
-                'email'             => $verifiedEmail,
-                'department'        => $validated['department'],
-                'password'          => Hash::make($validated['password']),
-                'role'              => 'user',
-                'status'            => 'active',
+                'id_number' => $validated['id_number'],
+                'first_name' => $validated['first_name'],
+                'middle_name' => $validated['middle_name'] ?? null,
+                'last_name' => $validated['last_name'],
+                'email' => $verifiedEmail, // Enforce verified email
+                'department' => $validated['department'],
+                'password' => Hash::make($validated['password']),
+                'role' => 'user',
+                'status' => 'active',
                 'email_verified_at' => now(),
             ]);
 
@@ -138,16 +214,11 @@ class RegisteredUserController extends Controller
                 'email' => $user->email,
             ]);
 
-            // Delete OTP record after successful registration
             $otpRecord->delete();
 
-            // Fire the Registered event
             event(new Registered($user));
-
-            // Log the user in
             Auth::login($user);
 
-            // Clear verification-related session data
             session()->forget([
                 'verified_email',
                 'email',
@@ -157,7 +228,7 @@ class RegisteredUserController extends Controller
             ]);
 
             return redirect()->route('dashboard')
-                             ->with('success', 'Registration completed successfully! Welcome to EventAps.');
+                ->with('success', 'Registration completed successfully! Welcome to EventAps.');
 
         } catch (\Exception $e) {
             Log::error('Registration failed', [

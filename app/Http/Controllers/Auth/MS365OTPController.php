@@ -11,6 +11,7 @@ use Illuminate\View\View;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 
 class MS365OTPController extends Controller
@@ -28,61 +29,98 @@ class MS365OTPController extends Controller
      */
     public function verifyMS365Account(Request $request): RedirectResponse
     {
-        $request->validate([
+        // ✅ Sanitize: Remove extra spaces and control chars
+        $rawEmail = $request->input('email', '');
+        $email = trim($rawEmail);
+
+        // ✅ Enforce "NO SPACES" policy strictly (including non-breaking spaces)
+        if ($rawEmail !== $email || preg_match('/\s/u', $rawEmail)) {
+            return back()
+                ->withInput(['email' => $email])
+                ->withErrors(['email' => 'Email must not contain any spaces or special whitespace characters.']);
+        }
+
+        // ✅ Additional sanitization: allow only safe email characters
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return back()
+                ->withInput(['email' => $email])
+                ->withErrors(['email' => 'Invalid email format.']);
+        }
+
+        // ✅ Validate domain and format
+        $validator = Validator::make(['email' => $email], [
             'email' => [
                 'required',
                 'email',
-                'regex:/^[a-zA-Z0-9._%+-]+@mcclawis\.edu\.ph$/',
-                'max:255'
+                'max:254',
+                'regex:/^[a-zA-Z0-9._%+-]+@mcclawis\.edu\.ph$/i',
             ],
         ], [
-            'email.regex' => 'Please use your official McLawis College email address (@mcclawis.edu.ph)',
+            'email.regex' => 'Please use your official McLawis College email address (@mcclawis.edu.ph).',
         ]);
 
-        // Check if email is already registered
-        if (User::where('email', $request->email)->exists()) {
+        if ($validator->fails()) {
+            return back()
+                ->withInput(['email' => $email])
+                ->withErrors($validator);
+        }
+
+        // ✅ Prevent registration if already exists
+        if (User::where('email', $email)->exists()) {
             return back()->withErrors(['email' => 'This email is already registered.']);
         }
 
-        // Store the email in the session for OTP verification
-        $request->session()->put('email', $request->email);
+        // Store sanitized email in session
+        $request->session()->put('email', $email);
         $request->session()->put('ms365_verification_started', true);
 
-        // Generate OTP and send it
-        return $this->sendOtp($request->email);
+        return $this->sendOtp($email);
     }
 
     /**
-     * Helper function to generate and send OTP
+     * Helper: Generate and send OTP securely
      */
     private function sendOtp(string $email): RedirectResponse
     {
-        // Generate OTP
+        // ✅ Final safety check: no spaces, valid format
+        if (preg_match('/\s/u', $email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            Log::warning('Blocked OTP send for invalid email: ' . $email);
+            return redirect()->route('ms365.verify')
+                ->withErrors(['email' => 'Invalid email address.']);
+        }
+
+        // ✅ Ensure domain is correct (defense in depth)
+        if (!str_ends_with(strtolower($email), '@mcclawis.edu.ph')) {
+            Log::warning('OTP requested for non-McLawis email: ' . $email);
+            return redirect()->route('ms365.verify')
+                ->withErrors(['email' => 'Only @mcclawis.edu.ph emails are allowed.']);
+        }
+
+        // Generate 6-digit numeric OTP
         $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
-        // Store OTP in the database
+        // Store hashed OTP with expiration
         OtpVerification::updateOrCreate(
             ['email' => $email],
             [
                 'otp' => Hash::make($otp),
                 'expires_at' => Carbon::now()->addMinutes(10),
                 'attempts' => 0,
-                'verified_at' => null, // Reset verification status
+                'verified_at' => null,
             ]
         );
 
         try {
-            // Send OTP email
             Mail::send('emails.otp-verification', ['otp' => $otp, 'email' => $email], function ($message) use ($email) {
                 $message->to($email)
                         ->subject('EventAps - Email Verification Code');
             });
 
             return redirect()->route('otp.verify.form')
-                             ->with('status', 'Verification code sent to your McLawis email address.');
+                ->with('status', 'Verification code sent to your McLawis email address.');
         } catch (\Exception $e) {
-            Log::error('OTP email sending failed for email: ' . $email . ' (verifyMS365Account): ' . $e->getMessage());
-            return back()->withErrors(['email' => 'Failed to send verification code. Please try again.']);
+            Log::error('OTP email failed for: ' . $email . ' - ' . $e->getMessage());
+            return back()->withErrors(['email' => 'Failed to send verification code. Please try again later.']);
         }
     }
 
@@ -91,9 +129,9 @@ class MS365OTPController extends Controller
      */
     public function showOTPForm(): View
     {
-        // Redirect to MS365 verification form if email is not in session
         if (!session('email')) {
-            return redirect()->route('ms365.verify')->withErrors(['email' => 'Session expired. Please start verification again.']);
+            return redirect()->route('ms365.verify')
+                ->withErrors(['email' => 'Session expired. Please start verification again.']);
         }
 
         return view('auth.otp-verify');
@@ -104,69 +142,101 @@ class MS365OTPController extends Controller
      */
     public function verifyOTP(Request $request): RedirectResponse
     {
-        $request->validate([
-            'otp' => ['required', 'digits:6'],
-            'email' => ['required', 'email'],
-        ]);
+        // ✅ Sanitize inputs
+        $rawOtp = $request->input('otp', '');
+        $rawEmail = $request->input('email', '');
 
-        $otpRecord = OtpVerification::where('email', $request->email)->first();
+        $otp = trim($rawOtp);
+        $email = trim($rawEmail);
+
+        // ✅ Enforce "NO SPACES" in OTP or email
+        if ($rawOtp !== $otp || $rawEmail !== $email || preg_match('/\s/u', $rawOtp . $rawEmail)) {
+            Log::warning('OTP verification blocked due to whitespace in input.');
+            return back()->withErrors(['otp' => 'Invalid input: spaces or special characters are not allowed.']);
+        }
+
+        // ✅ Validate OTP format: must be exactly 6 digits
+        if (!preg_match('/^[0-9]{6}$/', $otp)) {
+            return back()->withErrors(['otp' => 'OTP must be a 6-digit number with no spaces or symbols.']);
+        }
+
+        // ✅ Validate email format
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return back()->withErrors(['email' => 'Invalid email format.']);
+        }
+
+        // ✅ Cross-check email with session (prevent tampering)
+        if ($email !== session('email')) {
+            Log::alert('Email mismatch in OTP verification: session=' . session('email') . ', input=' . $email);
+            return back()->withErrors(['otp' => 'Verification request mismatch. Please restart the process.']);
+        }
+
+        $otpRecord = OtpVerification::where('email', $email)->first();
 
         if (!$otpRecord) {
+            Log::warning('OTP verification attempted for unregistered email: ' . $email);
             return back()->withErrors(['otp' => 'Invalid verification request.']);
         }
 
-        // Check if OTP has expired
         if ($otpRecord->isExpired()) {
             return back()->withErrors(['otp' => 'Verification code has expired. Please request a new code.']);
         }
 
-        // Check if too many attempts were made
         if ($otpRecord->maxAttemptsReached()) {
             return back()->withErrors(['otp' => 'Too many failed attempts. Please request a new code.']);
         }
 
-        // Check if OTP is correct
-        if (!Hash::check($request->otp, $otpRecord->otp)) {
+        if (!Hash::check($otp, $otpRecord->otp)) {
             $otpRecord->incrementAttempts();
+            Log::info('Failed OTP attempt for: ' . $email . ' (attempts: ' . ($otpRecord->attempts + 1) . ')');
             return back()->withErrors(['otp' => 'Invalid verification code.']);
         }
 
-        // Mark as verified
+        // ✅ Mark as verified
         $otpRecord->update(['verified_at' => Carbon::now()]);
-        
-        // Store verified email in session with multiple keys for redundancy
-        $request->session()->put('verified_email', $request->email);
+
+        // ✅ Store verified email securely
+        $request->session()->put('verified_email', $email);
         $request->session()->put('email_verified', true);
         $request->session()->put('otp_verified', true);
-        
-        // Save session explicitly
         $request->session()->save();
-        
-        // Log for debugging
-        Log::info('OTP verified successfully for: ' . $request->email);
-        
-        // Redirect to registration page with success message
+
+        Log::info('OTP verified successfully for: ' . $email);
+
         return redirect()->route('register')
-                         ->with('success', 'Email verified successfully! Please complete your registration.');
+            ->with('success', 'Email verified successfully! Please complete your registration.');
     }
 
     /**
-     * Resend OTP
+     * Resend OTP with rate limiting
      */
     public function resendOTP(Request $request): RedirectResponse
     {
-        $request->validate([
-            'email' => ['required', 'email'],
-        ]);
+        $rawEmail = $request->input('email', '');
+        $email = trim($rawEmail);
 
-        $otpRecord = OtpVerification::where('email', $request->email)->first();
+        // ✅ Block any whitespace
+        if ($rawEmail !== $email || preg_match('/\s/u', $rawEmail)) {
+            return back()->withErrors(['email' => 'Email must not contain spaces.']);
+        }
 
-        // Prevent sending OTP too soon (rate limiting)
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return back()->withErrors(['email' => 'Invalid email format.']);
+        }
+
+        // ✅ Verify email matches session (prevent abuse)
+        if ($email !== session('email')) {
+            Log::warning('Resend OTP: email mismatch - session=' . session('email') . ', input=' . $email);
+            return back()->withErrors(['email' => 'Invalid request.']);
+        }
+
+        $otpRecord = OtpVerification::where('email', $email)->first();
+
+        // ✅ Rate limit: 1 resend per minute
         if ($otpRecord && Carbon::now()->lt($otpRecord->updated_at->addMinutes(1))) {
             return back()->withErrors(['otp' => 'Please wait 1 minute before requesting another code.']);
         }
 
-        // Send a new OTP
-        return $this->sendOtp($request->email);
+        return $this->sendOtp($email);
     }
 }

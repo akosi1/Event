@@ -20,6 +20,7 @@ class NewPasswordController extends Controller
      */
     public function create(Request $request): View
     {
+        // Optional: Validate token/email early (Laravel does this in store, but safe to show form)
         return view('auth.reset-password', ['request' => $request]);
     }
 
@@ -30,15 +31,41 @@ class NewPasswordController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'token' => ['required'],
-            'email' => ['required', 'email'],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        // ✅ Step 1: Sanitize inputs
+        $email = trim($request->input('email'));
+        $password = trim($request->input('password'));
+        $passwordConfirmation = trim($request->input('password_confirmation'));
+        $token = trim($request->input('token'));
+
+        // ✅ Enforce "no spaces" in password fields (per your security policy)
+        if (preg_match('/\s/', $request->input('password') ?? '') || 
+            preg_match('/\s/', $request->input('password_confirmation') ?? '')) {
+            return back()
+                ->withInput($request->only('email', 'token'))
+                ->withErrors(['password' => 'Password must not contain any spaces.']);
+        }
+
+        // ✅ Re-inject sanitized values into request for validation
+        $request->merge([
+            'email' => $email,
+            'password' => $password,
+            'password_confirmation' => $passwordConfirmation,
+            'token' => $token,
         ]);
 
-        // Here we will attempt to reset the user's password. If it is successful we
-        // will update the password on an actual user model and persist it to the
-        // database. Otherwise we will parse the error and return the response.
+        // ✅ Step 2: Validate with strict rules
+        $request->validate([
+            'token' => ['required', 'string'],
+            'email' => ['required', 'email', 'max:254'],
+            'password' => [
+                'required',
+                'confirmed',
+                'regex:/^\S*$/',
+                Rules\Password::defaults(),
+            ],
+        ]);
+
+        // ✅ Step 3: Attempt password reset
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function (User $user) use ($request) {
@@ -51,12 +78,11 @@ class NewPasswordController extends Controller
             }
         );
 
-        // If the password was successfully reset, we will redirect the user back to
-        // the application's home authenticated view. If there is an error we can
-        // redirect them back to where they came from with their error message.
-        return $status == Password::PASSWORD_RESET
-                    ? redirect()->route('login')->with('status', __($status))
-                    : back()->withInput($request->only('email'))
-                        ->withErrors(['email' => __($status)]);
+        // ✅ Step 4: Handle response
+        return $status === Password::PASSWORD_RESET
+            ? redirect()->route('login')->with('status', __($status))
+            : back()
+                ->withInput($request->only('email', 'token'))
+                ->withErrors(['email' => __($status)]);
     }
 }

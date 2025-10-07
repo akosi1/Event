@@ -2,8 +2,8 @@
     <div class="otp-wrapper">
         <div class="otp-container">
             <div class="otp-header">
-                <h1>verification</h1>
-                <p>We sent a code to <strong>{{ session('email') }}</strong></p>
+                <h1>Verification</h1>
+                <p>We sent a code to <strong>{{ htmlspecialchars(session('email'), ENT_QUOTES, 'UTF-8') }}</strong></p>
             </div>
 
             <div class="otp-form">
@@ -23,11 +23,12 @@
                                 maxlength="6" 
                                 placeholder="000000"
                                 required 
-                                autocomplete="off"
+                                autocomplete="one-time-code"
                                 autofocus
                                 class="otp-input @error('otp') error @enderror"
                                 pattern="[0-9]{6}"
                                 inputmode="numeric"
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);"
                             >
                             <div class="otp-hint">6-digit code</div>
                         </div>
@@ -73,33 +74,48 @@
             </div>
         </div>
     </div>
- <link rel="stylesheet" href="{{ asset('user/otpverify/otpverify.css') }}">
+
+    <link rel="stylesheet" href="{{ asset('user/otpverify/otpverify.css') }}">
     <style>
-              body {
+        body {
             background: url("{{ asset('images/mcc background.jpg') }}") center/cover no-repeat;
             position: relative;
         }
     </style>
+
     <script>
-        // Auto-format OTP input
-        const otpInput = document.getElementById('otp');
-        otpInput.addEventListener('input', function(e) {
-            // Remove any non-numeric characters
-            e.target.value = e.target.value.replace(/[^0-9]/g, '');
-            
-            // Auto-submit when 6 digits are entered
-            if (e.target.value.length === 6) {
-                setTimeout(() => {
-                    e.target.form.submit();
-                }, 500);
+        document.addEventListener('DOMContentLoaded', function() {
+            const otpInput = document.getElementById('otp');
+            if (otpInput) {
+                otpInput.focus();
+                otpInput.select();
+
+                // Prevent non-numeric input and auto-submit on 6 digits
+                otpInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/[^0-9]/g, '').slice(0, 6);
+                    e.target.value = value;
+
+                    if (value.length === 6) {
+                        // Optional: auto-submit after short delay
+                        setTimeout(() => {
+                            if (e.target.form.checkValidity()) {
+                                e.target.form.submit();
+                            }
+                        }, 300);
+                    }
+                });
+
+                // Block paste of non-numeric data
+                otpInput.addEventListener('paste', function(e) {
+                    e.preventDefault();
+                    const pasted = (e.clipboardData || window.clipboardData).getData('text');
+                    const numeric = pasted.replace(/[^0-9]/g, '').slice(0, 6);
+                    otpInput.value = numeric;
+                    if (numeric.length === 6) {
+                        otpInput.form.submit();
+                    }
+                });
             }
         });
-
-        // Auto-focus and select all on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            otpInput.focus();
-            otpInput.select();
-        });
     </script>
-   
 </x-guest-layout>
