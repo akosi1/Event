@@ -64,4 +64,4 @@
                 position: relative;
             }
         </style>
-    </x-guest-layout>
+</x-guest-layout>

@@ -30,14 +30,11 @@ class LoginRequest extends FormRequest
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
             'department' => ['required', 'string', 'in:BSIT,BSBA,BSED,BEED,BSHM'],
-            
         ];
     }
 
     /**
-     * Get custom validation messages.
-     *
-     * @return array<string, string>
+     * Custom error messages for validation.
      */
     public function messages(): array
     {
@@ -56,29 +53,27 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        // First, check if user exists with this email
         $user = \App\Models\User::where('email', $this->email)->first();
-        
-        if (!$user) {
+
+        if (! $user) {
             RateLimiter::hit($this->throttleKey());
+
             throw ValidationException::withMessages([
                 'email' => 'These credentials do not match our records.',
             ]);
         }
 
-        // Check if the selected department matches the user's registered department
         if ($user->department !== $this->department) {
             RateLimiter::hit($this->throttleKey());
+
             throw ValidationException::withMessages([
                 'department' => 'Access denied. You can only login with your registered department: ' . $user->getDepartmentNameAttribute(),
             ]);
         }
 
-        // Now attempt authentication with email, password, and department
-        $credentials = $this->only('email', 'password', 'department');
-        
-        if (! Auth::attempt($credentials, $this->boolean('remember'))) {
+        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
+
             throw ValidationException::withMessages([
                 'password' => 'The password is incorrect.',
             ]);

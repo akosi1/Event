@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 
 class PasswordResetLinkController extends Controller
@@ -25,20 +26,38 @@ class PasswordResetLinkController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'email' => ['required', 'email'],
+        // Step 1: Sanitize input (trim and remove internal spaces if required)
+        $email = trim($request->input('email'));
+        
+        // Enforce "no spaces" rule (as per your security policy for CREATE/UPDATE)
+        if (preg_match('/\s/', $email)) {
+            return back()
+                ->withInput(['email' => $email])
+                ->withErrors(['email' => 'Email must not contain spaces.']);
+        }
+
+        // Step 2: Validate sanitized input
+        $validator = Validator::make(['email' => $email], [
+            'email' => ['required', 'email', 'max:254'],
         ]);
 
-        // We will send the password reset link to this user. Once we have attempted
-        // to send the link, we will examine the response then see the message we
-        // need to show to the user. Finally, we'll send out a proper response.
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
+        if ($validator->fails()) {
+            return back()
+                ->withInput(['email' => $email])
+                ->withErrors($validator);
+        }
 
-        return $status == Password::RESET_LINK_SENT
-                    ? back()->with('status', __($status))
-                    : back()->withInput($request->only('email'))
-                        ->withErrors(['email' => __($status)]);
+        // Step 3: Send reset link (using sanitized email)
+        $status = Password::sendResetLink(['email' => $email]);
+
+        // Step 4: Respond (avoid user enumeration if desired)
+        // Optional: Always return generic success to prevent email enumeration
+        // But Laravel's default behavior is acceptable if you're okay with status feedback.
+
+        return $status === Password::RESET_LINK_SENT
+            ? back()->with('status', __($status))
+            : back()
+                ->withInput(['email' => $email])
+                ->withErrors(['email' => __($status)]);
     }
 }

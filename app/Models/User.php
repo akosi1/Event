@@ -13,7 +13,7 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     protected $fillable = [
-        'id_number',      // ✅ added this field
+        'id_number',
         'first_name',
         'middle_name',
         'last_name',
@@ -26,12 +26,21 @@ class User extends Authenticatable
 
     protected $hidden = ['password', 'remember_token'];
 
-    protected function casts(): array
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
+
+    // Encrypt id_number before saving
+    public function setIdNumberAttribute($value)
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        $this->attributes['id_number'] = encrypt($value);
+    }
+
+    // Decrypt id_number when retrieving
+    public function getIdNumberAttribute($value)
+    {
+        return $value ? decrypt($value) : null;
     }
 
     public function getFullNameAttribute(): string
@@ -45,9 +54,6 @@ class User extends Authenticatable
         return trim($this->first_name . $middleInitial . ' ' . $this->last_name);
     }
 
-    /**
-     * Get the department name.
-     */
     public function getDepartmentNameAttribute(): string
     {
         $departments = [
@@ -66,9 +72,6 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
-    /**
-     * Check if user belongs to a specific department.
-     */
     public function belongsToDepartment(string $department): bool
     {
         return $this->department === $department;
@@ -86,4 +89,3 @@ class User extends Authenticatable
                     ->withPivot('joined_at');
     }
 }
-    

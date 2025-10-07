@@ -7,13 +7,13 @@
             </div>
 
             <div class="forgot-form">
-                <form method="POST" action="{{ route('password.store') }}">
+                <form method="POST" action="{{ route('password.store') }}" id="resetPasswordForm">
                     @csrf
 
                     <!-- Password Reset Token -->
                     <input type="hidden" name="token" value="{{ $request->route('token') }}">
 
-                    <!-- Email Address -->
+                    <!-- Email Address (Read-only) -->
                     <div class="form-group">
                         <div class="input-wrapper">
                             <input 
@@ -45,6 +45,8 @@
                                 required
                                 autocomplete="new-password"
                                 class="form-control"
+                                oninput="this.value = this.value.replace(/\s+/g, '')"
+                                onblur="this.value = this.value.trim()"
                             >
                             <label class="input-label" for="password">{{ __('Password') }}</label>
                             <i class="fas fa-lock input-icon"></i>
@@ -63,6 +65,8 @@
                                 required
                                 autocomplete="new-password"
                                 class="form-control"
+                                oninput="this.value = this.value.replace(/\s+/g, '')"
+                                onblur="this.value = this.value.trim()"
                             >
                             <label class="input-label" for="password_confirmation">{{ __('Confirm Password') }}</label>
                             <i class="fas fa-lock input-icon"></i>
@@ -78,9 +82,6 @@
                     </div>
 
                     <div class="form-footer">
-                        <!-- <div class="divider">
-                            <span>or</span>
-                        </div> -->
                         <div class="back-link">
                             <a href="{{ route('login') }}" class="btn-secondary">
                                 Back to sign in
@@ -91,6 +92,7 @@
             </div>
         </div>
     </div>
+
     <link rel="stylesheet" href="{{ asset('user/resetpass/resetpass.css') }}">
     <style>
         body {
@@ -98,4 +100,33 @@
             position: relative;
         }
     </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('resetPasswordForm');
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('password_confirmation');
+
+            // Optional: Real-time validation feedback (not required, but user-friendly)
+            confirmPasswordInput.addEventListener('input', function () {
+                if (passwordInput.value !== confirmPasswordInput.value) {
+                    confirmPasswordInput.setCustomValidity("Passwords do not match");
+                } else {
+                    confirmPasswordInput.setCustomValidity("");
+                }
+            });
+
+            // Prevent form submission if spaces were somehow injected (extra safety)
+            form.addEventListener('submit', function (e) {
+                const pass = passwordInput.value;
+                const confirmPass = confirmPasswordInput.value;
+
+                if (/\s/.test(pass) || /\s/.test(confirmPass)) {
+                    e.preventDefault();
+                    alert("Password must not contain spaces.");
+                    return false;
+                }
+            });
+        });
+    </script>
 </x-guest-layout>

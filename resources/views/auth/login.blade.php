@@ -3,7 +3,7 @@
         <div class="auth-container">
             <div class="auth-header">
                 <h1>Welcome Back</h1>
-                <p>Sign in to your E&P-O account</p>
+                <p>Sign in to your E&amp;P-O account</p>
             </div>
             <div class="auth-form" id="authForm">
                 <x-auth-session-status class="mb-4" :status="session('status')" />
@@ -12,8 +12,16 @@
 
                     <div class="form-group">
                         <div class="input-wrapper">
-                            <input id="email" type="email" name="email" value="{{ old('email') }}" 
-                                class="form-control @error('email') input-error @enderror" placeholder=" " required autocomplete="username" autofocus>
+                            <!-- ✅ Prevent spaces in email -->
+                            <input id="email" type="email" name="email" 
+                                value="{{ old('email') }}" 
+                                class="form-control @error('email') input-error @enderror" 
+                                placeholder=" " 
+                                required 
+                                autocomplete="username" 
+                                autofocus
+                                oninput="this.value = this.value.replace(/\s+/g, '')"
+                                onblur="this.value = this.value.trim()">
                             <label class="input-label">Email Address</label>
                             <i class="fas fa-envelope input-icon"></i>
                         </div>
@@ -24,8 +32,14 @@
 
                     <div class="form-group">
                         <div class="input-wrapper">
+                            <!-- ✅ Prevent spaces in password -->
                             <input id="password" type="password" name="password" 
-                                class="form-control @error('password') input-error @enderror" placeholder=" " required autocomplete="current-password">
+                                class="form-control @error('password') input-error @enderror" 
+                                placeholder=" " 
+                                required 
+                                autocomplete="current-password"
+                                oninput="this.value = this.value.replace(/\s+/g, '')"
+                                onblur="this.value = this.value.trim()">
                             <label class="input-label">Password</label>
                             <i class="fas fa-lock input-icon"></i>
                         </div>
@@ -47,7 +61,7 @@
                             <div class="menu" id="deptMenu">
                                 <div class="item" data-val="BSIT" data-icon="fa-laptop-code"><i class="fas fa-laptop-code"></i><span>BSIT</span></div>
                                 <div class="item" data-val="BSBA" data-icon="fa-briefcase"><i class="fas fa-briefcase"></i><span>BSBA</span></div>
-                                <div class="item" data-val="BSEd" data-icon="fa-chalkboard-teacher"><i class="fas fa-chalkboard-teacher"></i><span>BSED</span></div>
+                                <div class="item" data-val="BSEd" data-icon="fa-chalkboard-teacher"><i class="fas fa-chalkboard-teacher"></i><span>BSEd</span></div>
                                 <div class="item" data-val="BEED" data-icon="fa-school"><i class="fas fa-school"></i><span>BEED</span></div>
                                 <div class="item" data-val="BSHM" data-icon="fa-hotel"><i class="fas fa-hotel"></i><span>BSHM</span></div>
                             </div>
@@ -108,14 +122,8 @@
     }
 
     @keyframes slideInRight {
-        from { 
-            transform: translateX(120%); 
-            opacity: 0; 
-        }
-        to { 
-            transform: translateX(0); 
-            opacity: 1; 
-        }
+        from { transform: translateX(120%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
     }
 
     .popup-vertical.active { 
@@ -124,7 +132,6 @@
         gap: 12px; 
     }
 
-    /* Icon Circle */
     .popup-vertical .icon-circle {
         width: 40px;
         height: 40px;
@@ -142,7 +149,6 @@
         color: white;
     }
 
-    /* Content Area */
     .popup-vertical .content-area {
         flex: 1;
         display: flex;
@@ -167,7 +173,6 @@
         line-height: 1.3;
     }
 
-    /* Countdown Display */
     .popup-vertical .countdown-display {
         font-size: 18px;
         font-weight: 700;
@@ -178,7 +183,6 @@
         flex-shrink: 0;
     }
 
-    /* Smooth Progress Bar */
     .popup-vertical .progress-line {
         position: absolute;
         bottom: 0;
@@ -197,7 +201,6 @@
         transform-origin: left;
     }
 
-    /* Loading Spinner */
     .popup-vertical .loading-text {
         font-size: 12px;
         color: #2c3e50;
@@ -215,7 +218,6 @@
         100% { transform: rotate(360deg); }
     }
 
-    /* Variants */
     .popup-vertical.success .icon-circle {
         background: linear-gradient(135deg, #2ecc71, #27ae60);
         box-shadow: 0 4px 12px rgba(46,204,113,0.3);
@@ -235,7 +237,6 @@
         color: #f39c12;
     }
 
-    /* Disabled Form State */
     .form-disabled .form-control,
     .form-disabled .dropdown-btn {
         opacity: 0.4;
@@ -249,93 +250,30 @@
         background: #95a5a6 !important;
     }
 
-    /* Tablet View */
     @media (max-width: 768px) {
-        .popup-vertical {
-            width: 300px;
-            padding: 14px;
-            top: 15px;
-            right: 15px;
-        }
-        
-        .popup-vertical .icon-circle { 
-            width: 36px; 
-            height: 36px; 
-        }
-        
-        .popup-vertical .icon-circle i { 
-            font-size: 16px; 
-        }
-        
-        .popup-vertical h3 { 
-            font-size: 13px; 
-        }
-        
-        .popup-vertical p { 
-            font-size: 11px; 
-        }
-        
-        .popup-vertical .countdown-display { 
-            font-size: 16px;
-            min-width: 35px;
-        }
+        .popup-vertical { width: 300px; padding: 14px; top: 15px; right: 15px; }
+        .popup-vertical .icon-circle { width: 36px; height: 36px; }
+        .popup-vertical .icon-circle i { font-size: 16px; }
+        .popup-vertical h3 { font-size: 13px; }
+        .popup-vertical p { font-size: 11px; }
+        .popup-vertical .countdown-display { font-size: 16px; min-width: 35px; }
     }
 
-    /* Mobile View */
     @media (max-width: 480px) {
-        .popup-vertical {
-            width: 280px;
-            padding: 12px;
-            top: 10px;
-            right: 10px;
-            min-height: 55px;
-        }
-        
-        .popup-vertical .icon-circle { 
-            width: 32px; 
-            height: 32px; 
-        }
-        
-        .popup-vertical .icon-circle i { 
-            font-size: 14px; 
-        }
-        
-        .popup-vertical h3 { 
-            font-size: 12px; 
-        }
-        
-        .popup-vertical p { 
-            font-size: 10px; 
-        }
-        
-        .popup-vertical .countdown-display { 
-            font-size: 14px;
-            min-width: 30px;
-        }
-        
-        .popup-vertical .progress-line {
-            height: 2px;
-        }
+        .popup-vertical { width: 280px; padding: 12px; top: 10px; right: 10px; min-height: 55px; }
+        .popup-vertical .icon-circle { width: 32px; height: 32px; }
+        .popup-vertical .icon-circle i { font-size: 14px; }
+        .popup-vertical h3 { font-size: 12px; }
+        .popup-vertical p { font-size: 10px; }
+        .popup-vertical .countdown-display { font-size: 14px; min-width: 30px; }
+        .popup-vertical .progress-line { height: 2px; }
     }
 
-    /* Extra Small Mobile */
     @media (max-width: 360px) {
-        .popup-vertical {
-            width: 260px;
-            padding: 10px;
-            gap: 10px;
-        }
-        
-        .popup-vertical .icon-circle { 
-            width: 28px; 
-            height: 28px; 
-        }
-        
-        .popup-vertical .icon-circle i { 
-            font-size: 12px; 
-        }
+        .popup-vertical { width: 260px; padding: 10px; gap: 10px; }
+        .popup-vertical .icon-circle { width: 28px; height: 28px; }
+        .popup-vertical .icon-circle i { font-size: 12px; }
     }
-    
 </style>
 
 <script src="https://www.google.com/recaptcha/api.js?render={{ env('RECAPTCHA_SITE_KEY') }}"></script>
@@ -354,7 +292,7 @@
         let interval = null;
         const TOTAL_SECONDS = 60;
 
-        // Department dropdown
+        // Restore department selection
         const oldValue = deptInput.value;
         if (oldValue) {
             document.querySelectorAll('.item').forEach(item => {
@@ -386,7 +324,7 @@
             if (!deptBtn.contains(e.target)) deptMenu.classList.remove('show');
         });
 
-        // Create Lockout Popup
+        // Lockout Popup
         const lockoutPopup = document.createElement('div');
         lockoutPopup.className = 'popup-vertical';
         lockoutPopup.id = 'lockoutPopup';
@@ -441,7 +379,6 @@
             interval = setInterval(update, 100);
         }
 
-        // Check existing lockout
         const stored = localStorage.getItem('lockoutEnd');
         if (stored) {
             const end = parseInt(stored);
@@ -452,7 +389,7 @@
             }
         }
 
-        // Create Loading Popup
+        // Loading Popup
         const loadingPopup = document.createElement('div');
         loadingPopup.className = 'popup-vertical';
         loadingPopup.id = 'loadingPopup';
@@ -469,7 +406,6 @@
         `;
         document.body.appendChild(loadingPopup);
 
-        // Toast Helper
         function showToast(type, title, text) {
             const toast = document.createElement('div');
             toast.className = 'popup-vertical ' + type;
@@ -490,7 +426,7 @@
             }, 3000);
         }
 
-        // Handle errors
+        // Handle server-side errors
         @if($errors->has('locked_out'))
             const lockoutEnd = {{ $errors->first('lockout_end') ?? 'null' }};
             if (lockoutEnd) startLockout(lockoutEnd);
@@ -499,26 +435,21 @@
             showToast('warning', 'Login Failed', `${remaining} ${remaining === 1 ? 'attempt' : 'attempts'} remaining`);
         @endif
 
-        // Form submit handler
+        // Form submission with reCAPTCHA
         loginForm.addEventListener('submit', function(e) {
-            // Prevent default submission
             e.preventDefault();
             
-            // Validate department selection
             if (!deptInput.value.trim()) {
                 showToast('warning', 'Department Required', 'Please select your department');
                 return;
             }
 
-            // Show loading popup immediately
             loadingPopup.classList.add('active');
 
-            // Get fresh reCAPTCHA token
             grecaptcha.ready(() => {
                 grecaptcha.execute('{{ env("RECAPTCHA_SITE_KEY") }}', { action: 'login' })
                     .then(token => {
                         document.getElementById('recaptchaResponse').value = token;
-                        // Submit form after getting token
                         loginForm.submit();
                     })
                     .catch(() => {
