@@ -1,4 +1,14 @@
 <x-guest-layout>
+    <!-- ✅ Load CSS in HEAD before body renders -->
+    <link rel="stylesheet" href="{{ asset('user/ms365/ms365.css') }}">
+    
+    <style>
+        body {
+            background: url("{{ asset('images/mcc background.jpg') }}") center/cover no-repeat;
+            position: relative;
+        }
+    </style>
+
     <div class="auth-wrapper">
         <div class="auth-container">
             <div class="auth-header">
@@ -72,16 +82,17 @@
         </div>
     </div>
 
-    <link rel="stylesheet" href="{{ asset('user/ms365/ms365.css') }}">
-    <style>
-        body {
-            background: url("{{ asset('images/mcc background.jpg') }}") center/cover no-repeat;
-            position: relative;
-        }
-    </style>
-
+    <!-- ✅ Show content after CSS loads -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Add 'loaded' class to trigger fade-in
+            const wrapper = document.querySelector('.auth-wrapper');
+            if (wrapper) {
+                setTimeout(() => {
+                    wrapper.classList.add('loaded');
+                }, 10);
+            }
+
             const form = document.getElementById('ms365Form');
             const emailInput = document.getElementById('email');
 
