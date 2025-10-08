@@ -202,25 +202,30 @@ body::before {
 
 .btn-submit {
     width: 100%;
-    padding: 16px;
+    padding: 20px 16px;
     background: linear-gradient(135deg, #e53e3e 0%, #d53f41 100%);
     color: white;
     border: none;
     border-radius: 0;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 10px;
     margin-bottom: 20px;
     transition: all 0.3s ease;
     font-family: 'Oswald', sans-serif;
     text-transform: uppercase;
-    letter-spacing: 2px;
+    letter-spacing: 2.5px;
     box-shadow: 0 4px 15px rgba(229, 62, 62, 0.3);
     outline: none;
+    line-height: 1.4;
+}
+
+.btn-submit i {
+    font-size: 20px;
 }
 
 .btn-submit:hover {
@@ -350,14 +355,16 @@ body::before {
     margin-bottom: 4px;
 }
 
+/* ===== TABLET RESPONSIVE (≤768px) ===== */
 @media (max-width: 768px) {
     .auth-container {
-        padding: 30px 25px;
+        padding: 25px 20px;
         max-width: 100%;
     }
 
     .auth-header h1 {
         font-size: 32px;
+        letter-spacing: 0.5px;
     }
 
     .auth-header p {
@@ -365,8 +372,8 @@ body::before {
     }
 
     .form-control {
-        padding: 16px 14px 6px 45px;
-        font-size: 15px;
+        padding: 14px 14px 6px 45px;
+        font-size: 14px;
     }
 
     .input-icon {
@@ -377,7 +384,7 @@ body::before {
 
     .input-label {
         left: 45px;
-        font-size: 15px;
+        font-size: 14px;
     }
 
     .form-control:focus + .input-label,
@@ -386,23 +393,33 @@ body::before {
         left: 40px;
     }
 
+    /* Keep button same as desktop */
     .btn-submit {
-        padding: 14px;
-        font-size: 15px;
+        padding: 20px 16px;
+        font-size: 18px;
+        letter-spacing: 2.5px;
     }
 
     .btn-secondary {
         font-size: 14px;
+        padding: 12px 16px;
+    }
+
+    .form-group {
+        margin-bottom: 18px;
     }
 }
 
+/* ===== MOBILE RESPONSIVE (≤480px) ===== */
 @media (max-width: 480px) {
     .auth-wrapper {
-        padding: 15px;
+        padding: 10px;
+        align-items: flex-start;
+        padding-top: 40px;
     }
 
     .auth-container {
-        padding: 25px 20px;
+        padding: 20px 18px;
     }
 
     .auth-header {
@@ -411,90 +428,156 @@ body::before {
 
     .auth-header h1 {
         font-size: 28px;
-        margin-bottom: 6px;
+        margin-bottom: 4px;
+        letter-spacing: 0px;
     }
 
     .auth-header p {
         font-size: 12px;
+        letter-spacing: 0.5px;
     }
 
     .form-control {
-        padding: 14px 12px 5px 40px;
-        font-size: 14px;
+        padding: 13px 12px 5px 42px;
+        font-size: 13px;
     }
 
     .input-icon {
-        left: 12px;
-        width: 14px;
-        height: 14px;
+        left: 13px;
+        width: 15px;
+        height: 15px;
     }
 
     .input-label {
-        left: 40px;
-        font-size: 14px;
+        left: 42px;
+        font-size: 13px;
     }
 
     .form-control:focus + .input-label,
     .form-control:not(:placeholder-shown) + .input-label {
-        font-size: 10px;
-        left: 36px;
+        font-size: 9px;
+        left: 38px;
     }
 
+    /* Keep button same as desktop */
     .btn-submit {
-        padding: 12px;
-        font-size: 14px;
-        letter-spacing: 1.5px;
+        padding: 20px 16px;
+        font-size: 18px;
+        letter-spacing: 2.5px;
+    }
+
+    .btn-submit i {
+        font-size: 20px;
     }
 
     .btn-secondary {
-        padding: 9px 14px;
+        padding: 12px 14px;
         font-size: 13px;
     }
 
     .divider {
-        margin: 16px 0;
+        margin: 14px 0;
     }
 
     .divider span {
+        font-size: 12px;
+        padding: 0 12px;
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    .signup-link p {
         font-size: 13px;
+        margin-bottom: 10px;
     }
 }
 
+/* ===== SMALL MOBILE RESPONSIVE (≤360px) ===== */
 @media (max-width: 360px) {
+    .auth-wrapper {
+        padding: 8px;
+        padding-top: 30px;
+    }
+
     .auth-container {
-        padding: 20px 16px;
+        padding: 18px 14px;
     }
 
     .auth-header h1 {
         font-size: 24px;
+        letter-spacing: -0.5px;
     }
 
     .auth-header p {
         font-size: 11px;
+        letter-spacing: 0.3px;
     }
 
     .form-control {
-        padding: 12px 10px 4px 36px;
-        font-size: 13px;
+        padding: 12px 10px 4px 38px;
+        font-size: 12px;
     }
 
     .input-icon {
-        left: 10px;
-        width: 12px;
-        height: 12px;
+        left: 11px;
+        width: 13px;
+        height: 13px;
     }
 
     .input-label {
-        left: 36px;
-        font-size: 13px;
+        left: 38px;
+        font-size: 12px;
     }
 
+    .form-control:focus + .input-label,
+    .form-control:not(:placeholder-shown) + .input-label {
+        font-size: 9px;
+        left: 34px;
+    }
+
+    /* Keep button same as desktop */
     .btn-submit {
-        font-size: 13px;
-        letter-spacing: 1px;
+        padding: 20px 14px;
+        font-size: 17px;
+        letter-spacing: 2px;
+    }
+
+    .btn-submit i {
+        font-size: 19px;
     }
 
     .btn-secondary {
+        padding: 11px 12px;
         font-size: 12px;
+    }
+
+    .divider {
+        margin: 12px 0;
+    }
+
+    .divider span {
+        font-size: 11px;
+        padding: 0 10px;
+    }
+
+    .form-group {
+        margin-bottom: 14px;
+    }
+
+    .signup-link p {
+        font-size: 12px;
+        margin-bottom: 8px;
+    }
+
+    .error-msg {
+        font-size: 11px;
+        padding: 6px 10px;
+    }
+
+    .debug-info {
+        padding: 10px 12px;
+        font-size: 11px;
     }
 }
