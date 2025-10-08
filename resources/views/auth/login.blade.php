@@ -1,4 +1,38 @@
 <x-guest-layout>
+    <!-- ✅ CRITICAL: Add inline CSS in head to prevent FOUC -->
+    <style>
+        /* Minimal critical styles to prevent flash */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { 
+            height: 100%; 
+            overflow: hidden; 
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+        }
+        body {
+            background: url("{{ asset('images/mcc background.jpg') }}") center/cover no-repeat;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, rgba(74, 26, 92, 0.8) 0%, rgba(107, 44, 145, 0.8) 50%, rgba(61, 26, 120, 0.8) 100%);
+            z-index: 1;
+        }
+        .auth-wrapper {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
+            opacity: 0; /* Hide until CSS loads */
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+    </style>
+
     <div class="auth-wrapper">
         <div class="auth-container">
             <div class="auth-header">
@@ -12,7 +46,6 @@
 
                     <div class="form-group">
                         <div class="input-wrapper">
-                            <!-- ✅ Prevent spaces in email -->
                             <input id="email" type="email" name="email" 
                                 value="{{ old('email') }}" 
                                 class="form-control @error('email') input-error @enderror" 
@@ -32,7 +65,6 @@
 
                     <div class="form-group">
                         <div class="input-wrapper">
-                            <!-- ✅ Prevent spaces in password -->
                             <input id="password" type="password" name="password" 
                                 class="form-control @error('password') input-error @enderror" 
                                 placeholder=" " 
@@ -95,369 +127,366 @@
         </div>
     </div>
 
-    <link rel="stylesheet" href="{{ asset('user/login/login.css') }}">
+    <!-- ✅ Load full CSS after content (now won't cause FOUC) -->
+    <link rel="stylesheet" href="{{ asset('user/auth/auth.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<style>
-    body {
-        background: url("{{ asset('images/mcc background.jpg') }}") center/cover no-repeat;
-    }
-
-    /* Popup Styles */
-    .popup-vertical {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: white;
-        border-radius: 12px;
-        padding: 16px;
-        width: 340px;
-        min-height: 60px;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-        z-index: 9999;
-        display: none;
-        animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        overflow: hidden;
-    }
-
-    @keyframes slideInRight {
-        from { transform: translateX(120%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-
-    .popup-vertical.active { 
-        display: flex; 
-        align-items: center; 
-        gap: 12px; 
-    }
-
-    .popup-vertical .icon-circle {
-        width: 40px;
-        height: 40px;
-        flex-shrink: 0;
-        background: linear-gradient(135deg, #e74c3c, #c0392b);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 12px rgba(231,76,60,0.3);
-    }
-
-    .popup-vertical .icon-circle i {
-        font-size: 18px;
-        color: white;
-    }
-
-    .popup-vertical .content-area {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        gap: 2px;
-        min-width: 0;
-    }
-
-    .popup-vertical h3 {
-        font-size: 14px;
-        font-weight: 700;
-        color: #2c3e50;
-        margin: 0;
-        line-height: 1.3;
-    }
-
-    .popup-vertical p {
-        font-size: 12px;
-        color: #7f8c8d;
-        margin: 0;
-        line-height: 1.3;
-    }
-
-    .popup-vertical .countdown-display {
-        font-size: 18px;
-        font-weight: 700;
-        color: #e74c3c;
-        line-height: 1;
-        text-align: right;
-        min-width: 40px;
-        flex-shrink: 0;
-    }
-
-    .popup-vertical .progress-line {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 3px;
-        background: #ecf0f1;
-        overflow: hidden;
-    }
-
-    .popup-vertical .progress-fill {
-        height: 100%;
-        background: linear-gradient(90deg, #e74c3c, #c0392b);
-        width: 100%;
-        transition: width 0.1s linear;
-        transform-origin: left;
-    }
-
-    .popup-vertical .loading-text {
-        font-size: 12px;
-        color: #2c3e50;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .popup-vertical .loading-text i {
-        animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-        100% { transform: rotate(360deg); }
-    }
-
-    .popup-vertical.success .icon-circle {
-        background: linear-gradient(135deg, #2ecc71, #27ae60);
-        box-shadow: 0 4px 12px rgba(46,204,113,0.3);
-    }
-
-    .popup-vertical.warning .icon-circle {
-        background: linear-gradient(135deg, #f39c12, #e67e22);
-        box-shadow: 0 4px 12px rgba(243,156,18,0.3);
-    }
-
-    .popup-vertical.success .countdown-display,
-    .popup-vertical.success .progress-fill {
-        background: linear-gradient(90deg, #2ecc71, #27ae60);
-    }
-
-    .popup-vertical.warning .countdown-display {
-        color: #f39c12;
-    }
-
-    .form-disabled .form-control,
-    .form-disabled .dropdown-btn {
-        opacity: 0.4;
-        pointer-events: none;
-        background: #f5f5f5 !important;
-    }
-    
-    .form-disabled .btn-submit {
-        opacity: 0.4;
-        pointer-events: none;
-        background: #95a5a6 !important;
-    }
-
-    @media (max-width: 768px) {
-        .popup-vertical { width: 300px; padding: 14px; top: 15px; right: 15px; }
-        .popup-vertical .icon-circle { width: 36px; height: 36px; }
-        .popup-vertical .icon-circle i { font-size: 16px; }
-        .popup-vertical h3 { font-size: 13px; }
-        .popup-vertical p { font-size: 11px; }
-        .popup-vertical .countdown-display { font-size: 16px; min-width: 35px; }
-    }
-
-    @media (max-width: 480px) {
-        .popup-vertical { width: 280px; padding: 12px; top: 10px; right: 10px; min-height: 55px; }
-        .popup-vertical .icon-circle { width: 32px; height: 32px; }
-        .popup-vertical .icon-circle i { font-size: 14px; }
-        .popup-vertical h3 { font-size: 12px; }
-        .popup-vertical p { font-size: 10px; }
-        .popup-vertical .countdown-display { font-size: 14px; min-width: 30px; }
-        .popup-vertical .progress-line { height: 2px; }
-    }
-
-    @media (max-width: 360px) {
-        .popup-vertical { width: 260px; padding: 10px; gap: 10px; }
-        .popup-vertical .icon-circle { width: 28px; height: 28px; }
-        .popup-vertical .icon-circle i { font-size: 12px; }
-    }
-</style>
-
-<script src="https://www.google.com/recaptcha/api.js?render={{ env('RECAPTCHA_SITE_KEY') }}"></script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const deptBtn = document.getElementById('deptBtn');
-        const deptMenu = document.getElementById('deptMenu');
-        const deptText = document.getElementById('deptText');
-        const deptInput = document.getElementById('department');
-        const deptIcon = document.getElementById('deptIcon');
-        const authForm = document.getElementById('authForm');
-        const submitBtn = document.getElementById('submitBtn');
-        const loginForm = document.getElementById('loginForm');
-        
-        let interval = null;
-        const TOTAL_SECONDS = 60;
-
-        // Restore department selection
-        const oldValue = deptInput.value;
-        if (oldValue) {
-            document.querySelectorAll('.item').forEach(item => {
-                if (item.dataset.val === oldValue) {
-                    deptText.textContent = item.dataset.val;
-                    deptInput.value = item.dataset.val;
-                    deptIcon.className = 'fas ' + item.dataset.icon + ' input-icon';
-                    deptBtn.classList.add('has-value');
-                }
-            });
+    <style>
+        /* Popup Styles */
+        .popup-vertical {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            width: 340px;
+            min-height: 60px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            z-index: 9999;
+            display: none;
+            animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            overflow: hidden;
         }
 
-        deptBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            deptMenu.classList.toggle('show');
-        });
+        @keyframes slideInRight {
+            from { transform: translateX(120%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
 
-        document.querySelectorAll('.item').forEach(item => {
-            item.addEventListener('click', function() {
-                deptText.textContent = this.dataset.val;
-                deptInput.value = this.dataset.val;
-                deptIcon.className = 'fas ' + this.dataset.icon + ' input-icon';
-                deptBtn.classList.add('has-value');
-                deptMenu.classList.remove('show');
-            });
-        });
+        .popup-vertical.active { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+        }
 
-        document.addEventListener('click', (e) => {
-            if (!deptBtn.contains(e.target)) deptMenu.classList.remove('show');
-        });
+        .popup-vertical .icon-circle {
+            width: 40px;
+            height: 40px;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(231,76,60,0.3);
+        }
 
-        // Lockout Popup
-        const lockoutPopup = document.createElement('div');
-        lockoutPopup.className = 'popup-vertical';
-        lockoutPopup.id = 'lockoutPopup';
-        lockoutPopup.innerHTML = `
-            <div class="icon-circle">
-                <i class="fas fa-lock"></i>
-            </div>
-            <div class="content-area">
-                <h3>Account Locked</h3>
-                <p>Too many failed attempts</p>
-            </div>
-            <div class="countdown-display" id="countdownDisplay">60</div>
-            <div class="progress-line">
-                <div class="progress-fill" id="progressFill"></div>
-            </div>
-        `;
-        document.body.appendChild(lockoutPopup);
+        .popup-vertical .icon-circle i {
+            font-size: 18px;
+            color: white;
+        }
 
-        function startLockout(endTime) {
-            if (interval) clearInterval(interval);
-            localStorage.setItem('lockoutEnd', endTime);
+        .popup-vertical .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 2px;
+            min-width: 0;
+        }
+
+        .popup-vertical h3 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 0;
+            line-height: 1.3;
+        }
+
+        .popup-vertical p {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin: 0;
+            line-height: 1.3;
+        }
+
+        .popup-vertical .countdown-display {
+            font-size: 18px;
+            font-weight: 700;
+            color: #e74c3c;
+            line-height: 1;
+            text-align: right;
+            min-width: 40px;
+            flex-shrink: 0;
+        }
+
+        .popup-vertical .progress-line {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: #ecf0f1;
+            overflow: hidden;
+        }
+
+        .popup-vertical .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #e74c3c, #c0392b);
+            width: 100%;
+            transition: width 0.1s linear;
+            transform-origin: left;
+        }
+
+        .popup-vertical .loading-text {
+            font-size: 12px;
+            color: #2c3e50;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .popup-vertical .loading-text i {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        .popup-vertical.success .icon-circle {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            box-shadow: 0 4px 12px rgba(46,204,113,0.3);
+        }
+
+        .popup-vertical.warning .icon-circle {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            box-shadow: 0 4px 12px rgba(243,156,18,0.3);
+        }
+
+        .popup-vertical.success .countdown-display,
+        .popup-vertical.success .progress-fill {
+            background: linear-gradient(90deg, #2ecc71, #27ae60);
+        }
+
+        .popup-vertical.warning .countdown-display {
+            color: #f39c12;
+        }
+
+        .form-disabled .form-control,
+        .form-disabled .dropdown-btn {
+            opacity: 0.4;
+            pointer-events: none;
+            background: #f5f5f5 !important;
+        }
+        
+        .form-disabled .btn-submit {
+            opacity: 0.4;
+            pointer-events: none;
+            background: #95a5a6 !important;
+        }
+
+        @media (max-width: 768px) {
+            .popup-vertical { width: 300px; padding: 14px; top: 15px; right: 15px; }
+            .popup-vertical .icon-circle { width: 36px; height: 36px; }
+            .popup-vertical .icon-circle i { font-size: 16px; }
+            .popup-vertical h3 { font-size: 13px; }
+            .popup-vertical p { font-size: 11px; }
+            .popup-vertical .countdown-display { font-size: 16px; min-width: 35px; }
+        }
+
+        @media (max-width: 480px) {
+            .popup-vertical { width: 280px; padding: 12px; top: 10px; right: 10px; min-height: 55px; }
+            .popup-vertical .icon-circle { width: 32px; height: 32px; }
+            .popup-vertical .icon-circle i { font-size: 14px; }
+            .popup-vertical h3 { font-size: 12px; }
+            .popup-vertical p { font-size: 10px; }
+            .popup-vertical .countdown-display { font-size: 14px; min-width: 30px; }
+            .popup-vertical .progress-line { height: 2px; }
+        }
+
+        @media (max-width: 360px) {
+            .popup-vertical { width: 260px; padding: 10px; gap: 10px; }
+            .popup-vertical .icon-circle { width: 28px; height: 28px; }
+            .popup-vertical .icon-circle i { font-size: 12px; }
+        }
+    </style>
+
+    <script src="https://www.google.com/recaptcha/api.js?render={{ env('RECAPTCHA_SITE_KEY') }}"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const deptBtn = document.getElementById('deptBtn');
+            const deptMenu = document.getElementById('deptMenu');
+            const deptText = document.getElementById('deptText');
+            const deptInput = document.getElementById('department');
+            const deptIcon = document.getElementById('deptIcon');
+            const authForm = document.getElementById('authForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const loginForm = document.getElementById('loginForm');
             
-            authForm.classList.add('form-disabled');
-            lockoutPopup.classList.add('active');
-            submitBtn.disabled = true;
+            let interval = null;
+            const TOTAL_SECONDS = 60;
 
-            const countdownEl = document.getElementById('countdownDisplay');
-            const progressEl = document.getElementById('progressFill');
-            const startTime = Math.floor(Date.now() / 1000);
+            // Restore department selection
+            const oldValue = deptInput.value;
+            if (oldValue) {
+                document.querySelectorAll('.item').forEach(item => {
+                    if (item.dataset.val === oldValue) {
+                        deptText.textContent = item.dataset.val;
+                        deptInput.value = item.dataset.val;
+                        deptIcon.className = 'fas ' + item.dataset.icon + ' input-icon';
+                        deptBtn.classList.add('has-value');
+                    }
+                });
+            }
 
-            function update() {
-                const now = Math.floor(Date.now() / 1000);
-                const remaining = endTime - now;
+            deptBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                deptMenu.classList.toggle('show');
+            });
 
-                if (remaining <= 0) {
-                    clearInterval(interval);
+            document.querySelectorAll('.item').forEach(item => {
+                item.addEventListener('click', function() {
+                    deptText.textContent = this.dataset.val;
+                    deptInput.value = this.dataset.val;
+                    deptIcon.className = 'fas ' + this.dataset.icon + ' input-icon';
+                    deptBtn.classList.add('has-value');
+                    deptMenu.classList.remove('show');
+                });
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!deptBtn.contains(e.target)) deptMenu.classList.remove('show');
+            });
+
+            // Lockout Popup
+            const lockoutPopup = document.createElement('div');
+            lockoutPopup.className = 'popup-vertical';
+            lockoutPopup.id = 'lockoutPopup';
+            lockoutPopup.innerHTML = `
+                <div class="icon-circle">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <div class="content-area">
+                    <h3>Account Locked</h3>
+                    <p>Too many failed attempts</p>
+                </div>
+                <div class="countdown-display" id="countdownDisplay">60</div>
+                <div class="progress-line">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            `;
+            document.body.appendChild(lockoutPopup);
+
+            function startLockout(endTime) {
+                if (interval) clearInterval(interval);
+                localStorage.setItem('lockoutEnd', endTime);
+                
+                authForm.classList.add('form-disabled');
+                lockoutPopup.classList.add('active');
+                submitBtn.disabled = true;
+
+                const countdownEl = document.getElementById('countdownDisplay');
+                const progressEl = document.getElementById('progressFill');
+                const startTime = Math.floor(Date.now() / 1000);
+
+                function update() {
+                    const now = Math.floor(Date.now() / 1000);
+                    const remaining = endTime - now;
+
+                    if (remaining <= 0) {
+                        clearInterval(interval);
+                        localStorage.removeItem('lockoutEnd');
+                        authForm.classList.remove('form-disabled');
+                        lockoutPopup.classList.remove('active');
+                        submitBtn.disabled = false;
+                        showToast('success', 'Account Unlocked', 'You can now try again');
+                        return;
+                    }
+
+                    countdownEl.textContent = remaining;
+                    const elapsed = now - startTime;
+                    const percent = Math.max(0, ((TOTAL_SECONDS - elapsed) / TOTAL_SECONDS) * 100);
+                    progressEl.style.width = percent + '%';
+                }
+
+                update();
+                interval = setInterval(update, 100);
+            }
+
+            const stored = localStorage.getItem('lockoutEnd');
+            if (stored) {
+                const end = parseInt(stored);
+                if (end > Math.floor(Date.now() / 1000)) {
+                    startLockout(end);
+                } else {
                     localStorage.removeItem('lockoutEnd');
-                    authForm.classList.remove('form-disabled');
-                    lockoutPopup.classList.remove('active');
-                    submitBtn.disabled = false;
-                    showToast('success', 'Account Unlocked', 'You can now try again');
+                }
+            }
+
+            // Loading Popup
+            const loadingPopup = document.createElement('div');
+            loadingPopup.className = 'popup-vertical';
+            loadingPopup.id = 'loadingPopup';
+            loadingPopup.innerHTML = `
+                <div class="icon-circle">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <div class="content-area">
+                    <h3>Please Wait</h3>
+                    <div class="loading-text">
+                        <i class="fas fa-spinner fa-spin"></i> Signing in...
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(loadingPopup);
+
+            function showToast(type, title, text) {
+                const toast = document.createElement('div');
+                toast.className = 'popup-vertical ' + type;
+                toast.innerHTML = `
+                    <div class="icon-circle">
+                        <i class="fas ${type === 'success' ? 'fa-check' : type === 'warning' ? 'fa-exclamation-triangle' : 'fa-times'}"></i>
+                    </div>
+                    <div class="content-area">
+                        <h3>${title}</h3>
+                        <p>${text}</p>
+                    </div>
+                `;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.classList.add('active'), 10);
+                setTimeout(() => {
+                    toast.classList.remove('active');
+                    setTimeout(() => toast.remove(), 400);
+                }, 3000);
+            }
+
+            // Handle server-side errors
+            @if($errors->has('locked_out'))
+                const lockoutEnd = {{ $errors->first('lockout_end') ?? 'null' }};
+                if (lockoutEnd) startLockout(lockoutEnd);
+            @elseif($errors->has('failed_attempt'))
+                const remaining = {{ $errors->first('remaining') }};
+                showToast('warning', 'Login Failed', `${remaining} ${remaining === 1 ? 'attempt' : 'attempts'} remaining`);
+            @endif
+
+            // Form submission with reCAPTCHA
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                if (!deptInput.value.trim()) {
+                    showToast('warning', 'Department Required', 'Please select your department');
                     return;
                 }
 
-                countdownEl.textContent = remaining;
-                const elapsed = now - startTime;
-                const percent = Math.max(0, ((TOTAL_SECONDS - elapsed) / TOTAL_SECONDS) * 100);
-                progressEl.style.width = percent + '%';
-            }
+                loadingPopup.classList.add('active');
 
-            update();
-            interval = setInterval(update, 100);
-        }
-
-        const stored = localStorage.getItem('lockoutEnd');
-        if (stored) {
-            const end = parseInt(stored);
-            if (end > Math.floor(Date.now() / 1000)) {
-                startLockout(end);
-            } else {
-                localStorage.removeItem('lockoutEnd');
-            }
-        }
-
-        // Loading Popup
-        const loadingPopup = document.createElement('div');
-        loadingPopup.className = 'popup-vertical';
-        loadingPopup.id = 'loadingPopup';
-        loadingPopup.innerHTML = `
-            <div class="icon-circle">
-                <i class="fas fa-spinner fa-spin"></i>
-            </div>
-            <div class="content-area">
-                <h3>Please Wait</h3>
-                <div class="loading-text">
-                    <i class="fas fa-spinner fa-spin"></i> Signing in...
-                </div>
-            </div>
-        `;
-        document.body.appendChild(loadingPopup);
-
-        function showToast(type, title, text) {
-            const toast = document.createElement('div');
-            toast.className = 'popup-vertical ' + type;
-            toast.innerHTML = `
-                <div class="icon-circle">
-                    <i class="fas ${type === 'success' ? 'fa-check' : type === 'warning' ? 'fa-exclamation-triangle' : 'fa-times'}"></i>
-                </div>
-                <div class="content-area">
-                    <h3>${title}</h3>
-                    <p>${text}</p>
-                </div>
-            `;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.classList.add('active'), 10);
-            setTimeout(() => {
-                toast.classList.remove('active');
-                setTimeout(() => toast.remove(), 400);
-            }, 3000);
-        }
-
-        // Handle server-side errors
-        @if($errors->has('locked_out'))
-            const lockoutEnd = {{ $errors->first('lockout_end') ?? 'null' }};
-            if (lockoutEnd) startLockout(lockoutEnd);
-        @elseif($errors->has('failed_attempt'))
-            const remaining = {{ $errors->first('remaining') }};
-            showToast('warning', 'Login Failed', `${remaining} ${remaining === 1 ? 'attempt' : 'attempts'} remaining`);
-        @endif
-
-        // Form submission with reCAPTCHA
-        loginForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            if (!deptInput.value.trim()) {
-                showToast('warning', 'Department Required', 'Please select your department');
-                return;
-            }
-
-            loadingPopup.classList.add('active');
-
-            grecaptcha.ready(() => {
-                grecaptcha.execute('{{ env("RECAPTCHA_SITE_KEY") }}', { action: 'login' })
-                    .then(token => {
-                        document.getElementById('recaptchaResponse').value = token;
-                        loginForm.submit();
-                    })
-                    .catch(() => {
-                        loadingPopup.classList.remove('active');
-                        showToast('error', 'Verification Failed', 'Please try again');
-                    });
+                grecaptcha.ready(() => {
+                    grecaptcha.execute('{{ env("RECAPTCHA_SITE_KEY") }}', { action: 'login' })
+                        .then(token => {
+                            document.getElementById('recaptchaResponse').value = token;
+                            loginForm.submit();
+                        })
+                        .catch(() => {
+                            loadingPopup.classList.remove('active');
+                            showToast('error', 'Verification Failed', 'Please try again');
+                        });
+                });
             });
         });
-    });
-</script>
+    </script>
 </x-guest-layout>
