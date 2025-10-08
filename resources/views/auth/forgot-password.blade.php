@@ -1,4 +1,14 @@
 <x-guest-layout>
+    <!-- ✅ Load CSS in HEAD before body renders -->
+    <link rel="stylesheet" href="{{ asset('user/forgotpass/forgotpass.css') }}">
+    
+    <style>
+        body {
+            background: url("{{ asset('images/mcc background.jpg') }}") center/cover no-repeat;
+            position: relative;
+        }
+    </style>
+
     <div class="forgot-wrapper">
         <div class="forgot-container">
             <div class="forgot-header">
@@ -24,6 +34,8 @@
                                 autofocus
                                 autocomplete="username"
                                 class="form-control @error('email') input-error @enderror"
+                                oninput="this.value = this.value.replace(/\s+/g, '')"
+                                onblur="this.value = this.value.trim()"
                             >
                             <label class="input-label">Ms365 Email</label>
                             <i class="fas fa-envelope input-icon"></i>
@@ -58,11 +70,18 @@
             </div>
         </div>
     </div>
-    <link rel="stylesheet" href="{{ asset('user/forgotpass/forgotpass.css') }}">
-    <style>
-        body {
-            background: url("{{ asset('images/mcc background.jpg') }}") center/cover no-repeat;
-            position: relative;
-        } 
-    </style>
-</x-guest-layout>
+
+    <!-- ✅ Show content after CSS loads -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add 'loaded' class to trigger fade-in
+            const wrapper = document.querySelector('.forgot-wrapper');
+            if (wrapper) {
+                // Small delay to ensure CSS is fully applied
+                setTimeout(() => {
+                    wrapper.classList.add('loaded');
+                }, 10);
+            }
+        });
+    </script>
+</x-guest-layout>   
