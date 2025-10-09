@@ -1,292 +1,292 @@
-<x-guest-layout>
-    <div class="auth-wrapper">
-        <div class="auth-container">
-            <div class="auth-header">
-                <h1>Complete Registration</h1>
-                <p>Create your E&amp;P-O account</p>
-            </div>
+    <x-guest-layout>
+        <div class="auth-wrapper">
+            <div class="auth-container">
+                <div class="auth-header">
+                    <h1>Complete Registration</h1>
+                    <p>Create your E&amp;P-O account</p>
+                </div>
 
-            <div class="auth-form">
-                <form method="POST" action="{{ route('register') }}" id="registrationForm">
-                    @csrf
+                <div class="auth-form">
+                    <form method="POST" action="{{ route('register') }}" id="registrationForm">
+                        @csrf
 
-                    <!-- Student ID -->
-                    <div class="form-group">
-                        <div class="input-wrapper">
-                            <input 
-                                id="id_number" 
-                                type="text" 
-                                name="id_number" 
-                                value="{{ old('id_number') }}" 
-                                placeholder=" " 
-                                required 
-                                autocomplete="off" 
-                                class="form-control"
-                                oninput="this.value = this.value.replace(/\s+/g, '')"
-                                onblur="this.value = this.value.trim()"
-                            >
-                            <label class="input-label">Student ID Number</label>
-                            <i class="fas fa-id-card input-icon"></i>
-                        </div>
-                        <x-input-error :messages="$errors->get('id_number')" class="error-msg" />
-                    </div>
-
-                    <!-- First Name and Last Name Row -->
-                    <div class="form-row">
+                        <!-- Student ID -->
                         <div class="form-group">
                             <div class="input-wrapper">
                                 <input 
-                                    id="first_name" 
+                                    id="id_number" 
                                     type="text" 
-                                    name="first_name" 
-                                    value="{{ old('first_name') }}" 
+                                    name="id_number" 
+                                    value="{{ old('id_number') }}" 
                                     placeholder=" " 
                                     required 
-                                    autofocus 
-                                    autocomplete="given-name" 
+                                    autocomplete="off" 
                                     class="form-control"
                                     oninput="this.value = this.value.replace(/\s+/g, '')"
                                     onblur="this.value = this.value.trim()"
                                 >
-                                <label class="input-label">First Name</label>
-                                <i class="fas fa-user input-icon"></i>
+                                <label class="input-label">Student ID Number</label>
+                                <i class="fas fa-id-card input-icon"></i>
                             </div>
-                            <x-input-error :messages="$errors->get('first_name')" class="error-msg" />
+                            <x-input-error :messages="$errors->get('id_number')" class="error-msg" />
                         </div>
 
+                        <!-- First Name and Last Name Row -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <div class="input-wrapper">
+                                    <input 
+                                        id="first_name" 
+                                        type="text" 
+                                        name="first_name" 
+                                        value="{{ old('first_name') }}" 
+                                        placeholder=" " 
+                                        required 
+                                        autofocus 
+                                        autocomplete="given-name" 
+                                        class="form-control"
+                                        oninput="this.value = this.value.replace(/\s+/g, '')"
+                                        onblur="this.value = this.value.trim()"
+                                    >
+                                    <label class="input-label">First Name</label>
+                                    <i class="fas fa-user input-icon"></i>
+                                </div>
+                                <x-input-error :messages="$errors->get('first_name')" class="error-msg" />
+                            </div>
+
+                            <div class="form-group">
+                                <div class="input-wrapper">
+                                    <input 
+                                        id="last_name" 
+                                        type="text" 
+                                        name="last_name" 
+                                        value="{{ old('last_name') }}" 
+                                        placeholder=" " 
+                                        required 
+                                        autocomplete="family-name" 
+                                        class="form-control"
+                                        oninput="this.value = this.value.replace(/\s+/g, '')"
+                                        onblur="this.value = this.value.trim()"
+                                    >
+                                    <label class="input-label">Last Name</label>
+                                    <i class="fas fa-user input-icon"></i>
+                                </div>
+                                <x-input-error :messages="$errors->get('last_name')" class="error-msg" />
+                            </div>
+                        </div>
+
+                        <!-- Middle Name -->
                         <div class="form-group">
                             <div class="input-wrapper">
                                 <input 
-                                    id="last_name" 
+                                    id="middle_name" 
                                     type="text" 
-                                    name="last_name" 
-                                    value="{{ old('last_name') }}" 
+                                    name="middle_name" 
+                                    value="{{ old('middle_name') }}" 
                                     placeholder=" " 
-                                    required 
-                                    autocomplete="family-name" 
+                                    autocomplete="additional-name" 
                                     class="form-control"
                                     oninput="this.value = this.value.replace(/\s+/g, '')"
                                     onblur="this.value = this.value.trim()"
                                 >
-                                <label class="input-label">Last Name</label>
-                                <i class="fas fa-user input-icon"></i>
+                                <label class="input-label">Middle Name (Optional)</label>
+                                <i class="fas fa-user-circle input-icon"></i>
                             </div>
-                            <x-input-error :messages="$errors->get('last_name')" class="error-msg" />
+                            <x-input-error :messages="$errors->get('middle_name')" class="error-msg" />
                         </div>
-                    </div>
 
-                    <!-- Middle Name -->
-                    <div class="form-group">
-                        <div class="input-wrapper">
-                            <input 
-                                id="middle_name" 
-                                type="text" 
-                                name="middle_name" 
-                                value="{{ old('middle_name') }}" 
-                                placeholder=" " 
-                                autocomplete="additional-name" 
-                                class="form-control"
-                                oninput="this.value = this.value.replace(/\s+/g, '')"
-                                onblur="this.value = this.value.trim()"
-                            >
-                            <label class="input-label">Middle Name (Optional)</label>
-                            <i class="fas fa-user-circle input-icon"></i>
-                        </div>
-                        <x-input-error :messages="$errors->get('middle_name')" class="error-msg" />
-                    </div>
-
-                    <!-- Email (Read-only) -->
-                    <div class="form-group">
-                        <div class="input-wrapper">
-                            <input 
-                                id="email" 
-                                type="email" 
-                                name="email" 
-                                value="{{ old('email', session('verified_email')) }}" 
-                                placeholder=" " 
-                                required 
-                                autocomplete="username"
-                                readonly
-                                class="form-control"
-                                style="background-color: rgba(245, 245, 245, 0.95); cursor: not-allowed;"
-                            >
-                            <label class="input-label">McLawis College Email</label>
-                            <i class="fas fa-envelope input-icon"></i>
-                        </div>
-                        <x-input-error :messages="$errors->get('email')" class="error-msg" />
-                    </div>
-
-                    <!-- Department Dropdown -->
-                    <div class="form-group">
-                        <div class="dropdown-wrapper">
-                            <div class="dropdown-btn" id="deptBtn">
-                                <div class="dropdown-content">
-                                    <i class="fas fa-graduation-cap input-icon" id="deptIcon"></i>
-                                    <label class="select-label" id="deptLabel">Select Department</label>
-                                    <span id="deptText"></span>
-                                </div>
-                                <i class="fas fa-chevron-down arrow" id="deptArrow"></i>
-                            </div>
-                            <div class="menu" id="deptMenu">
-                                <div class="item" data-val="BSIT" data-full="Bachelor of Science in Information Technology" data-icon="fa-laptop-code">
-                                    <i class="fas fa-laptop-code"></i><span>BSIT</span>
-                                </div>
-                                <div class="item" data-val="BSBA" data-full="Bachelor of Science in Business Administration" data-icon="fa-briefcase">
-                                    <i class="fas fa-briefcase"></i><span>BSBA</span>
-                                </div>
-                                <div class="item" data-val="BSED" data-full="Bachelor of Science in Education" data-icon="fa-chalkboard-teacher">
-                                    <i class="fas fa-chalkboard-teacher"></i><span>BSEd</span>
-                                </div>
-                                <div class="item" data-val="BEED" data-full="Bachelor of Elementary Education" data-icon="fa-school">
-                                    <i class="fas fa-school"></i><span>BEEd</span>
-                                </div>
-                                <div class="item" data-val="BSHM" data-full="Bachelor of Science in Hospitality Management" data-icon="fa-hotel">
-                                    <i class="fas fa-hotel"></i><span>BSHM</span>
-                                </div>
-                            </div>
-                            <input type="hidden" name="department" id="department" value="{{ old('department') }}" required>
-                        </div>
-                        <x-input-error :messages="$errors->get('department')" class="error-msg" />
-                    </div>
-
-                    <!-- Password and Confirm Password Row -->
-                    <div class="form-row">
+                        <!-- Email (Read-only) -->
                         <div class="form-group">
                             <div class="input-wrapper">
                                 <input 
-                                    id="password" 
-                                    type="password" 
-                                    name="password" 
+                                    id="email" 
+                                    type="email" 
+                                    name="email" 
+                                    value="{{ old('email', session('verified_email')) }}" 
                                     placeholder=" " 
                                     required 
-                                    autocomplete="new-password" 
+                                    autocomplete="username"
+                                    readonly
                                     class="form-control"
-                                    oninput="this.value = this.value.replace(/\s+/g, '')"
-                                    onblur="this.value = this.value.trim()"
+                                    style="background-color: rgba(245, 245, 245, 0.95); cursor: not-allowed;"
                                 >
-                                <label class="input-label">Password</label>
-                                <i class="fas fa-lock input-icon"></i>
+                                <label class="input-label">McLawis College Email</label>
+                                <i class="fas fa-envelope input-icon"></i>
                             </div>
-                            <x-input-error :messages="$errors->get('password')" class="error-msg" />
+                            <x-input-error :messages="$errors->get('email')" class="error-msg" />
                         </div>
 
+                        <!-- Department Dropdown -->
                         <div class="form-group">
-                            <div class="input-wrapper">
-                                <input 
-                                    id="password_confirmation" 
-                                    type="password" 
-                                    name="password_confirmation" 
-                                    placeholder=" " 
-                                    required 
-                                    autocomplete="new-password" 
-                                    class="form-control"
-                                    oninput="this.value = this.value.replace(/\s+/g, '')"
-                                    onblur="this.value = this.value.trim()"
-                                >
-                                <label class="input-label">Confirm Password</label>
-                                <i class="fas fa-check-circle input-icon"></i>
+                            <div class="dropdown-wrapper">
+                                <div class="dropdown-btn" id="deptBtn">
+                                    <div class="dropdown-content">
+                                        <i class="fas fa-graduation-cap input-icon" id="deptIcon"></i>
+                                        <label class="select-label" id="deptLabel">Select Department</label>
+                                        <span id="deptText"></span>
+                                    </div>
+                                    <i class="fas fa-chevron-down arrow" id="deptArrow"></i>
+                                </div>
+                                <div class="menu" id="deptMenu">
+                                    <div class="item" data-val="BSIT" data-full="Bachelor of Science in Information Technology" data-icon="fa-laptop-code">
+                                        <i class="fas fa-laptop-code"></i><span>BSIT</span>
+                                    </div>
+                                    <div class="item" data-val="BSBA" data-full="Bachelor of Science in Business Administration" data-icon="fa-briefcase">
+                                        <i class="fas fa-briefcase"></i><span>BSBA</span>
+                                    </div>
+                                    <div class="item" data-val="BSED" data-full="Bachelor of Science in Education" data-icon="fa-chalkboard-teacher">
+                                        <i class="fas fa-chalkboard-teacher"></i><span>BSEd</span>
+                                    </div>
+                                    <div class="item" data-val="BEED" data-full="Bachelor of Elementary Education" data-icon="fa-school">
+                                        <i class="fas fa-school"></i><span>BEEd</span>
+                                    </div>
+                                    <div class="item" data-val="BSHM" data-full="Bachelor of Science in Hospitality Management" data-icon="fa-hotel">
+                                        <i class="fas fa-hotel"></i><span>BSHM</span>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="department" id="department" value="{{ old('department') }}" required>
                             </div>
-                            <x-input-error :messages="$errors->get('password_confirmation')" class="error-msg" />
+                            <x-input-error :messages="$errors->get('department')" class="error-msg" />
                         </div>
-                    </div>
 
-                    <!-- Hidden fields -->
-                    <input type="hidden" name="role" value="student">
-                    <input type="hidden" name="status" value="active">
+                        <!-- Password and Confirm Password Row -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <div class="input-wrapper">
+                                    <input 
+                                        id="password" 
+                                        type="password" 
+                                        name="password" 
+                                        placeholder=" " 
+                                        required 
+                                        autocomplete="new-password" 
+                                        class="form-control"
+                                        oninput="this.value = this.value.replace(/\s+/g, '')"
+                                        onblur="this.value = this.value.trim()"
+                                    >
+                                    <label class="input-label">Password</label>
+                                    <i class="fas fa-lock input-icon"></i>
+                                </div>
+                                <x-input-error :messages="$errors->get('password')" class="error-msg" />
+                            </div>
 
-                    <button type="submit" class="btn-submit">
-                        <i class="fas fa-user-plus"></i>
-                        Create Account
-                    </button>
-
-                    <div class="form-footer">
-                        <div class="divider">
-                            <span>or</span>
+                            <div class="form-group">
+                                <div class="input-wrapper">
+                                    <input 
+                                        id="password_confirmation" 
+                                        type="password" 
+                                        name="password_confirmation" 
+                                        placeholder=" " 
+                                        required 
+                                        autocomplete="new-password" 
+                                        class="form-control"
+                                        oninput="this.value = this.value.replace(/\s+/g, '')"
+                                        onblur="this.value = this.value.trim()"
+                                    >
+                                    <label class="input-label">Confirm Password</label>
+                                    <i class="fas fa-check-circle input-icon"></i>
+                                </div>
+                                <x-input-error :messages="$errors->get('password_confirmation')" class="error-msg" />
+                            </div>
                         </div>
-                        <div class="signup-link">
-                            <p>Already registered?</p>
-                            <a href="{{ route('login') }}" class="btn-signin">
-                                Sign in here
-                            </a>
+
+                        <!-- Hidden fields -->
+                        <input type="hidden" name="role" value="student">
+                        <input type="hidden" name="status" value="active">
+
+                        <button type="submit" class="btn-submit">
+                            <i class="fas fa-user-plus"></i>
+                            Create Account
+                        </button>
+
+                        <div class="form-footer">
+                            <div class="divider">
+                                <span>or</span>
+                            </div>
+                            <div class="signup-link">
+                                <p>Already registered?</p>
+                                <a href="{{ route('login') }}" class="btn-signin">
+                                    Sign in here
+                                </a>
+                            </div>
                         </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const deptBtn = document.getElementById('deptBtn');
-            const deptMenu = document.getElementById('deptMenu');
-            const deptText = document.getElementById('deptText');
-            const deptInput = document.getElementById('department');
-            const deptArrow = document.getElementById('deptArrow');
-            const deptIcon = document.getElementById('deptIcon');
-            const items = document.querySelectorAll('.item');
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const deptBtn = document.getElementById('deptBtn');
+                const deptMenu = document.getElementById('deptMenu');
+                const deptText = document.getElementById('deptText');
+                const deptInput = document.getElementById('department');
+                const deptArrow = document.getElementById('deptArrow');
+                const deptIcon = document.getElementById('deptIcon');
+                const items = document.querySelectorAll('.item');
 
-            // Restore old department selection
-            const oldValue = deptInput.value;
-            if (oldValue) {
+                // Restore old department selection
+                const oldValue = deptInput.value;
+                if (oldValue) {
+                    items.forEach(item => {
+                        if (item.dataset.val === oldValue || item.dataset.full === oldValue) {
+                            deptText.textContent = item.dataset.val;
+                            deptInput.value = item.dataset.val;
+                            deptIcon.className = 'fas ' + item.dataset.icon + ' input-icon';
+                            deptBtn.classList.add('has-value');
+                        }
+                    });
+                }
+
+                deptBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    deptMenu.classList.toggle('show');
+                    deptBtn.classList.toggle('active');
+                });
+
                 items.forEach(item => {
-                    if (item.dataset.val === oldValue || item.dataset.full === oldValue) {
-                        deptText.textContent = item.dataset.val;
-                        deptInput.value = item.dataset.val;
-                        deptIcon.className = 'fas ' + item.dataset.icon + ' input-icon';
+                    item.addEventListener('click', function() {
+                        const val = this.dataset.val;
+                        const icon = this.dataset.icon;
+                        
+                        deptText.textContent = val;
+                        deptInput.value = val;
+                        deptIcon.className = 'fas ' + icon + ' input-icon';
                         deptBtn.classList.add('has-value');
+                        
+                        deptMenu.classList.remove('show');
+                        deptBtn.classList.remove('active');
+                    });
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!deptBtn.contains(e.target)) {
+                        deptMenu.classList.remove('show');
+                        deptBtn.classList.remove('active');
                     }
                 });
+
+                // Extra: Prevent form submission if any field contains spaces (defense-in-depth)
+                document.getElementById('registrationForm').addEventListener('submit', function(e) {
+                    const textFields = ['id_number', 'first_name', 'last_name', 'middle_name', 'password', 'password_confirmation'];
+                    for (const fieldId of textFields) {
+                        const field = document.getElementById(fieldId);
+                        if (field && /\s/.test(field.value)) {
+                            e.preventDefault();
+                            alert(`"${field.previousElementSibling?.textContent || fieldId}" must not contain spaces.`);
+                            field.focus();
+                            return false;
+                        }
+                    }
+                });
+            });
+        </script>
+
+        <link rel="stylesheet" href="{{ asset('user/register/register.css') }}">
+        <style>
+            body {
+                background: url("{{ asset('images/mcc background.jpg') }}") center/cover no-repeat;
+                position: relative;
             }
-
-            deptBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                deptMenu.classList.toggle('show');
-                deptBtn.classList.toggle('active');
-            });
-
-            items.forEach(item => {
-                item.addEventListener('click', function() {
-                    const val = this.dataset.val;
-                    const icon = this.dataset.icon;
-                    
-                    deptText.textContent = val;
-                    deptInput.value = val;
-                    deptIcon.className = 'fas ' + icon + ' input-icon';
-                    deptBtn.classList.add('has-value');
-                    
-                    deptMenu.classList.remove('show');
-                    deptBtn.classList.remove('active');
-                });
-            });
-
-            document.addEventListener('click', function(e) {
-                if (!deptBtn.contains(e.target)) {
-                    deptMenu.classList.remove('show');
-                    deptBtn.classList.remove('active');
-                }
-            });
-
-            // Extra: Prevent form submission if any field contains spaces (defense-in-depth)
-            document.getElementById('registrationForm').addEventListener('submit', function(e) {
-                const textFields = ['id_number', 'first_name', 'last_name', 'middle_name', 'password', 'password_confirmation'];
-                for (const fieldId of textFields) {
-                    const field = document.getElementById(fieldId);
-                    if (field && /\s/.test(field.value)) {
-                        e.preventDefault();
-                        alert(`"${field.previousElementSibling?.textContent || fieldId}" must not contain spaces.`);
-                        field.focus();
-                        return false;
-                    }
-                }
-            });
-        });
-    </script>
-
-    <link rel="stylesheet" href="{{ asset('user/register/register.css') }}">
-    <style>
-        body {
-            background: url("{{ asset('images/mcc background.jpg') }}") center/cover no-repeat;
-            position: relative;
-        }
-    </style>
-</x-guest-layout>
+        </style>
+    </x-guest-layout>
