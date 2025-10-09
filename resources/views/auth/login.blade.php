@@ -1,15 +1,22 @@
 <x-guest-layout>
-    <!-- ✅ CRITICAL: Add inline CSS in head to prevent FOUC -->
+    <link rel="stylesheet" href="{{ asset('user/auth/auth.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link rel="preload" as="image" href="{{ asset('images/mcc background.jpg') }}">
     <style>
-        /* Minimal critical styles to prevent flash */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { 
-            height: 100%; 
-            overflow: hidden; 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html, body {
+            height: 100%;
+            /* Only hide overflow if you're sure content fits */
+            /* overflow: hidden; */
             font-family: 'Poppins', 'Segoe UI', sans-serif;
         }
         body {
             background: url("{{ asset('images/mcc background.jpg') }}") center/cover no-repeat;
+            margin: 0;
         }
         body::before {
             content: '';
@@ -25,7 +32,7 @@
             justify-content: center;
             position: relative;
             z-index: 2;
-            opacity: 0; /* Hide until CSS loads */
+            opacity: 0;
             animation: fadeIn 0.6s ease-out forwards;
         }
         @keyframes fadeIn {
@@ -127,184 +134,8 @@
         </div>
     </div>
 
-    <!-- ✅ Load full CSS after content (now won't cause FOUC) -->
-    <link rel="stylesheet" href="{{ asset('user/auth/auth.css') }}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    {{-- ✅ Scripts at bottom for performance --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <style>
-        /* Popup Styles */
-        .popup-vertical {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: white;
-            border-radius: 12px;
-            padding: 16px;
-            width: 340px;
-            min-height: 60px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-            z-index: 9999;
-            display: none;
-            animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            overflow: hidden;
-        }
-
-        @keyframes slideInRight {
-            from { transform: translateX(120%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        .popup-vertical.active { 
-            display: flex; 
-            align-items: center; 
-            gap: 12px; 
-        }
-
-        .popup-vertical .icon-circle {
-            width: 40px;
-            height: 40px;
-            flex-shrink: 0;
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(231,76,60,0.3);
-        }
-
-        .popup-vertical .icon-circle i {
-            font-size: 18px;
-            color: white;
-        }
-
-        .popup-vertical .content-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            gap: 2px;
-            min-width: 0;
-        }
-
-        .popup-vertical h3 {
-            font-size: 14px;
-            font-weight: 700;
-            color: #2c3e50;
-            margin: 0;
-            line-height: 1.3;
-        }
-
-        .popup-vertical p {
-            font-size: 12px;
-            color: #7f8c8d;
-            margin: 0;
-            line-height: 1.3;
-        }
-
-        .popup-vertical .countdown-display {
-            font-size: 18px;
-            font-weight: 700;
-            color: #e74c3c;
-            line-height: 1;
-            text-align: right;
-            min-width: 40px;
-            flex-shrink: 0;
-        }
-
-        .popup-vertical .progress-line {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: #ecf0f1;
-            overflow: hidden;
-        }
-
-        .popup-vertical .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #e74c3c, #c0392b);
-            width: 100%;
-            transition: width 0.1s linear;
-            transform-origin: left;
-        }
-
-        .popup-vertical .loading-text {
-            font-size: 12px;
-            color: #2c3e50;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .popup-vertical .loading-text i {
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            100% { transform: rotate(360deg); }
-        }
-
-        .popup-vertical.success .icon-circle {
-            background: linear-gradient(135deg, #2ecc71, #27ae60);
-            box-shadow: 0 4px 12px rgba(46,204,113,0.3);
-        }
-
-        .popup-vertical.warning .icon-circle {
-            background: linear-gradient(135deg, #f39c12, #e67e22);
-            box-shadow: 0 4px 12px rgba(243,156,18,0.3);
-        }
-
-        .popup-vertical.success .countdown-display,
-        .popup-vertical.success .progress-fill {
-            background: linear-gradient(90deg, #2ecc71, #27ae60);
-        }
-
-        .popup-vertical.warning .countdown-display {
-            color: #f39c12;
-        }
-
-        .form-disabled .form-control,
-        .form-disabled .dropdown-btn {
-            opacity: 0.4;
-            pointer-events: none;
-            background: #f5f5f5 !important;
-        }
-        
-        .form-disabled .btn-submit {
-            opacity: 0.4;
-            pointer-events: none;
-            background: #95a5a6 !important;
-        }
-
-        @media (max-width: 768px) {
-            .popup-vertical { width: 300px; padding: 14px; top: 15px; right: 15px; }
-            .popup-vertical .icon-circle { width: 36px; height: 36px; }
-            .popup-vertical .icon-circle i { font-size: 16px; }
-            .popup-vertical h3 { font-size: 13px; }
-            .popup-vertical p { font-size: 11px; }
-            .popup-vertical .countdown-display { font-size: 16px; min-width: 35px; }
-        }
-
-        @media (max-width: 480px) {
-            .popup-vertical { width: 280px; padding: 12px; top: 10px; right: 10px; min-height: 55px; }
-            .popup-vertical .icon-circle { width: 32px; height: 32px; }
-            .popup-vertical .icon-circle i { font-size: 14px; }
-            .popup-vertical h3 { font-size: 12px; }
-            .popup-vertical p { font-size: 10px; }
-            .popup-vertical .countdown-display { font-size: 14px; min-width: 30px; }
-            .popup-vertical .progress-line { height: 2px; }
-        }
-
-        @media (max-width: 360px) {
-            .popup-vertical { width: 260px; padding: 10px; gap: 10px; }
-            .popup-vertical .icon-circle { width: 28px; height: 28px; }
-            .popup-vertical .icon-circle i { font-size: 12px; }
-        }
-    </style>
-
     <script src="https://www.google.com/recaptcha/api.js?render={{ env('RECAPTCHA_SITE_KEY') }}"></script>
 
     <script>
