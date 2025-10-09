@@ -1,4 +1,45 @@
 <x-guest-layout>
+    <link rel="stylesheet" href="{{ asset('user/auth/auth.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link rel="preload" as="image" href="{{ asset('images/mcc background.jpg') }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html, body {
+            height: 100%;
+            /* Only hide overflow if you're sure content fits */
+            /* overflow: hidden; */
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+        }
+        body {
+            background: url("{{ asset('images/mcc background.jpg') }}") center/cover no-repeat;
+            margin: 0;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, rgba(74, 26, 92, 0.8) 0%, rgba(107, 44, 145, 0.8) 50%, rgba(61, 26, 120, 0.8) 100%);
+            z-index: 1;
+        }
+        .auth-wrapper {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
+            opacity: 0;
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+    </style>
+
     <div class="auth-wrapper">
         <div class="auth-container">
             <div class="auth-header">
@@ -93,40 +134,8 @@
         </div>
     </div>
 
-    <link rel="stylesheet" href="{{ asset('user/auth/auth.css') }}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    {{-- ✅ Scripts at bottom for performance --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { 
-            height: 100%; 
-            overflow: hidden; 
-            font-family: 'Poppins', 'Segoe UI', sans-serif;
-        }
-        body {
-            background: url("{{ asset('images/mcc background.jpg') }}") center/cover no-repeat;
-        }
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(135deg, rgba(74, 26, 92, 0.8) 0%, rgba(107, 44, 145, 0.8) 50%, rgba(61, 26, 120, 0.8) 100%);
-            z-index: 1;
-        }
-        .auth-wrapper {
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            z-index: 2;
-            opacity: 0; /* Hide until CSS loads */
-            animation: fadeIn 0.6s ease-out forwards;
-        }
-        @keyframes fadeIn {
-            to { opacity: 1; }
-        }
-    </style>
     <script src="https://www.google.com/recaptcha/api.js?render={{ env('RECAPTCHA_SITE_KEY') }}"></script>
 
     <script>
