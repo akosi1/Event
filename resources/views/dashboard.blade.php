@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'EventAP') }} - Dashboard</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="<?php echo asset('user/dashboard/dashboard.css'); ?>" rel="stylesheet">
+    <link href="{{ asset('user/dashboard/dashboard.css') }}" rel="stylesheet">
     <link href="{{ asset('user/nav/css/navbar.css') }}" rel="stylesheet">
 </head>
 <body>
