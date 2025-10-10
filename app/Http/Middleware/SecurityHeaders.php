@@ -12,37 +12,22 @@ class SecurityHeaders
     {
         $response = $next($request);
 
-        // === SECURITY HEADERS ===
+        // Optional: test header (remove in production if desired)
+        $response->headers->set('X-Test-Middleware', 'active');
 
-        // Enforce HTTPS across the site
+        // Core security headers
         $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
-
-        // Prevent MIME-type sniffing
         $response->headers->set('X-Content-Type-Options', 'nosniff');
-
-        // Prevent clickjacking
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
-
-        // Enable basic XSS protection
         $response->headers->set('X-XSS-Protection', '1; mode=block');
-
-        // Limit referrer info
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
-        // Restrict access to browser features
-        $response->headers->set('Permissions-Policy', 'geolocation=(), microphone=(), camera=(), payment=(), usb=(), vr=(), fullscreen=(), magnetometer=(), accelerometer=()');
+        // ✅ ADD MISSING Permissions-Policy
+        $response->headers->set('Permissions-Policy', 'geolocation=(), microphone=(), camera=(), payment=(), usb=(), vr=()');
 
-        // === SAFE CONTENT SECURITY POLICY (CSP) ===
-        $response->headers->set(
-            'Content-Security-Policy',
-            "default-src 'self'; 
-             script-src 'self'; 
-             style-src 'self'; 
-             object-src 'none'; 
-             frame-ancestors 'none'; 
-             base-uri 'self'; 
-             form-action 'self'"
-        );
+        // Optional: Content-Security-Policy (basic example)
+        // Only enable if you control all assets; otherwise may break site
+        // $response->headers->set('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';");
 
         return $response;
     }
