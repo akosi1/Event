@@ -54,8 +54,6 @@ class RegisteredUserController extends Controller
 
     /**
      * Handle an incoming registration request.
-     *
-     * @throws \Illuminate\Validation\ValidationException
      */
     public function store(Request $request): RedirectResponse
     {
@@ -87,7 +85,7 @@ class RegisteredUserController extends Controller
                 ->withErrors(['email' => 'Email verification has expired. Please verify again.']);
         }
 
-        // ✅ Step 1: Sanitize ALL text inputs (trim + remove internal spaces)
+        // ✅ Sanitize inputs
         $inputs = $request->only([
             'id_number',
             'first_name',
@@ -99,12 +97,12 @@ class RegisteredUserController extends Controller
             'password_confirmation'
         ]);
 
-        // Sanitize text fields: trim and enforce no spaces
         $sanitized = [];
+
         foreach (['id_number', 'first_name', 'middle_name', 'last_name'] as $field) {
             $value = trim($inputs[$field] ?? '');
-            if ($field !== 'middle_name' || $value !== '') { // middle_name can be null
-                if (preg_match('/\s/', $inputs[$field] ?? '')) {
+            if ($field !== 'middle_name' || $value !== '') {
+                if (preg_match('/\s/', $value)) {
                     return back()
                         ->withInput($request->except('password', 'password_confirmation'))
                         ->withErrors([$field => ucfirst(str_replace('_', ' ', $field)) . ' must not contain spaces.']);
@@ -115,17 +113,17 @@ class RegisteredUserController extends Controller
             }
         }
 
-        // Password: enforce no spaces
+        // ✅ Password validation — trim + no spaces
         $password = trim($inputs['password'] ?? '');
         $passwordConfirmation = trim($inputs['password_confirmation'] ?? '');
 
-        if (preg_match('/\s/', $inputs['password'] ?? '') || preg_match('/\s/', $inputs['password_confirmation'] ?? '')) {
+        if (preg_match('/\s/', $password) || preg_match('/\s/', $passwordConfirmation)) {
             return back()
                 ->withInput($request->except('password', 'password_confirmation'))
                 ->withErrors(['password' => 'Password must not contain spaces.']);
         }
 
-        // Email: must match verified email (case-insensitive)
+        // ✅ Email: must match verified one
         $requestEmail = trim($inputs['email'] ?? '');
         if (strtolower($requestEmail) !== strtolower($verifiedEmail)) {
             return back()
@@ -133,7 +131,7 @@ class RegisteredUserController extends Controller
                 ->withErrors(['email' => 'The email must match your verified McLawis College email.']);
         }
 
-        // Department: allow only predefined values
+        // ✅ Department validation
         $allowedDepts = ['BSIT', 'BSBA', 'BSED', 'BEED', 'BSHM'];
         if (!in_array($inputs['department'], $allowedDepts)) {
             return back()
@@ -141,7 +139,7 @@ class RegisteredUserController extends Controller
                 ->withErrors(['department' => 'Invalid department selected.']);
         }
 
-        // ✅ Step 2: Validate with sanitized data
+        // ✅ Final validation
         $request->merge(array_merge($sanitized, [
             'email' => $verifiedEmail,
             'department' => $inputs['department'],
@@ -150,60 +148,42 @@ class RegisteredUserController extends Controller
         ]));
 
         $validated = $request->validate([
-            'id_number' => [
-                'required',
-                'string',
-                'max:255',
-                'unique:' . User::class,
-                'regex:/^\S*$/',
-            ],
-            'first_name' => [
-                'required',
-                'string',
-                'max:255',
-                'regex:/^\S*$/',
-            ],
-            'middle_name' => [
-                'nullable',
-                'string',
-                'max:255',
-                'regex:/^\S*$/',
-            ],
-            'last_name' => [
-                'required',
-                'string',
-                'max:255',
-                'regex:/^\S*$/',
-            ],
-            'email' => [
-                'required',
-                'string',
-                'email',
-                'max:255',
-                'unique:' . User::class,
-            ],
-            'department' => [
-                'required',
-                'string',
-                'in:' . implode(',', $allowedDepts),
-            ],
+            'id_number' => ['required', 'string', 'max:255', 'unique:' . User::class, 'regex:/^\S*$/'],
+            'first_name' => ['required', 'string', 'max:255', 'regex:/^\S*$/'],
+            'middle_name' => ['nullable', 'string', 'max:255', 'regex:/^\S*$/'],
+            'last_name' => ['required', 'string', 'max:255', 'regex:/^\S*$/'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:' . User::class],
+            'department' => ['required', 'string', 'in:' . implode(',', $allowedDepts)],
             'password' => [
                 'required',
                 'confirmed',
                 'regex:/^\S*$/',
-                Rules\Password::defaults(),
+                Rules\Password::min(8)
+                    ->mixedCase()
+                    ->letters()
+                    ->numbers()
+                    ->symbols()
+                    ->uncompromised(),
             ],
         ]);
 
         try {
+            // ✅ Secure password storage with ARGON2ID
+            $argonOptions = [
+                'memory_cost' => 65536,  // 64 MB
+                'time_cost'   => 4,      // Iterations
+                'threads'     => 2       // Parallelism
+            ];
+
             $user = User::create([
                 'id_number' => $validated['id_number'],
                 'first_name' => $validated['first_name'],
                 'middle_name' => $validated['middle_name'] ?? null,
                 'last_name' => $validated['last_name'],
-                'email' => $verifiedEmail, // Enforce verified email
+                'email' => $verifiedEmail,
                 'department' => $validated['department'],
-                'password' => Hash::make($validated['password']),
+                // 👇 Argon2id Hashing
+                'password' => Hash::make($validated['password'], $argonOptions),
                 'role' => 'user',
                 'status' => 'active',
                 'email_verified_at' => now(),

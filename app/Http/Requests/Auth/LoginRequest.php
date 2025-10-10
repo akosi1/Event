@@ -20,32 +20,48 @@ class LoginRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * Validation rules for login fields.
      */
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
-            'password' => ['required', 'string'],
-            'department' => ['required', 'string', 'in:BSIT,BSBA,BSED,BEED,BSHM'],
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                'regex:/^[^\s]+$/'
+            ],
+            'password' => [
+                'required',
+                'string',
+                // Optional: uncomment below if you want strong password policy even during login
+                // 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/'
+            ],
+            'department' => [
+                'required',
+                'string',
+                'in:BSIT,BSBA,BSEd,BEED,BSHM'
+            ],
         ];
     }
 
     /**
-     * Custom error messages for validation.
+     * Custom messages (generic to prevent credential leaks).
      */
     public function messages(): array
     {
         return [
+            'email.required' => 'Invalid login credentials.',
+            'email.email' => 'Invalid login credentials.',
+            'email.regex' => 'Invalid login credentials.',
+            'password.required' => 'Invalid login credentials.',
             'department.required' => 'Please select your department.',
             'department.in' => 'Please select a valid department.',
         ];
     }
 
     /**
-     * Attempt to authenticate the request's credentials.
+     * Attempt authentication.
      *
      * @throws \Illuminate\Validation\ValidationException
      */
@@ -53,39 +69,33 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
+        // Find user
         $user = \App\Models\User::where('email', $this->email)->first();
 
-        if (! $user) {
+        // Validate department & password
+        $credentialsMatch = $user &&
+            $user->department === $this->department &&
+            Auth::validate([
+                'email' => $this->email,
+                'password' => $this->password
+            ]);
+
+        if (! $credentialsMatch) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => 'These credentials do not match our records.',
+                'email' => 'Invalid login credentials.',
             ]);
         }
 
-        if ($user->department !== $this->department) {
-            RateLimiter::hit($this->throttleKey());
-
-            throw ValidationException::withMessages([
-                'department' => 'Access denied. You can only login with your registered department: ' . $user->getDepartmentNameAttribute(),
-            ]);
-        }
-
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
-            RateLimiter::hit($this->throttleKey());
-
-            throw ValidationException::withMessages([
-                'password' => 'The password is incorrect.',
-            ]);
-        }
+        // Success: log in user
+        Auth::login($user, $this->boolean('remember'));
 
         RateLimiter::clear($this->throttleKey());
     }
 
     /**
-     * Ensure the login request is not rate limited.
-     *
-     * @throws \Illuminate\Validation\ValidationException
+     * Check for too many failed login attempts.
      */
     public function ensureIsNotRateLimited(): void
     {
@@ -98,18 +108,15 @@ class LoginRequest extends FormRequest
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'email' => trans('auth.throttle', [
-                'seconds' => $seconds,
-                'minutes' => ceil($seconds / 60),
-            ]),
+            'email' => "Too many login attempts. Please try again in {$seconds} seconds.",
         ]);
     }
 
     /**
-     * Get the rate limiting throttle key for the request.
+     * Generate a unique key for login rate limiting.
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
+        return Str::lower($this->string('email')) . '|' . $this->ip();
     }
 }

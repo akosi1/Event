@@ -10,7 +10,6 @@
                 <form method="POST" action="{{ route('register') }}" id="registrationForm">
                     @csrf
 
-                    <!-- Student ID -->
                     <div class="form-group">
                         <div class="input-wrapper">
                             <input 
@@ -31,7 +30,6 @@
                         <x-input-error :messages="$errors->get('id_number')" class="error-msg" />
                     </div>
 
-                    <!-- First Name and Last Name Row -->
                     <div class="form-row">
                         <div class="form-group">
                             <div class="input-wrapper">
@@ -75,7 +73,6 @@
                         </div>
                     </div>
 
-                    <!-- Middle Name -->
                     <div class="form-group">
                         <div class="input-wrapper">
                             <input 
@@ -95,7 +92,6 @@
                         <x-input-error :messages="$errors->get('middle_name')" class="error-msg" />
                     </div>
 
-                    <!-- Email (Read-only) -->
                     <div class="form-group">
                         <div class="input-wrapper">
                             <input 
@@ -116,7 +112,6 @@
                         <x-input-error :messages="$errors->get('email')" class="error-msg" />
                     </div>
 
-                    <!-- Department Dropdown -->
                     <div class="form-group">
                         <div class="dropdown-wrapper">
                             <div class="dropdown-btn" id="deptBtn">
@@ -149,7 +144,6 @@
                         <x-input-error :messages="$errors->get('department')" class="error-msg" />
                     </div>
 
-                    <!-- Password and Confirm Password Row -->
                     <div class="form-row">
                         <div class="form-group">
                             <div class="input-wrapper">
@@ -166,6 +160,9 @@
                                 >
                                 <label class="input-label">Password</label>
                                 <i class="fas fa-lock input-icon"></i>
+                                <button type="button" class="password-toggle" onclick="togglePasswordVisibility('password')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
                             </div>
                             <x-input-error :messages="$errors->get('password')" class="error-msg" />
                         </div>
@@ -185,12 +182,18 @@
                                 >
                                 <label class="input-label">Confirm Password</label>
                                 <i class="fas fa-check-circle input-icon"></i>
+                                <button type="button" class="password-toggle" onclick="togglePasswordVisibility('password_confirmation')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
                             </div>
                             <x-input-error :messages="$errors->get('password_confirmation')" class="error-msg" />
                         </div>
                     </div>
 
-                    <!-- Hidden fields -->
+                    <div class="password-policy">
+                        Password must be at least 12 characters with uppercase, lowercase, number, and symbol.
+                    </div>
+
                     <input type="hidden" name="role" value="student">
                     <input type="hidden" name="status" value="active">
 
@@ -216,6 +219,14 @@
     </div>
 
     <script>
+        function togglePasswordVisibility(fieldId) {
+            const field = document.getElementById(fieldId);
+            const button = field.nextElementSibling;
+            const type = field.getAttribute('type') === 'password' ? 'text' : 'password';
+            field.setAttribute('type', type);
+            button.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const deptBtn = document.getElementById('deptBtn');
             const deptMenu = document.getElementById('deptMenu');
@@ -225,7 +236,6 @@
             const deptIcon = document.getElementById('deptIcon');
             const items = document.querySelectorAll('.item');
 
-            // Restore old department selection
             const oldValue = deptInput.value;
             if (oldValue) {
                 items.forEach(item => {
@@ -248,12 +258,10 @@
                 item.addEventListener('click', function() {
                     const val = this.dataset.val;
                     const icon = this.dataset.icon;
-                    
                     deptText.textContent = val;
                     deptInput.value = val;
                     deptIcon.className = 'fas ' + icon + ' input-icon';
                     deptBtn.classList.add('has-value');
-                    
                     deptMenu.classList.remove('show');
                     deptBtn.classList.remove('active');
                 });
@@ -266,7 +274,6 @@
                 }
             });
 
-            // Extra: Prevent form submission if any field contains spaces (defense-in-depth)
             document.getElementById('registrationForm').addEventListener('submit', function(e) {
                 const textFields = ['id_number', 'first_name', 'last_name', 'middle_name', 'password', 'password_confirmation'];
                 for (const fieldId of textFields) {
@@ -287,6 +294,23 @@
         body {
             background: url("{{ asset('images/mcc background.jpg') }}") center/cover no-repeat;
             position: relative;
+        }
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .password-policy {
+            font-size: 0.75rem;
+            color: #ccc;
+            margin: 8px 0 16px;
+            text-align: center;
         }
     </style>
 </x-guest-layout>
