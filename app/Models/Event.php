@@ -2,7 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\{Factories\HasFactory, Model, Relations\HasMany, Relations\BelongsToMany, Relations\BelongsTo};
+use Illuminate\Database\Eloquent\{
+    Factories\HasFactory,
+    Model,
+    Relations\HasMany,
+    Relations\BelongsToMany,
+    Relations\BelongsTo
+};
 use Illuminate\Support\Facades\Storage;
 
 class Event extends Model
@@ -28,7 +34,6 @@ class Event extends Model
         'allowed_departments' => 'array',
     ];
 
-    // Department constants
     const DEPARTMENTS = [
         'BSIT' => 'Bachelor of Science in Information Technology',
         'BSBA' => 'Bachelor of Science in Business Administration',
@@ -37,7 +42,6 @@ class Event extends Model
         'BSHM' => 'Bachelor of Science in Hospitality Management'
     ];
 
-    // Recurrence pattern constants
     const RECURRENCE_PATTERNS = [
         'daily' => 'Daily',
         'weekly' => 'Weekly',
@@ -47,58 +51,49 @@ class Event extends Model
         'custom' => 'Custom'
     ];
 
-    /**
-     * Check if event has an image
-     */
     public function hasImage(): bool
     {
-        return !empty($this->image) && Storage::disk('public')->exists($this->image);
+        return !empty($this->image) && file_exists(public_path('images/' . $this->image));
     }
 
-    /**
-     * Get the image URL accessor
-     */
     public function getImageUrlAttribute(): string
     {
         if (!$this->image) {
             return asset('images/default-event.jpg');
         }
 
-        // If image is already a full URL, return as is
         if (filter_var($this->image, FILTER_VALIDATE_URL)) {
             return $this->image;
         }
 
-        // Check if file exists in storage
-        if (Storage::disk('public')->exists($this->image)) {
-            return asset('storage/' . $this->image);
+        $extension = strtolower(pathinfo($this->image, PATHINFO_EXTENSION));
+        if (!in_array($extension, ['jpg', 'jpeg', 'png'])) {
+            return asset('images/default-event.jpg');
         }
 
-        // Return default image if file doesn't exist
+        if (file_exists(public_path('images/' . $this->image))) {
+            return asset('images/' . $this->image);
+        }
+
         return asset('images/default-event.jpg');
     }
 
-    /**
-     * Get image path for display with fallback
-     */
     public function getImagePath(): string
     {
         if ($this->hasImage()) {
-            return asset('storage/' . $this->image);
+            return asset('images/' . $this->image);
         }
-        
-        // Return a placeholder image
+
         return asset('images/default-event.jpg');
     }
 
-    /**
-     * Delete the event image from storage
-     */
     public function deleteImage(): bool
     {
-        if ($this->image && Storage::disk('public')->exists($this->image)) {
+        $path = public_path('images/' . $this->image);
+        if ($this->image && file_exists($path)) {
             try {
-                return Storage::disk('public')->delete($this->image);
+                unlink($path);
+                return true;
             } catch (\Exception $e) {
                 \Log::error('Failed to delete event image: ' . $e->getMessage());
                 return false;
@@ -158,52 +153,40 @@ class Event extends Model
         });
     }
 
-    /**
-     * Check if event is available for a specific department
-     * This is the main method used by EventJoinController
-     */
     public function isAvailableForUserDepartment($userDepartment): bool
     {
-        // If event is not exclusive (open event), it's available for all departments
         if (!$this->is_exclusive) {
             return true;
         }
 
-        // If event is exclusive, check department restrictions
         return $this->isAvailableForDepartment($userDepartment);
     }
 
-    /**
-     * Original method kept for backward compatibility
-     */
     public function isAvailableForDepartment($department): bool
     {
         if (!$this->is_exclusive) {
-            return true; // Open to all departments
+            return true;
         }
 
         if ($this->department === $department) {
-            return true; // Matches primary department
+            return true;
         }
 
         if ($this->allowed_departments && in_array($department, $this->allowed_departments)) {
-            return true; // In allowed departments list
+            return true;
         }
 
         return false;
     }
 
-    /**
-     * Get departments that can access this event
-     */
     public function getAccessibleDepartments(): array
     {
         if (!$this->is_exclusive) {
-            return array_keys(self::DEPARTMENTS); // All departments
+            return array_keys(self::DEPARTMENTS);
         }
 
         $departments = [];
-        
+
         if ($this->department) {
             $departments[] = $this->department;
         }
@@ -225,9 +208,6 @@ class Event extends Model
         return implode(', ', $departments);
     }
 
-    /**
-     * Get full department names for display
-     */
     public function getDepartmentNamesAttribute(): string
     {
         if (!$this->is_exclusive) {
@@ -244,27 +224,20 @@ class Event extends Model
         return implode(', ', $departmentNames);
     }
 
-    /**
-     * Check if a user can join this event based on their department
-     */
     public function canUserJoin($user): bool
     {
-        // Check if event is active
         if ($this->status !== 'active') {
             return false;
         }
 
-        // Check if event is not in the past
         if ($this->date < now()) {
             return false;
         }
 
-        // Check if user already joined
         if ($this->isJoinedByUser($user->id)) {
             return false;
         }
 
-        // Check department restrictions
         return $this->isAvailableForUserDepartment($user->department);
     }
 
@@ -286,13 +259,10 @@ class Event extends Model
 
         $pattern = self::RECURRENCE_PATTERNS[$this->recurrence_pattern] ?? $this->recurrence_pattern;
         $interval = $this->recurrence_interval > 1 ? " (Every {$this->recurrence_interval})" : '';
-        
+
         return $pattern . $interval;
     }
 
-    /**
-     * Get events available for a specific user's department
-     */
     public static function availableForUser($user)
     {
         return static::where('status', 'active')
@@ -304,14 +274,10 @@ class Event extends Model
                     });
     }
 
-    /**
-     * Boot method to handle model events
-     */
     protected static function boot()
     {
         parent::boot();
 
-        // Delete image when event is deleted
         static::deleting(function ($event) {
             $event->deleteImage();
         });
