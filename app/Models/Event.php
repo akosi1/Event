@@ -17,6 +17,15 @@ class Event extends Model
         'parent_event_id', 'cancel_reason', 'image',
     ];
 
+    protected $attributes = [
+        'description' => null,
+        'location' => null,
+        'status' => 'active',
+        'is_exclusive' => false,
+        'is_recurring' => false,
+        'department' => null,
+    ];
+
     protected $casts = [
         'date' => 'datetime',
         'start_time' => 'datetime',
@@ -52,30 +61,66 @@ class Event extends Model
      */
     public function hasImage(): bool
     {
-        return !empty($this->image) && Storage::disk('public')->exists($this->image);
+        if (empty($this->image)) {
+            return false;
+        }
+
+        // Check if it's a full URL
+        if (filter_var($this->image, FILTER_VALIDATE_URL)) {
+            return true;
+        }
+
+        // Check if file exists in storage
+        try {
+            return Storage::disk('public')->exists($this->image);
+        } catch (\Exception $e) {
+            \Log::warning('Error checking image existence: ' . $e->getMessage());
+            return false;
+        }
     }
 
     /**
-     * Get the image URL accessor
+     * Get the image URL - Main accessor for all image URL needs
      */
     public function getImageUrlAttribute(): string
     {
-        if (!$this->image) {
-            return asset('images/default-event.jpg');
+        if (empty($this->image)) {
+            return $this->getDefaultImage();
         }
 
-        // If image is already a full URL, return as is
+        // If image is already a full URL, validate and return
         if (filter_var($this->image, FILTER_VALIDATE_URL)) {
             return $this->image;
         }
 
-        // Check if file exists in storage
-        if (Storage::disk('public')->exists($this->image)) {
-            return asset('storage/' . $this->image);
+        // For relative paths, construct proper URL
+        try {
+            if (Storage::disk('public')->exists($this->image)) {
+                // Use URL helper to generate proper signed/permanent URL
+                $url = Storage::disk('public')->url($this->image);
+                return url($url);
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Error retrieving image URL: ' . $e->getMessage());
         }
 
-        // Return default image if file doesn't exist
-        return asset('images/default-event.jpg');
+        return $this->getDefaultImage();
+    }
+
+    /**
+     * Get default image path
+     */
+    private function getDefaultImage(): string
+    {
+        $defaultPath = 'images/default-event.jpg';
+        
+        // Check if default exists, otherwise use placeholder
+        if (Storage::disk('public')->exists($defaultPath)) {
+            return url(Storage::disk('public')->url($defaultPath));
+        }
+
+        // Fallback to public path
+        return asset('images/placeholder-event.png');
     }
 
     /**
@@ -83,12 +128,7 @@ class Event extends Model
      */
     public function getImagePath(): string
     {
-        if ($this->hasImage()) {
-            return asset('storage/' . $this->image);
-        }
-        
-        // Return a placeholder image
-        return asset('images/default-event.jpg');
+        return $this->getImageUrlAttribute();
     }
 
     /**
@@ -96,15 +136,61 @@ class Event extends Model
      */
     public function deleteImage(): bool
     {
-        if ($this->image && Storage::disk('public')->exists($this->image)) {
-            try {
-                return Storage::disk('public')->delete($this->image);
-            } catch (\Exception $e) {
-                \Log::error('Failed to delete event image: ' . $e->getMessage());
-                return false;
-            }
+        if (empty($this->image)) {
+            return true;
         }
-        return true;
+
+        // Don't delete if it's a full URL (external image)
+        if (filter_var($this->image, FILTER_VALIDATE_URL)) {
+            return true;
+        }
+
+        try {
+            if (Storage::disk('public')->exists($this->image)) {
+                return Storage::disk('public')->delete($this->image);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to delete event image: ' . $e->getMessage());
+        }
+
+        return true; // Return true to not block deletion
+    }
+
+    /**
+     * Store image and return the path
+     */
+    public function storeImage($file, $folder = 'events'): ?string
+    {
+        try {
+            if ($file === null) {
+                return null;
+            }
+
+            // Delete old image if exists
+            if ($this->image) {
+                $this->deleteImage();
+            }
+
+            // Generate unique filename with timestamp
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            
+            // Store file with proper visibility
+            $path = $file->storeAs(
+                $folder,
+                $filename,
+                'public'
+            );
+
+            if ($path === false) {
+                \Log::error('Failed to store image file');
+                return null;
+            }
+
+            return $path;
+        } catch (\Exception $e) {
+            \Log::error('Image storage error: ' . $e->getMessage());
+            return null;
+        }
     }
 
     public function joins(): HasMany
@@ -160,16 +246,13 @@ class Event extends Model
 
     /**
      * Check if event is available for a specific department
-     * This is the main method used by EventJoinController
      */
     public function isAvailableForUserDepartment($userDepartment): bool
     {
-        // If event is not exclusive (open event), it's available for all departments
         if (!$this->is_exclusive) {
             return true;
         }
 
-        // If event is exclusive, check department restrictions
         return $this->isAvailableForDepartment($userDepartment);
     }
 
@@ -179,15 +262,15 @@ class Event extends Model
     public function isAvailableForDepartment($department): bool
     {
         if (!$this->is_exclusive) {
-            return true; // Open to all departments
+            return true;
         }
 
         if ($this->department === $department) {
-            return true; // Matches primary department
+            return true;
         }
 
         if ($this->allowed_departments && in_array($department, $this->allowed_departments)) {
-            return true; // In allowed departments list
+            return true;
         }
 
         return false;
@@ -199,7 +282,7 @@ class Event extends Model
     public function getAccessibleDepartments(): array
     {
         if (!$this->is_exclusive) {
-            return array_keys(self::DEPARTMENTS); // All departments
+            return array_keys(self::DEPARTMENTS);
         }
 
         $departments = [];
@@ -245,26 +328,22 @@ class Event extends Model
     }
 
     /**
-     * Check if a user can join this event based on their department
+     * Check if a user can join this event
      */
     public function canUserJoin($user): bool
     {
-        // Check if event is active
         if ($this->status !== 'active') {
             return false;
         }
 
-        // Check if event is not in the past
         if ($this->date < now()) {
             return false;
         }
 
-        // Check if user already joined
         if ($this->isJoinedByUser($user->id)) {
             return false;
         }
 
-        // Check department restrictions
         return $this->isAvailableForUserDepartment($user->department);
     }
 
@@ -291,7 +370,7 @@ class Event extends Model
     }
 
     /**
-     * Get events available for a specific user's department
+     * Get events available for a specific user
      */
     public static function availableForUser($user)
     {
@@ -311,7 +390,6 @@ class Event extends Model
     {
         parent::boot();
 
-        // Delete image when event is deleted
         static::deleting(function ($event) {
             $event->deleteImage();
         });
