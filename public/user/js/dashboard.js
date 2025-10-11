@@ -85,7 +85,7 @@ async function toggleEventJoin(button) {
             button.className = `register-btn ${newJoinedState ? 'joined' : ''}`;
             
             // Update button text
-            btnText.innerHTML = newJoinedState ? 'Leave Event' : 'Register Now';
+            btnText.innerHTML = newJoinedState ? 'Leave Event' : 'join Now';
             
             // Show success toast
             showToast(data.message, 'success');
@@ -421,10 +421,3 @@ document.querySelectorAll('.info-btn').forEach(btn => {
         this.style.transform = '';
     });
 });
-
-// Console log for developers
-console.log('%c🎉 EventAP Dashboard Loaded Successfully!', 'color: #8b5cf6; font-size: 16px; font-weight: bold;');
-console.log('%cKeyboard Shortcuts:', 'color: #7c3aed; font-size: 14px; font-weight: bold;');
-console.log('%c• Ctrl/Cmd + K: Focus search', 'color: #4a5568; font-size: 12px;');
-console.log('%c• Escape: Close search/modal', 'color: #4a5568; font-size: 12px;');
-console.log('%c• Click info icon: View event details', 'color: #4a5568; font-size: 12px;');
