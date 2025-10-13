@@ -175,9 +175,7 @@ class LoginAttemptService
         Cache::forget($this->getTotalAttemptsKey($identifier));
     }
 
-    /**
-     * Get max attempts allowed
-     */
+   
     public function getMaxAttempts(): int
     {
         return self::MAX_ATTEMPTS;

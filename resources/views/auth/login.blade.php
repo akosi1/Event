@@ -342,7 +342,6 @@
                 // Show loading popup
                 loadingPopup.classList.add('active');
 
-                // Execute reCAPTCHA
                 grecaptcha.ready(() => {
                     grecaptcha.execute('{{ env("RECAPTCHA_SITE_KEY") }}', { action: 'login' })
                         .then(token => {

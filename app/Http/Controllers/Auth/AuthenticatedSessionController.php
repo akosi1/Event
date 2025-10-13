@@ -115,7 +115,6 @@ class AuthenticatedSessionController extends Controller
             ]);
         }
 
-        // Check if department matches
         $user = Auth::user();
         if ($user->department !== $request->input('department')) {
             Auth::logout();
