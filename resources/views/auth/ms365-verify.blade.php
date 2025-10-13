@@ -1,5 +1,4 @@
 <x-guest-layout>
-    <!-- ✅ Load CSS in HEAD before body renders -->
     <link rel="stylesheet" href="{{ asset('user/ms365/ms365.css') }}">
     
     <style>
@@ -15,15 +14,15 @@
                 <h1>Sign Up</h1>
                 <p>Create your E&amp;P-O account</p>
             </div>
-            <div class="auth-form" id="authForm">
+            
+            <div class="auth-form">
                 <x-auth-session-status class="mb-4" :status="session('status')" />
 
                 @if($errors->any())
-                    <div class="debug-info">
+                    <div class="error-list">
                         <strong>Validation Errors:</strong>
                         <ul>
                             @foreach ($errors->all() as $error)
-                                {{-- ✅ Output is auto HTML-encoded by Blade --}}
                                 <li>{{ $error }}</li>
                             @endforeach
                         </ul>
@@ -32,6 +31,7 @@
 
                 <form method="POST" action="{{ route('ms365.verify.store') }}" id="ms365Form">
                     @csrf
+                    
                     <div class="form-group">
                         <div class="input-wrapper">
                             <input 
@@ -44,17 +44,15 @@
                                 required 
                                 autocomplete="username" 
                                 autofocus
-                                {{-- ✅ Prevent spaces in real-time --}}
                                 oninput="this.value = this.value.replace(/\s+/g, '')"
                                 onblur="this.value = this.value.trim()"
                             >
-                            <label class="input-label">Ms365 Email</label>
+                            <label class="input-label">MS365 Email</label>
                             <i class="fas fa-envelope input-icon"></i>
                         </div>
                         @error('email')
                             <div class="error-msg">
                                 <i class="fas fa-exclamation-circle"></i>
-                                {{-- ✅ Safe output --}}
                                 {{ $message }}
                             </div>
                         @enderror
@@ -62,7 +60,7 @@
                     
                     <button type="submit" class="btn-submit">
                         <i class="fas fa-paper-plane"></i>
-                        Send verification code
+                        Send Verification Code
                     </button>
                     
                     <div class="form-footer">
@@ -73,7 +71,7 @@
                         <div class="signup-link">
                             <p>Already have an account?</p>
                             <a href="{{ route('login') }}" class="btn-secondary">
-                                Sign in here
+                                Sign In Here
                             </a>
                         </div>
                     </div>
@@ -82,22 +80,17 @@
         </div>
     </div>
 
-    <!-- ✅ Show content after CSS loads -->
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Add 'loaded' class to trigger fade-in
+        document.addEventListener('DOMContentLoaded', function() {
             const wrapper = document.querySelector('.auth-wrapper');
             if (wrapper) {
-                setTimeout(() => {
-                    wrapper.classList.add('loaded');
-                }, 10);
+                setTimeout(() => wrapper.classList.add('loaded'), 10);
             }
 
             const form = document.getElementById('ms365Form');
             const emailInput = document.getElementById('email');
 
-            // Extra safety: block form submission if space somehow exists
-            form.addEventListener('submit', function (e) {
+            form.addEventListener('submit', function(e) {
                 const email = emailInput.value;
                 if (/\s/.test(email)) {
                     e.preventDefault();

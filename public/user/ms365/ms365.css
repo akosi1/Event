@@ -1,17 +1,3 @@
-
-/* ===== CRITICAL: PREVENT FLASH OF UNSTYLED CONTENT ===== */
-.auth-wrapper {
-    opacity: 0;
-    visibility: hidden;
-}
-
-.auth-wrapper.loaded {
-    opacity: 1;
-    visibility: visible;
-    animation: fadeIn 0.6s ease-out;
-}
-
-/* ===== GLOBAL RESET & ACCESSIBILITY ===== */
 * {
     margin: 0;
     padding: 0;
@@ -43,6 +29,25 @@ body::before {
     padding: 20px;
     position: relative;
     z-index: 2;
+    opacity: 0;
+    visibility: hidden;
+}
+
+.auth-wrapper.loaded {
+    opacity: 1;
+    visibility: visible;
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(15px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
 }
 
 .auth-container {
@@ -50,11 +55,6 @@ body::before {
     width: 100%;
     max-width: 420px;
     padding: 40px;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(15px); }
-    to { opacity: 1; transform: translateY(0); }
 }
 
 .auth-header {
@@ -331,7 +331,7 @@ body::before {
     margin-bottom: 18px;
 }
 
-.debug-info {
+.error-list {
     margin-bottom: 20px;
     padding: 12px 16px;
     background: rgba(255, 243, 205, 0.95);
@@ -341,25 +341,24 @@ body::before {
     color: #856404;
 }
 
-.debug-info strong {
+.error-list strong {
     display: block;
     margin-bottom: 8px;
     font-size: 14px;
 }
 
-.debug-info ul {
+.error-list ul {
     margin-left: 20px;
     margin-top: 8px;
 }
 
-.debug-info li {
+.error-list li {
     margin-bottom: 4px;
 }
 
-/* ===== TABLET RESPONSIVE (≤768px) ===== */
 @media (max-width: 768px) {
     .auth-container {
-        padding: 25px 20px;
+        padding: 30px 20px;
         max-width: 100%;
     }
 
@@ -369,12 +368,12 @@ body::before {
     }
 
     .auth-header p {
-        font-size: 13px;
+        font-size: 14px;
     }
 
     .form-control {
-        padding: 14px 14px 6px 45px;
-        font-size: 14px;
+        padding: 16px 14px 6px 45px;
+        font-size: 15px;
     }
 
     .input-icon {
@@ -385,7 +384,7 @@ body::before {
 
     .input-label {
         left: 45px;
-        font-size: 14px;
+        font-size: 15px;
     }
 
     .form-control:focus + .input-label,
@@ -393,34 +392,15 @@ body::before {
         font-size: 10px;
         left: 40px;
     }
-
-    /* Keep button same as desktop */
-    .btn-submit {
-        padding: 20px 16px;
-        font-size: 18px;
-        letter-spacing: 2.5px;
-    }
-
-    .btn-secondary {
-        font-size: 14px;
-        padding: 12px 16px;
-    }
-
-    .form-group {
-        margin-bottom: 18px;
-    }
 }
 
-/* ===== MOBILE RESPONSIVE (≤480px) ===== */
 @media (max-width: 480px) {
     .auth-wrapper {
-        padding: 10px;
-        align-items: flex-start;
-        padding-top: 40px;
+        padding: 15px;
     }
 
     .auth-container {
-        padding: 20px 18px;
+        padding: 25px 18px;
     }
 
     .auth-header {
@@ -429,18 +409,16 @@ body::before {
 
     .auth-header h1 {
         font-size: 28px;
-        margin-bottom: 4px;
-        letter-spacing: 0px;
+        margin-bottom: 6px;
     }
 
     .auth-header p {
-        font-size: 12px;
-        letter-spacing: 0.5px;
+        font-size: 13px;
     }
 
     .form-control {
-        padding: 13px 12px 5px 42px;
-        font-size: 13px;
+        padding: 14px 12px 5px 42px;
+        font-size: 14px;
     }
 
     .input-icon {
@@ -451,28 +429,103 @@ body::before {
 
     .input-label {
         left: 42px;
+        font-size: 14px;
+    }
+
+    .form-control:focus + .input-label,
+    .form-control:not(:placeholder-shown) + .input-label {
+        font-size: 10px;
+        left: 38px;
+    }
+
+    .btn-submit {
+        font-size: 16px;
+        letter-spacing: 2px;
+        padding: 18px 14px;
+    }
+
+    .btn-secondary {
+        padding: 12px 14px;
+        font-size: 14px;
+    }
+
+    .form-group {
+        margin-bottom: 18px;
+    }
+
+    .signup-link p {
+        font-size: 14px;
+    }
+
+    .divider {
+        margin: 16px 0;
+    }
+
+    .divider span {
+        font-size: 13px;
+        padding: 0 12px;
+    }
+}
+
+@media (max-width: 360px) {
+    .auth-wrapper {
+        padding: 10px;
+    }
+
+    .auth-container {
+        padding: 20px 15px;
+    }
+
+    .auth-header h1 {
+        font-size: 24px;
+    }
+
+    .auth-header p {
+        font-size: 12px;
+    }
+
+    .form-control {
+        padding: 13px 10px 4px 38px;
+        font-size: 13px;
+    }
+
+    .input-icon {
+        left: 11px;
+        width: 14px;
+        height: 14px;
+    }
+
+    .input-label {
+        left: 38px;
         font-size: 13px;
     }
 
     .form-control:focus + .input-label,
     .form-control:not(:placeholder-shown) + .input-label {
         font-size: 9px;
-        left: 38px;
+        left: 34px;
     }
 
-    /* Keep button same as desktop */
     .btn-submit {
-        padding: 20px 16px;
-        font-size: 18px;
-        letter-spacing: 2.5px;
+        padding: 16px 12px;
+        font-size: 15px;
+        letter-spacing: 1.5px;
     }
 
     .btn-submit i {
-        font-size: 20px;
+        font-size: 18px;
     }
 
     .btn-secondary {
-        padding: 12px 14px;
+        padding: 11px 12px;
+        font-size: 13px;
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    .signup-link p {
         font-size: 13px;
     }
 
@@ -482,94 +535,7 @@ body::before {
 
     .divider span {
         font-size: 12px;
-        padding: 0 12px;
-    }
-
-    .form-group {
-        margin-bottom: 16px;
-    }
-
-    .signup-link p {
-        font-size: 13px;
-        margin-bottom: 10px;
-    }
-}
-
-/* ===== SMALL MOBILE RESPONSIVE (≤360px) ===== */
-@media (max-width: 360px) {
-    .auth-wrapper {
-        padding: 8px;
-        padding-top: 30px;
-    }
-
-    .auth-container {
-        padding: 18px 14px;
-    }
-
-    .auth-header h1 {
-        font-size: 24px;
-        letter-spacing: -0.5px;
-    }
-
-    .auth-header p {
-        font-size: 11px;
-        letter-spacing: 0.3px;
-    }
-
-    .form-control {
-        padding: 12px 10px 4px 38px;
-        font-size: 12px;
-    }
-
-    .input-icon {
-        left: 11px;
-        width: 13px;
-        height: 13px;
-    }
-
-    .input-label {
-        left: 38px;
-        font-size: 12px;
-    }
-
-    .form-control:focus + .input-label,
-    .form-control:not(:placeholder-shown) + .input-label {
-        font-size: 9px;
-        left: 34px;
-    }
-
-    /* Keep button same as desktop */
-    .btn-submit {
-        padding: 20px 14px;
-        font-size: 17px;
-        letter-spacing: 2px;
-    }
-
-    .btn-submit i {
-        font-size: 19px;
-    }
-
-    .btn-secondary {
-        padding: 11px 12px;
-        font-size: 12px;
-    }
-
-    .divider {
-        margin: 12px 0;
-    }
-
-    .divider span {
-        font-size: 11px;
         padding: 0 10px;
-    }
-
-    .form-group {
-        margin-bottom: 14px;
-    }
-
-    .signup-link p {
-        font-size: 12px;
-        margin-bottom: 8px;
     }
 
     .error-msg {
@@ -577,7 +543,7 @@ body::before {
         padding: 6px 10px;
     }
 
-    .debug-info {
+    .error-list {
         padding: 10px 12px;
         font-size: 11px;
     }
