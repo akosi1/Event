@@ -10,8 +10,6 @@
         }
         html, body {
             height: 100%;
-            /* Only hide overflow if you're sure content fits */
-            /* overflow: hidden; */
             font-family: 'Poppins', 'Segoe UI', sans-serif;
         }
         body {
@@ -37,6 +35,26 @@
         }
         @keyframes fadeIn {
             to { opacity: 1; }
+        }
+        
+        /* Countdown Display Styles */
+        .countdown-display {
+            font-size: 48px;
+            font-weight: 700;
+            color: #e74c3c;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            margin: 20px 0;
+        }
+        
+        .countdown-label {
+            font-size: 12px;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: -10px;
+            margin-bottom: 20px;
         }
     </style>
 
@@ -134,7 +152,6 @@
         </div>
     </div>
 
-    {{-- ✅ Scripts at bottom for performance --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://www.google.com/recaptcha/api.js?render={{ env('RECAPTCHA_SITE_KEY') }}"></script>
 
@@ -150,7 +167,6 @@
             const loginForm = document.getElementById('loginForm');
             
             let interval = null;
-            const TOTAL_SECONDS = 60;
 
             // Restore department selection
             const oldValue = deptInput.value;
@@ -184,6 +200,13 @@
                 if (!deptBtn.contains(e.target)) deptMenu.classList.remove('show');
             });
 
+            // Format time display (MM:SS)
+            function formatTime(totalSeconds) {
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = totalSeconds % 60;
+                return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }
+
             // Lockout Popup
             const lockoutPopup = document.createElement('div');
             lockoutPopup.className = 'popup-vertical';
@@ -196,7 +219,8 @@
                     <h3>Account Locked</h3>
                     <p>Too many failed attempts</p>
                 </div>
-                <div class="countdown-display" id="countdownDisplay">60</div>
+                <div class="countdown-display" id="countdownDisplay">0:00</div>
+                <div class="countdown-label">Time Remaining</div>
                 <div class="progress-line">
                     <div class="progress-fill" id="progressFill"></div>
                 </div>
@@ -213,11 +237,14 @@
 
                 const countdownEl = document.getElementById('countdownDisplay');
                 const progressEl = document.getElementById('progressFill');
-                const startTime = Math.floor(Date.now() / 1000);
+                
+                // Calculate total duration for progress bar
+                const now = Math.floor(Date.now() / 1000);
+                const totalDuration = endTime - now;
 
                 function update() {
-                    const now = Math.floor(Date.now() / 1000);
-                    const remaining = endTime - now;
+                    const currentTime = Math.floor(Date.now() / 1000);
+                    const remaining = endTime - currentTime;
 
                     if (remaining <= 0) {
                         clearInterval(interval);
@@ -225,24 +252,29 @@
                         authForm.classList.remove('form-disabled');
                         lockoutPopup.classList.remove('active');
                         submitBtn.disabled = false;
-                        showToast('success', 'Account Unlocked', 'You can now try again');
+                        showToast('success', 'Account Unlocked', 'You can now try logging in again');
                         return;
                     }
 
-                    countdownEl.textContent = remaining;
-                    const elapsed = now - startTime;
-                    const percent = Math.max(0, ((TOTAL_SECONDS - elapsed) / TOTAL_SECONDS) * 100);
+                    // Update countdown display (MM:SS)
+                    countdownEl.textContent = formatTime(remaining);
+                    
+                    // Update progress bar
+                    const elapsed = totalDuration - remaining;
+                    const percent = Math.max(0, ((totalDuration - elapsed) / totalDuration) * 100);
                     progressEl.style.width = percent + '%';
                 }
 
                 update();
-                interval = setInterval(update, 100);
+                interval = setInterval(update, 1000); // Update every second
             }
 
+            // Check for existing lockout on page load
             const stored = localStorage.getItem('lockoutEnd');
             if (stored) {
                 const end = parseInt(stored);
-                if (end > Math.floor(Date.now() / 1000)) {
+                const now = Math.floor(Date.now() / 1000);
+                if (end > now) {
                     startLockout(end);
                 } else {
                     localStorage.removeItem('lockoutEnd');
@@ -289,7 +321,9 @@
             // Handle server-side errors
             @if($errors->has('locked_out'))
                 const lockoutEnd = {{ $errors->first('lockout_end') ?? 'null' }};
-                if (lockoutEnd) startLockout(lockoutEnd);
+                if (lockoutEnd) {
+                    startLockout(lockoutEnd);
+                }
             @elseif($errors->has('failed_attempt'))
                 const remaining = {{ $errors->first('remaining') }};
                 showToast('warning', 'Login Failed', `${remaining} ${remaining === 1 ? 'attempt' : 'attempts'} remaining`);
@@ -299,13 +333,16 @@
             loginForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 
+                // Check if department is selected
                 if (!deptInput.value.trim()) {
                     showToast('warning', 'Department Required', 'Please select your department');
                     return;
                 }
 
+                // Show loading popup
                 loadingPopup.classList.add('active');
 
+                // Execute reCAPTCHA
                 grecaptcha.ready(() => {
                     grecaptcha.execute('{{ env("RECAPTCHA_SITE_KEY") }}', { action: 'login' })
                         .then(token => {
