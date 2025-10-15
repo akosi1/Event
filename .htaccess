@@ -5,12 +5,13 @@
     RewriteCond %{HTTPS} off
     RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
-    # Route all requests to public/ (Laravel front controller)
+    # Route all requests to public/ (Laravel front controller), except requests already to public/
+    RewriteCond %{REQUEST_URI} !^/public/
     RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>
 
-# Block common attack patterns in query strings
 <IfModule mod_rewrite.c>
+    # Block common attack patterns in query strings
     RewriteCond %{QUERY_STRING} union [NC,OR]
     RewriteCond %{QUERY_STRING} select [NC,OR]
     RewriteCond %{QUERY_STRING} sleep [NC]
