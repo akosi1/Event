@@ -206,6 +206,7 @@ class EventController extends Controller
                 
                 // Store the image
                 $imagePath = $image->storeAs('events', $imageName, 'public');
+                $validated['image'] = $imagePath;
                 
                 // Verify the file was actually stored
                 if (!Storage::disk('public')->exists($imagePath)) {
