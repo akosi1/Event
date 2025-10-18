@@ -126,8 +126,8 @@
                             </td>
                             <td class="py-2 align-middle">
                                 <div class="event-image-compact">
-                                    <!-- @if($event->image && file_exists(public_path('storage/' . $event->image))) -->
-                                     <img src="{{ $event->image_url }}" alt="{{ $event->title }}" class="event-img-compact">
+                                    @if($event->image && file_exists(public_path('storage/' . $event->image)))
+                                     <!-- <img src="{{ $event->image_url }}" alt="{{ $event->title }}" class="event-img-compact"> -->
                                         <img src="{{ asset('storage/' . $event->image) }}" 
                                              alt="{{ $event->title }}" 
                                              class="event-img-compact"
