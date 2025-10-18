@@ -51,51 +51,34 @@ class Event extends Model
         'custom' => 'Custom'
     ];
 
-    public function hasImage(): bool
-    {
-        return !empty($this->image) && file_exists(public_path('images/' . $this->image));
-    }
-
- public function getImageUrlAttribute(): string
+ public function hasImage(): bool
 {
-    if (!$this->image) {
-        return asset('images/default-event.jpg');
-    }
+    return !empty($this->image) && Storage::disk('public')->exists($this->image);
+}
 
-    if (filter_var($this->image, FILTER_VALIDATE_URL)) {
-        return $this->image;
-    }
-
-    if (file_exists(public_path('storage/' . $this->image))) {
+public function getImageUrlAttribute(): string
+{
+    if ($this->image && Storage::disk('public')->exists($this->image)) {
         return asset('storage/' . $this->image);
     }
 
     return asset('images/default-event.jpg');
 }
 
-    public function getImagePath(): string
-    {
-        if ($this->hasImage()) {
-            return asset('images/' . $this->image);
+public function deleteImage(): bool
+{
+    if ($this->image && Storage::disk('public')->exists($this->image)) {
+        try {
+            Storage::disk('public')->delete($this->image);
+            return true;
+        } catch (\Exception $e) {
+            \Log::error('Failed to delete event image: ' . $e->getMessage());
+            return false;
         }
-
-        return asset('images/default-event.jpg');
     }
 
-    public function deleteImage(): bool
-    {
-        $path = public_path('images/' . $this->image);
-        if ($this->image && file_exists($path)) {
-            try {
-                unlink($path);
-                return true;
-            } catch (\Exception $e) {
-                \Log::error('Failed to delete event image: ' . $e->getMessage());
-                return false;
-            }
-        }
-        return true;
-    }
+    return true;
+}
 
     public function joins(): HasMany
     {
