@@ -126,24 +126,25 @@
                             </td>
                             <td class="py-2 align-middle">
                                 <div class="event-image-compact">
-                                   @if($event->image)
+                                @if($event->image)
     <img src="{{ asset('storage/' . $event->image) }}" alt="{{ $event->title }}">
 @endif
 
-                                        <img src="{{ asset('storage/' . $event->image) }}" 
-                                             alt="{{ $event->title }}" 
-                                             class="event-img-compact"
-                                             onerror="this.parentElement.innerHTML='<div class=\'no-image-compact\'><i class=\'fas fa-image\'></i></div>'">
-                                    @elseif($event->image)
-                                        <img src="{{ $event->image }}" 
-                                             alt="{{ $event->title }}" 
-                                             class="event-img-compact"
-                                             onerror="this.parentElement.innerHTML='<div class=\'no-image-compact\'><i class=\'fas fa-image\'></i></div>'">
-                                    @else
-                                        <div class="no-image-compact">
-                                            <i class="fas fa-image"></i>
-                                        </div>
-                                    @endif
+<img src="{{ asset('storage/' . $event->image) }}" 
+     alt="{{ $event->title }}" 
+     class="event-img-compact"
+     onerror="this.parentElement.innerHTML='<div class=\'no-image-compact\'><i class=\'fas fa-image\'></i></div>'">
+@elseif($event->image)
+    <img src="{{ $event->image }}" 
+         alt="{{ $event->title }}" 
+         class="event-img-compact"
+         onerror="this.parentElement.innerHTML='<div class=\'no-image-compact\'><i class=\'fas fa-image\'></i></div>'">
+@else
+    <div class="no-image-compact">
+        <i class="fas fa-image"></i>
+    </div>
+@endif
+
                                 </div>
                             </td>
                             <td class="py-2 align-middle">
