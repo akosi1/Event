@@ -56,27 +56,22 @@ class Event extends Model
         return !empty($this->image) && file_exists(public_path('images/' . $this->image));
     }
 
-    public function getImageUrlAttribute(): string
-    {
-        if (!$this->image) {
-            return asset('images/default-event.jpg');
-        }
-
-        if (filter_var($this->image, FILTER_VALIDATE_URL)) {
-            return $this->image;
-        }
-
-        $extension = strtolower(pathinfo($this->image, PATHINFO_EXTENSION));
-        if (!in_array($extension, ['jpg', 'jpeg', 'png'])) {
-            return asset('images/default-event.jpg');
-        }
-
-        if (file_exists(public_path('images/' . $this->image))) {
-            return asset('images/' . $this->image);
-        }
-
+ public function getImageUrlAttribute(): string
+{
+    if (!$this->image) {
         return asset('images/default-event.jpg');
     }
+
+    if (filter_var($this->image, FILTER_VALIDATE_URL)) {
+        return $this->image;
+    }
+
+    if (file_exists(public_path('storage/' . $this->image))) {
+        return asset('storage/' . $this->image);
+    }
+
+    return asset('images/default-event.jpg');
+}
 
     public function getImagePath(): string
     {
