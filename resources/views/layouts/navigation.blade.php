@@ -2,8 +2,8 @@
 <nav class="navbar" id="navbar">
     <div class="nav-container">
         <a href="{{ route('dashboard') }}" class="nav-logo">
-            <img src="{{ asset('images/logo.png') }}" alt="MCC Logo">
-            <span>MCC E&PO</span>
+            <i class="fas fa-calendar-alt"></i>
+            <span>EventAps</span>
         </a>
 
         <ul class="nav-menu" id="navMenu">
