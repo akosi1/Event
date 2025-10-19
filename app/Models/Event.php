@@ -2,14 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\{
-    Factories\HasFactory,
-    Model,
-    Relations\HasMany,
-    Relations\BelongsToMany,
-    Relations\BelongsTo
-};
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Log;
 
 class Event extends Model
 {
@@ -51,73 +49,15 @@ class Event extends Model
         'custom' => 'Custom'
     ];
 
+    // 🔗 Relationships
     public function certificates(): HasMany
     {
         return $this->hasMany(Certificate::class);
-    }
-    public function hasImage(): bool
-    {
-        return !empty($this->image) && file_exists(public_path('app/public/' . $this->image));
-    }
-
-    public function getImageUrlAttribute(): string
-    {
-        if (!$this->image) {
-            return asset('images/default-event.jpg');
-        }
-
-        if (filter_var($this->image, FILTER_VALIDATE_URL)) {
-            return $this->image;
-        }
-
-        $extension = strtolower(pathinfo($this->image, PATHINFO_EXTENSION));
-        if (!in_array($extension, ['jpg', 'jpeg', 'png'])) {
-            return asset('images/default-event.jpg');
-        }
-
-        if (file_exists(public_path('storage/' . $this->image))) {
-            return asset('storage/' . $this->image);
-        }
-
-        return asset('images/default-event.jpg');
-    }
-
-    public function getImagePath(): string
-    {
-        if ($this->hasImage()) {
-            return asset('app/public/' . $this->image);
-        }
-
-        return asset('images/default-event.jpg');
-    }
-
-    public function deleteImage(): bool
-    {
-        $path = public_path('app/public/' . $this->image);
-        if ($this->image && file_exists($path)) {
-            try {
-                unlink($path);
-                return true;
-            } catch (\Exception $e) {
-                \Log::error('Failed to delete event image: ' . $e->getMessage());
-                return false;
-            }
-        }
-        return true;
     }
 
     public function joins(): HasMany
     {
         return $this->hasMany(EventJoin::class);
-    }
-
-    public function joinStatus($userId)
-    {
-        $join = $this->joins()->where('user_id', $userId)->first();
-
-        if (!$join) return 'not_joined';
-        if ($join->approved) return 'joined';
-        return 'pending';
     }
 
     public function joinedUsers(): BelongsToMany
@@ -137,6 +77,56 @@ class Event extends Model
         return $this->hasMany(Event::class, 'parent_event_id');
     }
 
+    // 🖼️ Image Helpers
+    public function hasImage(): bool
+    {
+        return !empty($this->image) && file_exists(public_path('storage/' . $this->image));
+    }
+
+    public function getImageUrlAttribute(): string
+    {
+        if (!$this->image) {
+            return asset('images/default-event.jpg');
+        }
+
+        if (filter_var($this->image, FILTER_VALIDATE_URL)) {
+            return $this->image;
+        }
+
+        $extension = strtolower(pathinfo($this->image, PATHINFO_EXTENSION));
+        if (!in_array($extension, ['jpg', 'jpeg', 'png'])) {
+            return asset('images/default-event.jpg');
+        }
+
+        return file_exists(public_path('storage/' . $this->image))
+            ? asset('storage/' . $this->image)
+            : asset('images/default-event.jpg');
+    }
+
+    public function deleteImage(): bool
+    {
+        if ($this->image && file_exists(public_path('storage/' . $this->image))) {
+            try {
+                unlink(public_path('storage/' . $this->image));
+                return true;
+            } catch (\Throwable $e) {
+                Log::error('Failed to delete event image: ' . $e->getMessage());
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // 👥 Join status
+    public function joinStatus($userId): string
+    {
+        $join = $this->joins()->where('user_id', $userId)->first();
+
+        if (!$join) return 'not_joined';
+        if ($join->approved) return 'joined';
+        return 'pending';
+    }
+
     public function isJoinedByUser($userId): bool
     {
         return $this->joins()->where('user_id', $userId)->exists();
@@ -147,6 +137,7 @@ class Event extends Model
         return $this->joins()->count();
     }
 
+    // 🔍 Scopes
     public function scopeActive($query)
     {
         return $query->where('status', 'active');
@@ -166,6 +157,7 @@ class Event extends Model
         });
     }
 
+    // 🧩 Department logic
     public function isAvailableForUserDepartment($userDepartment): bool
     {
         if (!$this->is_exclusive) {
@@ -185,11 +177,7 @@ class Event extends Model
             return true;
         }
 
-        if ($this->allowed_departments && in_array($department, $this->allowed_departments)) {
-            return true;
-        }
-
-        return false;
+        return $this->allowed_departments && in_array($department, $this->allowed_departments);
     }
 
     public function getAccessibleDepartments(): array
@@ -204,7 +192,7 @@ class Event extends Model
             $departments[] = $this->department;
         }
 
-        if ($this->allowed_departments && is_array($this->allowed_departments)) {
+        if (is_array($this->allowed_departments)) {
             $departments = array_merge($departments, $this->allowed_departments);
         }
 
@@ -213,12 +201,9 @@ class Event extends Model
 
     public function getDepartmentDisplayAttribute(): string
     {
-        if (!$this->is_exclusive) {
-            return 'All Departments';
-        }
-
-        $departments = $this->getAccessibleDepartments();
-        return implode(', ', $departments);
+        return !$this->is_exclusive
+            ? 'All Departments'
+            : implode(', ', $this->getAccessibleDepartments());
     }
 
     public function getDepartmentNamesAttribute(): string
@@ -227,33 +212,24 @@ class Event extends Model
             return 'Open to All Departments';
         }
 
-        $accessibleDepartments = $this->getAccessibleDepartments();
         $departmentNames = [];
-
-        foreach ($accessibleDepartments as $deptCode) {
+        foreach ($this->getAccessibleDepartments() as $deptCode) {
             $departmentNames[] = self::DEPARTMENTS[$deptCode] ?? $deptCode;
         }
 
         return implode(', ', $departmentNames);
     }
 
+    // 🧑‍💻 Joining rules
     public function canUserJoin($user): bool
     {
-        if ($this->status !== 'active') {
-            return false;
-        }
-
-        if ($this->date < now()) {
-            return false;
-        }
-
-        if ($this->isJoinedByUser($user->id)) {
-            return false;
-        }
-
-        return $this->isAvailableForUserDepartment($user->department);
+        return $this->status === 'active'
+            && $this->date >= now()
+            && !$this->isJoinedByUser($user->id)
+            && $this->isAvailableForUserDepartment($user->department);
     }
 
+    // 🔁 Recurrence
     public function isRecurring(): bool
     {
         return $this->is_recurring && !empty($this->recurrence_pattern);
@@ -276,17 +252,19 @@ class Event extends Model
         return $pattern . $interval;
     }
 
+    // 🔍 Query helper
     public static function availableForUser($user)
     {
         return static::where('status', 'active')
-                    ->where('date', '>=', now())
-                    ->where(function ($query) use ($user) {
-                        $query->where('is_exclusive', false)
-                              ->orWhere('department', $user->department)
-                              ->orWhereJsonContains('allowed_departments', $user->department);
-                    });
+            ->where('date', '>=', now())
+            ->where(function ($query) use ($user) {
+                $query->where('is_exclusive', false)
+                      ->orWhere('department', $user->department)
+                      ->orWhereJsonContains('allowed_departments', $user->department);
+            });
     }
 
+    // 🧹 Auto-delete image when deleting event
     protected static function boot()
     {
         parent::boot();
