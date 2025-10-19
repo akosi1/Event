@@ -14,8 +14,7 @@ class DashboardController extends Controller
         $user = auth()->user();
 
         $query = Event::where('status', 'active')
-                      ->upcoming()
-                      ->whereNull('parent_event_id'); // Only show parent events, not recurring instances
+                      ->whereNull('parent_event_id'); 
 
         // Department filter - now handles exclusive events properly
         if ($request->filled('department')) {
@@ -41,11 +40,13 @@ class DashboardController extends Controller
         // Add is_joined attribute for each event
         $events->getCollection()->transform(function ($event) {
             $userId = auth()->id();
+            $eventDate = Carbon::parse($event->date)->format('Y-m-d');
+            $endTime = Carbon::parse($event->end_time)->format('H:i:s');
+            $end = Carbon::parse("{$eventDate} {$endTime}", 'Asia/Manila');
+            
             $event->is_joined = $event->isJoinedByUser(auth()->id());
             $event->join_status = $event->joinStatus($userId);
-            $event->hasEnded = Carbon::parse($event->date)
-            ->setTimeFromTimeString($event->end_time)
-            ->isPast();
+            $event->hasEnded = $end->isPast();
 
             return $event;
         });
