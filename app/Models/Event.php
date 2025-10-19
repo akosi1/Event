@@ -55,11 +55,9 @@ class Event extends Model
     {
         return $this->hasMany(Certificate::class);
     }
-
-
     public function hasImage(): bool
     {
-        return !empty($this->image) && file_exists(public_path('storage/' . $this->image));
+        return !empty($this->image) && file_exists(public_path('app/public/' . $this->image));
     }
 
     public function getImageUrlAttribute(): string
@@ -87,7 +85,7 @@ class Event extends Model
     public function getImagePath(): string
     {
         if ($this->hasImage()) {
-            return asset('storage/' . $this->image);
+            return asset('app/public/' . $this->image);
         }
 
         return asset('images/default-event.jpg');
@@ -95,7 +93,7 @@ class Event extends Model
 
     public function deleteImage(): bool
     {
-        $path = public_path('storage/' . $this->image);
+        $path = public_path('app/public/' . $this->image);
         if ($this->image && file_exists($path)) {
             try {
                 unlink($path);
