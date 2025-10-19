@@ -84,8 +84,8 @@
 
         .certificate-image-container {
             position: relative;
-            width: 100%;
-            height: 220px;
+            width: 100%; 
+            height: 220px; 
             overflow: hidden;
             background: #f9fafb;
         }
