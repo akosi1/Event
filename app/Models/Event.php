@@ -57,63 +57,56 @@ class Event extends Model
     }
 
 
-   public function hasImage(): bool
-{
-    if (empty($this->image)) {
-        return false;
+    public function hasImage(): bool
+    {
+        return !empty($this->image) && file_exists(public_path('public/' . $this->image));
     }
 
-    // Check using Laravel Storage (works both locally and in production)
-    return \Storage::disk('public')->exists($this->image);
-}
-
-public function getImageUrlAttribute(): string
-{
-    if (empty($this->image)) {
-        return asset('images/default-event.jpg');
-    }
-
-    // If the image field already has a full URL
-    if (filter_var($this->image, FILTER_VALIDATE_URL)) {
-        return $this->image;
-    }
-
-    $extension = strtolower(pathinfo($this->image, PATHINFO_EXTENSION));
-    if (!in_array($extension, ['jpg', 'jpeg', 'png', 'webp'])) {
-        return asset('images/default-event.jpg');
-    }
-
-    // Check if the image exists in storage
-    if (\Storage::disk('public')->exists($this->image)) {
-        return asset('storage/' . $this->image);
-    }
-
-    return asset('images/default-event.jpg');
-}
-
-public function getImagePath(): string
-{
-    if (\Storage::disk('public')->exists($this->image)) {
-        return asset('storage/' . $this->image);
-    }
-
-    return asset('images/default-event.jpg');
-}
-
-public function deleteImage(): bool
-{
-    if (!empty($this->image) && \Storage::disk('public')->exists($this->image)) {
-        try {
-            \Storage::disk('public')->delete($this->image);
-            return true;
-        } catch (\Exception $e) {
-            \Log::error('Failed to delete event image: ' . $e->getMessage());
-            return false;
+    public function getImageUrlAttribute(): string
+    {
+        if (!$this->image) {
+            return asset('images/default-event.jpg');
         }
+
+        if (filter_var($this->image, FILTER_VALIDATE_URL)) {
+            return $this->image;
+        }
+
+        $extension = strtolower(pathinfo($this->image, PATHINFO_EXTENSION));
+        if (!in_array($extension, ['jpg', 'jpeg', 'png'])) {
+            return asset('images/default-event.jpg');
+        }
+
+        if (file_exists(public_path('public/' . $this->image))) {
+            return asset('public/' . $this->image);
+        }
+
+        return asset('images/default-event.jpg');
     }
 
-    return true;
-}
+    public function getImagePath(): string
+    {
+        if ($this->hasImage()) {
+            return asset('public/' . $this->image);
+        }
+
+        return asset('images/default-event.jpg');
+    }
+
+    public function deleteImage(): bool
+    {
+        $path = public_path('public/' . $this->image);
+        if ($this->image && file_exists($path)) {
+            try {
+                unlink($path);
+                return true;
+            } catch (\Exception $e) {
+                \Log::error('Failed to delete event image: ' . $e->getMessage());
+                return false;
+            }
+        }
+        return true;
+    }
 
     public function joins(): HasMany
     {
