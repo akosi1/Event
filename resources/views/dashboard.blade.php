@@ -460,14 +460,15 @@
                                                     data-certificate-date={{$certificate->created_at}}
                                                     onclick="showCertificateInfo({{ $certificate->event_id }})"
                                                 @else
+                                                    data-event-id="{{$event->id}}"
                                                     onclick="toggleGenerateCertificate(this)" 
                                                 @endif
-                                                title="{{ (!$event->hasEnded && !$event->certificate_template_image)
+                                                title="{{ (!$event->hasEnded || !$event->certificate_template_image)
                                                 ? 'The Event is not yet end or no Certificate template'
                                                 : '' }}"
-                                                @disabled(!$event->hasEnded && !$event->certificate_template_image)>
+                                                @disabled(!$event->hasEnded || !$event->certificate_template_image)>
                                                 <span class="btn-text">
-                                                    Certificate
+                                                    {{$certificate && $event->hasEnded ? 'View' : 'Certificate'}}
                                                 </span>
                                             </button>
                                         </div>
@@ -837,6 +838,8 @@
                             showConfirmButton: false,
                             toast: true,
                             position: 'top-end'
+                        }).then(() => {
+                            location.reload();
                         });
                     } else {
                         // Show error message
