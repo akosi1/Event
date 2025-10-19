@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>MCC Event & Portfolio Organizer</title>
-    <link href="{{ asset('user/footer/footer.css') }}" rel="stylesheet">  
-    <link href="{{ asset('user/welcome/welcome.css') }}" rel="stylesheet">   
+    <link href="{{ asset('user/footer/footer.css') }}" rel="stylesheet">
+    <link href="{{ asset('user/welcome/welcome.css') }}" rel="stylesheet">
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,11 +14,11 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
-</head>
 
+</head>
 <body>
     <!-- Include Navigation -->
-    @include('layouts.intronav')
+    @include('layouts.intromav')
 
     <!-- Animated Background -->
     <div class="animated-background">
