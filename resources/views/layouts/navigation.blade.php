@@ -1,31 +1,29 @@
 <!-- Navigation -->
-<nav class="navbar" id="navbar">
+<nav class="navbar">
     <div class="nav-container">
-        <a href="{{ route('dashboard') }}" class="nav-logo">
+        <a href="{{ route('dashboard') }}" class="nav-brand">
             <i class="fas fa-calendar-alt"></i>
-            <span>EventAps</span>
+            EventAps
         </a>
 
-        <ul class="nav-menu" id="navMenu">
-            <!-- Certificates Link -->
-            <li>
-                <a href="{{ route('certificates') }}">
-                    <i class="fas fa-medal"></i>
-                    Certificates
-                </a>
-            </li>
+        <!-- Mobile toggle will be inserted here by JavaScript -->
 
-            <!-- Dashboard Link -->
-            <li>
-                <a href="{{ route('dashboard') }}">
-                    <i class="fas fa-tachometer-alt"></i>
-                    Home
-                </a>
-            </li>
+        <div class="nav-content">
+            <!-- Certificates Button -->
+            <a href="{{ route('certificates') }}" class="nav-btn">
+                <i class="fas fa-medal"></i>
+                Certificates
+            </a>
 
-            <!-- Department Dropdown -->
-            <li class="dropdown" id="deptDropdown">
-                <a href="#" class="dropdown-toggle">
+            <!-- Dashboard Button -->
+            <a href="{{ route('dashboard') }}" class="nav-btn">
+                <i class="fas fa-tachometer-alt"></i>
+                Home
+            </a>
+
+            <!-- Department Filter -->
+            <div class="dropdown" id="deptDropdown">
+                <button class="dropdown-btn" type="button">
                     <i class="fas fa-graduation-cap"></i>
                     <span id="deptLabel">
                         @if(request('department'))
@@ -34,8 +32,8 @@
                             Departments
                         @endif
                     </span>
-                    <i class="fas fa-chevron-down dropdown-arrow"></i>
-                </a>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
                 <div class="dropdown-menu">
                     <div class="dropdown-header">Select Department</div>
                     @php
@@ -59,23 +57,23 @@
                         </a>
                     @endforeach
 
-                    <div class="dropdown-divider"></div>
+                    <div style="height: 1px; background: #1a1a1a; margin: 0.5rem 0;"></div>
                     <a href="{{ route('dashboard', request()->except('department')) }}"
-                       class="dropdown-item clear-filter">
+                       class="dropdown-item">
                         <i class="fas fa-times"></i>
                         Clear Filter
                     </a>
                 </div>
-            </li>
+            </div>
 
-            <!-- User Dropdown -->
-            <li class="dropdown" id="userDropdown">
-                <a href="#" class="dropdown-toggle user-toggle">
+            <!-- User Menu -->
+            <div class="dropdown" id="userDropdown">
+                <button class="dropdown-btn user-btn" type="button">
                     <i class="fas fa-user-circle"></i>
                     {{ auth()->user()->first_name }}
-                    <i class="fas fa-chevron-down dropdown-arrow"></i>
-                </a>
-                <div class="dropdown-menu dropdown-menu-right">
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="dropdown-menu right">
                     <a href="{{ route('profile.edit') }}" class="dropdown-item">
                         <i class="fas fa-user"></i>
                         Profile
@@ -88,11 +86,20 @@
                         </button>
                     </form>
                 </div>
-            </li>
-        </ul>
-
-        <button class="mobile-toggle" id="mobileToggle">
-            <i class="fas fa-bars"></i>
-        </button>
+            </div>
+        </div>
     </div>
 </nav>
+
+<!-- Filter Status Banner -->
+<!-- @if(request('department'))
+    <div class="filter-status">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <i class="fas fa-filter"></i>
+            <span>Filtering by: <strong>{{ request('department') }} - {{ $departments[request('department')] ?? '' }}</strong></span>
+        </div>
+        <a href="{{ route('dashboard', request()->except('department')) }}" class="filter-close">
+            <i class="fas fa-times"></i>
+        </a>
+    </div>
+@endif -->
