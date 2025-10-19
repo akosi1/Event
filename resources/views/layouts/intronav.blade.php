@@ -6,11 +6,11 @@
             <span>MCC E&PO</span>
         </a>
         <ul class="nav-menu" id="navMenu">
-            <li><a href="#features">Features</a></li>
-            <li><a href="#location">Location</a></li>
-            <li><a href="#feedback">Feedback</a></li>
-            <li><a href="#contact">Contact Us</a></li>
-            <li><a href="#about">About Us</a></li>
+            <li><a href="#features"><i class="fas fa-star"></i> Features</a></li>
+            <li><a href="#location"><i class="fas fa-map-marker-alt"></i> Location</a></li>
+            <li><a href="#feedback"><i class="fas fa-comments"></i> Feedback</a></li>
+            <li><a href="#contact"><i class="fas fa-envelope"></i> Contact Us</a></li>
+            <li><a href="#about"><i class="fas fa-info-circle"></i> About Us</a></li>
         </ul>
         <button class="mobile-toggle" id="mobileToggle">
             <i class="fas fa-bars"></i>
@@ -76,6 +76,14 @@
         font-weight: 500;
         transition: all 0.3s ease;
         position: relative;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .nav-menu li a i {
+        font-size: 16px;
+        transition: all 0.3s ease;
     }
 
     .nav-menu li a::after {
@@ -93,26 +101,12 @@
         color: #e53e3e;
     }
 
+    .nav-menu li a:hover i {
+        transform: scale(1.1);
+    }
+
     .nav-menu li a:hover::after {
         width: 100%;
-    }
-
-    .nav-login {
-        background: linear-gradient(135deg, #e53e3e, #d53f41);
-        color: white;
-        padding: 8px 20px;
-        border-radius: 5px;
-        text-decoration: none;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .nav-login:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 20px rgba(229, 62, 62, 0.4);
     }
 
     .mobile-toggle {
@@ -122,6 +116,12 @@
         color: white;
         font-size: 22px;
         cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .mobile-toggle:hover {
+        color: #e53e3e;
+        transform: scale(1.1);
     }
 
     /* Mobile Responsive Navigation */
@@ -146,6 +146,11 @@
 
         .mobile-toggle {
             display: block;
+        }
+
+        .nav-menu li a {
+            font-size: 16px;
+            padding: 10px 0;
         }
     }
 </style>
