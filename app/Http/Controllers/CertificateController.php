@@ -51,15 +51,15 @@ class CertificateController extends Controller
         $fullName = $user->first_name . ' ' . $user->last_name;
 
         // load the certificate background image
-        $eventTemplateImageFile = storage_path('app/public/' . $event->certificate_template_image);
+        $certificateTemplateImageFile = storage_path('app/public/' . $event->certificate_template_image);
 
-        if(!file_exists($eventTemplateImageFile)){
+        if(!file_exists($certificateTemplateImageFile)){
             return response()->json([
             'success' => false,
             'message' => 'Certificate Template Not Found!',
             ]);
         }
-        $image =  Image::make($certificateImageFile);
+        $image =  Image::make($certificateTemplateImageFile);
 
         // get image width and height
         $imgWidth = $image->width();
