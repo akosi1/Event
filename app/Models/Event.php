@@ -53,7 +53,7 @@ class Event extends Model
 
     public function hasImage(): bool
     {
-        return !empty($this->image) && file_exists(public_path('images/' . $this->image));
+        return !empty($this->image) && file_exists(public_path('storage/' . $this->image));
     }
 
     public function getImageUrlAttribute(): string
@@ -71,8 +71,8 @@ class Event extends Model
             return asset('images/default-event.jpg');
         }
 
-        if (file_exists(public_path('images/' . $this->image))) {
-            return asset('images/' . $this->image);
+        if (file_exists(public_path('storage/' . $this->image))) {
+            return asset('storage/' . $this->image);
         }
 
         return asset('images/default-event.jpg');
@@ -81,7 +81,7 @@ class Event extends Model
     public function getImagePath(): string
     {
         if ($this->hasImage()) {
-            return asset('images/' . $this->image);
+            return asset('storage/' . $this->image);
         }
 
         return asset('images/default-event.jpg');
@@ -89,7 +89,7 @@ class Event extends Model
 
     public function deleteImage(): bool
     {
-        $path = public_path('images/' . $this->image);
+        $path = public_path('storage/' . $this->image);
         if ($this->image && file_exists($path)) {
             try {
                 unlink($path);
