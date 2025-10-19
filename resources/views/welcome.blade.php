@@ -18,7 +18,7 @@
 </head>
 <body>
     <!-- Include Navigation -->
-    @include('layouts.intromav')
+    @include('layouts.intronav')
 
     <!-- Animated Background -->
     <div class="animated-background">
