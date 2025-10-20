@@ -466,7 +466,7 @@
                                                 title="{{ (!$event->hasEnded || !$event->certificate_template_image)
                                                 ? 'The Event is not yet end or no Certificate template'
                                                 : '' }}"
-                                                @disabled(!$event->hasEnded || !$event->certificate_template_image)>
+                                                <!-- @disabled(!$event->hasEnded || !$event->certificate_template_image)> -->
                                                 <span class="btn-text">
                                                     {{$certificate && $event->hasEnded ? 'View' : 'Certificate'}}
                                                 </span>
