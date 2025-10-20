@@ -1,5 +1,6 @@
 # Laravel & PHP
 /vendor/
+vendor/
 .env
 .env.*
 .phpunit.result.cache
@@ -10,9 +11,7 @@ Homestead.json
 .phpstorm.meta.php
 # /public/storage
 # /storage/*.key
-
-# Allow storage/app/public and its contents
-!storage/app/public/**
+# /storage/app/public
 /storage/framework/cache/*
 /storage/framework/sessions/*
 /storage/framework/testing/*
@@ -36,3 +35,4 @@ Thumbs.db
 
 # Composer dependencies
 composer.lock
+
