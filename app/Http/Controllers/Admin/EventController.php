@@ -90,40 +90,23 @@ class EventController extends Controller
 
     public function store(Request $request)
     {
+        // dd($request->input('image'));
         $validated = $this->validateEventData($request);
 
         $fileFields = ['image', 'certificate_template_image'];
 
-        foreach($fileFields as $field){
-            if ($request->hasFile($field)) {
-                try {
-                    $image = $request->file($field);
+        foreach ($fileFields as $field) {
+            if ($request->filled($field)) {
+                $base64String = $request->input($field);
 
-                    // Validate the file is actually an image
-                    if (!$image->isValid()) {
-                        return back()->withErrors([$field => 'Invalid image file.'])->withInput();
-                    }
-
-                    // Create a unique filename with timestamp
-                    $fileName = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
-
-                    // Store the image in public disk
-                    $folder = $field === 'certificate_template_image' ? 'certificates' : 'events';
-                    $filePath = $image->storeAs($folder, $fileName, 'public');
-
-                    // Verify the file was actually stored
-                    if (!Storage::disk('public')->exists($filePath)) {
-                        return back()->withErrors([$field => 'Failed to store image.'])->withInput();
-                    }
-
-                    $validated[$field] = $filePath;
-                } catch (\Exception $e) {
-                    return back()->withErrors([$field => 'Failed to upload image: ' . $e->getMessage()])->withInput();
+                // Validate it's a proper base64 image
+                if (!preg_match('/^data:image\/(jpeg|png|jpg|gif|webp);base64,/', $base64String)) {
+                    return back()->withErrors([$field => 'Invalid base64 image format.'])->withInput();
                 }
+
+                $validated[$field] = $base64String;
             }
-
         }
-
         // Process department exclusivity
         $validated = $this->processDepartmentExclusivity($validated, $request);
 
@@ -353,7 +336,7 @@ class EventController extends Controller
             'department' => 'nullable|string|in:' . implode(',', array_keys(self::DEPARTMENTS)),
             'status' => 'required|in:active,postponed,cancelled',
             'cancel_reason' => 'required_if:status,postponed,cancelled|nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'image' => ['nullable', 'string', 'regex:/^data:image\/(jpeg|png|jpg|gif|webp);base64,/'],
             'remove_image' => 'nullable|boolean',
 
             // Exclusivity fields

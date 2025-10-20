@@ -223,8 +223,9 @@
                     <!-- Image Upload -->
                     <div class="mb-4">
                         <label for="image" class="form-label fw-semibold">Event Image</label>
+                        <input type="hidden" name="image" id="imageBase64">
                         <input type="file" class="form-control @error('image') is-invalid @enderror"
-                            id="image" name="image" accept="image/jpeg,image/png,image/jpg,image/">
+                            id="image" accept="image/jpeg,image/png,image/jpg,image/">
                         @error('image')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         <div class="form-text">Supported: JPG, PNG, JPEG. Max size: 2MB</div>
 
@@ -245,8 +246,9 @@
                     <!-- Certificate Template Upload -->
                     <div class="mb-4">
                         <label for="certificateTemplateImage" class="form-label fw-semibold">Certificate Template Image</label>
+                        <input type="hidden" name="certificate_template_image" id="certificateImageBase64">
                         <input type="file" class="form-control @error('image') is-invalid @enderror"
-                            id="certificateTemplateImage" name="certificate_template_image" accept="image/jpeg,image/png,image/jpg,image/">
+                            id="certificateTemplateImage" accept="image/jpeg,image/png,image/jpg,image/">
                         @error('image')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         <div class="form-text">Supported: JPG, PNG, JPEG. Max size: 2MB</div>
 
@@ -351,7 +353,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (file) {
             const reader = new FileReader();
             reader.onload = function(e) {
-                previewImg.src = e.target.result;
+                const base64String = e.target.result;
+                document.getElementById('imageBase64').value = base64String;
+                previewImg.src = base64String;
                 imagePreview.style.display = 'block';
             };
             reader.readAsDataURL(file);
@@ -363,7 +367,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (file) {
             const reader = new FileReader();
             reader.onload = function(e) {
-                certificatePreviewImg.src = e.target.result;
+                const base64String = e.target.result;
+                document.getElementById('certificateImageBase64').value = base64String;
+                certificatePreviewImg.src = base64String;
                 certificateImagePreview.style.display = 'block';
             };
             reader.readAsDataURL(file);
