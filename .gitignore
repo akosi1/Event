@@ -10,8 +10,8 @@ Homestead.json
 .vscode/
 .phpstorm.meta.php
 /public/storage
-/storage/*.key
-/storage/app/public
+# /storage/*.key
+# /storage/app/public
 /storage/framework/cache/*
 /storage/framework/sessions/*
 /storage/framework/testing/*
