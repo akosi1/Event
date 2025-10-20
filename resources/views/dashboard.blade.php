@@ -9,7 +9,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="{{ asset('user/dashboard/dashboard.css') }}" rel="stylesheet">
     <link href="{{ asset('user/nav/css/navbar.css') }}" rel="stylesheet">
-    <link href="{{ asset('user/footer/footer.css') }}" rel="stylesheet">   
+    {{-- <link href="{{ asset('user/footer/footer.css') }}" rel="stylesheet"> --}}
     <!-- SweetAlert2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.min.css" rel="stylesheet">
 
@@ -228,6 +228,12 @@
             }
         }
 
+        /* opacity: 0.4; */
+        /* ===========================
+       FEEDBACK FEATURE STYLES
+       =========================== */
+
+        /* Feedback button under each event */
         .feedback-btn {
             background-color: #2e2f54ff;
             color: #fff;
@@ -313,6 +319,8 @@
             font-family: inherit;
             font-size: 0.95rem;
         }
+
+        /* Feedback modal animation */
         @keyframes fadeInScale {
             from {
                 opacity: 0;
@@ -328,6 +336,7 @@
 </head>
 
 <body>
+    <!-- Include Navigation -->
     @include('layouts.navigation')
 
     <div class="py-12">
@@ -361,8 +370,8 @@
                                 data-end-time="{{ \Carbon\Carbon::parse($event->end_time)->format('H:i:s') }}">
                                 <!-- Background Image -->
                                 <div class="event-image-container">
-                                    @if ($event->hasImage())
-                                        <img src="{{ $event->image_url }}" alt="{{ e($event->title) }}"
+                                    @if ($event->image)
+                                        <img src="{{ $event->image }}" alt="{{ e($event->title) }}"
                                             class="event-image"
                                             onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'no-image-placeholder\'><i class=\'fas fa-calendar-alt\'></i></div>';">
                                     @else
@@ -446,18 +455,18 @@
 
                                             <button class="custom-btn generate-btn"
                                                 @if ($certificate)
-                                                    data-certificate-path="{{ asset('storage/' . $certificate->certificate_path) }}"
+                                                    data-certificate-path="{{ $certificate->certificate_path }}"
                                                     data-event-title={{$certificate->event->title}}
                                                     data-certificate-date={{$certificate->created_at}}
                                                     onclick="showCertificateInfo({{ $certificate->event_id }})"
                                                 @else
                                                     data-event-id="{{$event->id}}"
-                                                    onclick="toggleGenerateCertificate(this)" 
+                                                    onclick="toggleGenerateCertificate(this)"
                                                 @endif
                                                 title="{{ (!$event->hasEnded || !$event->certificate_template_image)
                                                 ? 'The Event is not yet end or no Certificate template'
                                                 : '' }}"
-                                                @disabled(!$event->hasEnded || !$event->certificate_template_image)>
+                                                {{-- @disabled(!$event->hasEnded || !$event->certificate_template_image)> --}}
                                                 <span class="btn-text">
                                                     {{$certificate && $event->hasEnded ? 'View' : 'Certificate'}}
                                                 </span>
