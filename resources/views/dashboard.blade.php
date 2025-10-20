@@ -403,7 +403,7 @@
                                     data-event-time="{{ e($event->start_time ? $event->start_time->format('g:i A') : 'TBA') }}"
                                     data-event-department="{{ e($event->department_display) }}"
                                     data-event-description="{{ e($event->description ?? 'No description available.') }}"
-                                    data-event-image="{{ $event->hasImage() ? $event->image_url : '' }}"
+                                    data-event-image="{{ $event->image }}"
                                     data-event-status="{{ e($event->status) }}">
                                     <i class="fas fa-info"></i>
                                 </button>
