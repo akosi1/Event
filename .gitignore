@@ -9,7 +9,7 @@ Homestead.json
 .idea/
 .vscode/
 .phpstorm.meta.php
-/public/storage
+# /public/storage
 # /storage/*.key
 # /storage/app/public
 /storage/framework/cache/*
