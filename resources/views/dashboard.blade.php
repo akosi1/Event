@@ -455,7 +455,7 @@
 
                                             <button class="custom-btn generate-btn"
                                                 @if ($certificate)
-                                                    data-certificate-path="{{ asset('storage/' . $certificate->certificate_path) }}"
+                                                    data-certificate-path="{{ $certificate->certificate_path }}"
                                                     data-event-title={{$certificate->event->title}}
                                                     data-certificate-date={{$certificate->created_at}}
                                                     onclick="showCertificateInfo({{ $certificate->event_id }})"
@@ -466,7 +466,7 @@
                                                 title="{{ (!$event->hasEnded || !$event->certificate_template_image)
                                                 ? 'The Event is not yet end or no Certificate template'
                                                 : '' }}"
-                                                {{-- @disabled(!$event->hasEnded || !$event->certificate_template_image)> --}}
+                                                @disabled(!$event->hasEnded || !$event->certificate_template_image)>
                                                 <span class="btn-text">
                                                     {{$certificate && $event->hasEnded ? 'View' : 'Certificate'}}
                                                 </span>
