@@ -412,7 +412,7 @@
                                 @if ($event->is_exclusive)
                                     <div class="exclusivity-badge exclusive">
                                         <i class="fas fa-graduation-cap"></i>
-                                        {{ e($event->department ?? 'BSBA') }}
+                                        {{ auth()->user()->department }}
                                     </div>
                                 @else
                                     <div class="exclusivity-badge open">
