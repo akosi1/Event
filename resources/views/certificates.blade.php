@@ -166,7 +166,7 @@
                         @foreach($certificates as $certificate)
                             <div class="certificate-card">
                                 <div class="certificate-image-container">
-                                    <img src="{{ asset('storage/' . $certificate->certificate_path) }}"
+                                    <img src="{{ $certificate->certificate_path }}"
                                         alt="Certificate for {{ e($certificate->event->title ?? 'Event') }}"
                                         class="certificate-image"
                                         onerror="this.onerror=null; this.src='{{ asset('images/default-event.jpg') }}';">
@@ -181,9 +181,9 @@
                                         Generated on: {{ $certificate->created_at->format('F d, Y') }}
                                     </p>
 
-                                    <a href="{{ asset('storage/' . $certificate->certificate_path) }}"
-                                    download
-                                    class="download-btn">
+                                    <a href="{{$certificate->certificate_path}}"
+                                        download="{{ strtolower($certificate->user->first_name ?? 'user') }}_{{ strtolower(preg_replace('/[^A-Za-z0-9\-]/', '_', $certificate->event->title ?? 'event')) }}_certificate.jpg"
+                                        class="download-btn">
                                         <i class="fas fa-download"></i> Download
                                     </a>
                                 </div>
