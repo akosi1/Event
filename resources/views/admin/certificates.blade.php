@@ -95,7 +95,7 @@
 
                             <td class="py-2 align-middle">
                                 <div class="text-center">
-                                    <img src="{{ asset('storage/' . $certificate->certificate_path) }}"
+                                    <img src="{{ $certificate->certificate_path }}"
                                         alt="crtificate"
                                         class="img-fluid rounded shadow"
                                         style="width:50px; height:50px; max-height: 300px; object-fit: cover;">
