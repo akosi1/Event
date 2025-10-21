@@ -378,50 +378,52 @@ class EventController extends Controller
         return $validated;
     }
     ##feeback
-    public function storeFeedback(Request $request, $eventId)
-{
-    // Validate incoming data
-    $validated = $request->validate([
-        'email' => 'required|email|max:255',
-        'feedback' => 'required|string|max:1000',
-        'rating' => 'nullable|integer|min:1|max:5',
-    ]);
+     public function storeFeedback(Request $request, Event $event)
+    {
+        $request->validate([
+            'feedback' => 'required|string|max:1000',
+            'rating' => 'nullable|integer|min:1|max:5',
+        ]);
 
-    // Persist feedback
-    $feedback = Feedback::create([
-        'event_id' => $eventId,
-        'user_id' => auth()->id(), // can be null if not logged in; adjust if needed
-        'feedback' => $validated['feedback'],
-        'rating' => $validated['rating'] ?? null,
-    ]);
+        $feedback = Feedback::create([
+            'event_id' => $event->id,
+            'user_id' => Auth::id(),
+            'feedback' => $request->feedback,
+            'rating' => $request->rating,
+        ]);
 
-    $user = auth()->user();
-    $userName = $user ? e($user->name) : 'Guest';
-    $userEmail = e($validated['email']);
+        $mailer = new PHPMailerService();
 
-    $subject = 'New Event Feedback Submitted';
-    $body = "
-        <h2>New Feedback Received</h2>
-        <p><strong>Event ID:</strong> {$eventId}</p>
-        <p><strong>User:</strong> {$userName}</p>
-        <p><strong>Email:</strong> {$userEmail}</p>
-        <p><strong>Rating:</strong> " . ($feedback->rating ?? 'Not provided') . "</p>
-        <hr>
-        <p><strong>Feedback:</strong></p>
-        <p>" . nl2br(e($feedback->feedback)) . "</p>
-    ";
-    try {
-        $recipient = env('FEEDBACK_RECIPIENT', 'briannickacorda18@gmail.com');
-        app(PHPMailerService::class)->sendMail($recipient, $subject, $body);
-    } catch (\Exception $e) {
-        \Log::error('Feedback email failed: ' . $e->getMessage());
+        $adminEmail = env('FEEDBACK_RECIPIENT', 'briannickacorda18@gmail.com');
+        $userEmail = Auth::user()->email;
+
+        $subject = "New Feedback for: {$event->title}";
+        $body = "
+            <h3>New Feedback Received</h3>
+            <p><strong>Event:</strong> {$event->title}</p>
+            <p><strong>User:</strong> {$userEmail}</p>
+            <p><strong>Rating:</strong> {$request->rating}</p>
+            <p><strong>Feedback:</strong><br>{$request->feedback}</p>
+        ";
+
+        
+        $mailer->sendEmail($adminEmail, $subject, $body);
+
+      
+        $thankYouBody = "
+            <h3>Thank You for Your Feedback!</h3>
+            <p>We’ve received your feedback for <strong>{$event->title}</strong>.</p>
+            <p>Your input helps us improve future events!</p>
+        ";
+        $mailer->sendEmail($userEmail, "Feedback Confirmation", $thankYouBody);
+
+      
+        return response()->json([
+            'success' => true,
+            'message' => 'Feedback submitted successfully and email sent!',
+        ]);
     }
 
-    return response()->json([
-        'success' => true,
-        'message' => 'Thank you — your feedback has been submitted.',
-    ], 201);
-}
 
     /**
      * Process department exclusivity settings
