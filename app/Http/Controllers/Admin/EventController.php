@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Carbon\Carbon;
+use App\Models\Feedback;
 
 class EventController extends Controller
 {
@@ -383,7 +384,7 @@ class EventController extends Controller
             'rating' => 'nullable|integer|min:1|max:5',
         ]);
 
-        // Store feedback in your database (assuming you have a Feedback model)
+       
         \App\Models\Feedback::create([
             'event_id' => $id,
             'user_id' => auth()->id(),
