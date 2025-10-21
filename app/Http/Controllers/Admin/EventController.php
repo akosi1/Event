@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Carbon\Carbon;
 use App\Models\Feedback;
-use App\Mail\PHPMailerService;
+use App\Services\PHPMailerService;
 
 
 class EventController extends Controller
