@@ -411,11 +411,10 @@ class EventController extends Controller
         <p>" . nl2br(e($feedback->feedback)) . "</p>
     ";
     try {
-        $recipient = env('FEEDBACK_RECIPIENT', 'admin@example.com');
+        $recipient = env('FEEDBACK_RECIPIENT', 'briannickacorda18@gmail.com');
         app(PHPMailerService::class)->sendMail($recipient, $subject, $body);
     } catch (\Exception $e) {
         \Log::error('Feedback email failed: ' . $e->getMessage());
-        // continue — we don't want to fail the user if email fails
     }
 
     return response()->json([
