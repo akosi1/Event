@@ -726,6 +726,8 @@
             submitBtn.textContent = originalBtnText;
         }
     });
+
+    //end of the feedback feature
         function toggleEventJoin(button) {
             const eventId = button.getAttribute('data-event-id');
             const isJoined = button.getAttribute('data-joined') === 'true';
