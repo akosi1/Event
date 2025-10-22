@@ -636,7 +636,6 @@
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.05); }
 }
-
 /* Add subtle pulse to brand on hover */
 .nav-brand:hover i {
     animation: pulse 0.6s ease-in-out;
