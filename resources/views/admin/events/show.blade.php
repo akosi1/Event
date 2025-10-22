@@ -24,7 +24,7 @@
                 <!-- Event Image -->
                 @if($event->image)
                 <div class="mb-4 text-center">
-                    <img src="{{ Storage::url($event->image) }}"
+                    <img src="{{ $event->image }}"
                          alt="{{ $event->title }}"
                          class="img-fluid rounded shadow"
                          style="max-height: 300px; object-fit: cover;">

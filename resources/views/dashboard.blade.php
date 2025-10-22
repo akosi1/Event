@@ -9,7 +9,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="{{ asset('user/dashboard/dashboard.css') }}" rel="stylesheet">
     <link href="{{ asset('user/nav/css/navbar.css') }}" rel="stylesheet">
-    <link href="{{ asset('user/footer/footer.css') }}" rel="stylesheet">   
+    <link href="{{ asset('user/footer/footer.css') }}" rel="stylesheet">
+    
     <!-- SweetAlert2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.min.css" rel="stylesheet">
 
@@ -370,8 +371,8 @@
                                 data-end-time="{{ \Carbon\Carbon::parse($event->end_time)->format('H:i:s') }}">
                                 <!-- Background Image -->
                                 <div class="event-image-container">
-                                    @if ($event->hasImage())
-                                        <img src="{{ $event->image_url }}" alt="{{ e($event->title) }}"
+                                    @if ($event->image)
+                                        <img src="{{ $event->image }}" alt="{{ e($event->title) }}"
                                             class="event-image"
                                             onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'no-image-placeholder\'><i class=\'fas fa-calendar-alt\'></i></div>';">
                                     @else
@@ -403,7 +404,7 @@
                                     data-event-time="{{ e($event->start_time ? $event->start_time->format('g:i A') : 'TBA') }}"
                                     data-event-department="{{ e($event->department_display) }}"
                                     data-event-description="{{ e($event->description ?? 'No description available.') }}"
-                                    data-event-image="{{ $event->hasImage() ? $event->image_url : '' }}"
+                                    data-event-image="{{ $event->image }}"
                                     data-event-status="{{ e($event->status) }}">
                                     <i class="fas fa-info"></i>
                                 </button>
@@ -412,7 +413,7 @@
                                 @if ($event->is_exclusive)
                                     <div class="exclusivity-badge exclusive">
                                         <i class="fas fa-graduation-cap"></i>
-                                        {{ e($event->department ?? 'BSIT') }}
+                                        {{ auth()->user()->department }}
                                     </div>
                                 @else
                                     <div class="exclusivity-badge open">
@@ -455,13 +456,13 @@
 
                                             <button class="custom-btn generate-btn"
                                                 @if ($certificate)
-                                                    data-certificate-path="{{ asset('storage/' . $certificate->certificate_path) }}"
+                                                    data-certificate-path="{{ $certificate->certificate_path }}"
                                                     data-event-title={{$certificate->event->title}}
                                                     data-certificate-date={{$certificate->created_at}}
                                                     onclick="showCertificateInfo({{ $certificate->event_id }})"
                                                 @else
                                                     data-event-id="{{$event->id}}"
-                                                    onclick="toggleGenerateCertificate(this)" 
+                                                    onclick="toggleGenerateCertificate(this)"
                                                 @endif
                                                 title="{{ (!$event->hasEnded || !$event->certificate_template_image)
                                                 ? 'The Event is not yet end or no Certificate template'
@@ -560,36 +561,49 @@
         </div>
     </div>
 
-    <!-- Feedback Modal -->
-    <div id="feedbackModal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Event Feedback</h2>
-                <button class="modal-close" onclick="closeFeedbackModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="feedbackForm">
-                    <input type="hidden" id="feedbackEventId">
-                    <label for="feedbackMessage">Your Feedback</label>
-                    <textarea id="feedbackMessage" placeholder="Share your thoughts..." required></textarea>
-                    <div class="rating">
-                        <label>Rate the event:</label>
-                        <div class="stars">
-                            <i class="fas fa-star" data-value="1"></i>
-                            <i class="fas fa-star" data-value="2"></i>
-                            <i class="fas fa-star" data-value="3"></i>
-                            <i class="fas fa-star" data-value="4"></i>
-                            <i class="fas fa-star" data-value="5"></i>
-                        </div>
+ <!-- Feedback Modal -->
+<div id="feedbackModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Event Feedback</h2>
+            <button class="modal-close" onclick="closeFeedbackModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <form id="feedbackForm">
+                @csrf
+                <input type="hidden" id="feedbackEventId" name="event_id">
+                <label for="feedbackEmail" style="font-weight:600;display:block;margin-bottom:6px;">Your Email</label>
+                <input id="feedbackEmail" name="email" type="email"
+                       placeholder="you@example.com"
+                       style="width:100%;padding:8px;border-radius:6px;border:1px solid #ddd;margin-bottom:0.75rem;"
+                       required>
+                <label for="feedbackMessage" style="font-weight:600;display:block;margin-bottom:6px;margin-top:6px;">Feedback</label>
+                <textarea id="feedbackMessage" name="feedback" placeholder="Share your thoughts..." required
+                          style="width:100%;border-radius:6px;padding:8px;border:1px solid #ddd;min-height:100px;"></textarea>
+
+                <div class="rating" style="margin-top:0.75rem;">
+                    <label style="display:block;font-weight:600;margin-bottom:6px;">Rate the event:</label>
+                    <div class="stars" style="display:flex;gap:8px;">
+                        <i class="fas fa-star" data-value="1" style="cursor:pointer;"></i>
+                        <i class="fas fa-star" data-value="2" style="cursor:pointer;"></i>
+                        <i class="fas fa-star" data-value="3" style="cursor:pointer;"></i>
+                        <i class="fas fa-star" data-value="4" style="cursor:pointer;"></i>
+                        <i class="fas fa-star" data-value="5" style="cursor:pointer;"></i>
                     </div>
-                    <button type="submit" class="register-btn" style="margin-top: 1rem;">Submit Feedback</button>
-                </form>
-            </div>
+                </div>
+
+                <div id="feedbackResponse" class="feedback-response" style="text-align:center;margin-top:12px;display:none;font-weight:600;"></div>
+                <div style="display:flex;gap:0.5rem;margin-top:1rem;">
+                    <button type="button" class="custom-btn" style="flex:1;background:#ef4444;color:#fff" onclick="closeFeedbackModal()">Cancel</button>
+                    <button type="submit" id="submitFeedbackBtn" class="custom-btn" style="flex:1;background:#10b981;color:#fff">Submit Feedback</button>
+                </div>
+            </form>
         </div>
     </div>
-
+</div>
     <!-- Include Navigation Script -->
     <script src="{{ asset('user/nav/js/navbar.js') }}"></script>
 
@@ -618,67 +632,109 @@
     <script src="{{ asset('user/js/dashboard.js') }}"></script>
 
     <script>
-        function openFeedbackModal(eventId, eventTitle) {
-            document.getElementById('feedbackModal').style.display = 'flex';
-            document.getElementById('feedbackEventId').value = eventId;
-            document.getElementById('feedbackMessage').value = '';
-            document.querySelectorAll('.stars .fa-star').forEach(s => s.classList.remove('selected'));
-        }
+       function openFeedbackModal(eventId, eventTitle) {
+        document.getElementById('feedbackModal').style.display = 'flex';
+        document.getElementById('feedbackEventId').value = eventId;
+        document.getElementById('feedbackMessage').value = '';
+        document.getElementById('feedbackEmail').value = '{{ auth()->user()->email ?? "" }}'; 
+        document.querySelectorAll('#feedbackModal .stars .fa-star').forEach(s => s.classList.remove('selected'));
+        hideFeedbackResponse();
+    }
 
-        function closeFeedbackModal() {
-            document.getElementById('feedbackModal').style.display = 'none';
-        }
-
-        // Handle Star Rating
-        document.querySelectorAll('.stars .fa-star').forEach(star => {
-            star.addEventListener('click', function() {
-                const value = this.dataset.value;
-                document.querySelectorAll('.stars .fa-star').forEach(s => {
-                    s.classList.toggle('selected', s.dataset.value <= value);
-                });
+    function closeFeedbackModal() {
+        document.getElementById('feedbackModal').style.display = 'none';
+        hideFeedbackResponse();
+    }
+    
+    document.querySelectorAll('#feedbackModal .stars .fa-star').forEach(star => {
+        star.addEventListener('click', function () {
+            const value = parseInt(this.dataset.value, 10);
+            document.querySelectorAll('#feedbackModal .stars .fa-star').forEach(s => {
+                s.classList.toggle('selected', parseInt(s.dataset.value, 10) <= value);
             });
         });
+    });
+   
+    function showFeedbackResponse(type, text) {
+        const el = document.getElementById('feedbackResponse');
+        el.style.display = 'block';
+        el.style.color = (type === 'success') ? '#10b981' : '#ef4444';
+        el.textContent = text;
+    }
+    function hideFeedbackResponse() {
+        const el = document.getElementById('feedbackResponse');
+        el.style.display = 'none';
+        el.textContent = '';
+    }
+    document.getElementById('feedbackForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        hideFeedbackResponse();
 
-        // Submit Feedback
-        document.getElementById('feedbackForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const eventId = document.getElementById('feedbackEventId').value;
-            const feedback = document.getElementById('feedbackMessage').value;
-            const rating = document.querySelectorAll('.stars .selected').length;
+        const submitBtn = document.getElementById('submitFeedbackBtn');
+        const originalBtnText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Sending...';
 
-            fetch(`/events/${eventId}/feedback`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify({
-                        feedback,
-                        rating
-                    })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    Swal.fire({
-                        icon: data.success ? 'success' : 'error',
-                        title: data.message,
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
+        const eventId = document.getElementById('feedbackEventId').value;
+        const email = document.getElementById('feedbackEmail').value.trim();
+        const feedback = document.getElementById('feedbackMessage').value.trim();
+        const rating = document.querySelectorAll('#feedbackModal .stars .selected').length;
+
+        if (!email || !feedback) {
+            showFeedbackResponse('error', 'Please provide both your email and feedback.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalBtnText;
+            return;
+        }
+
+        try {
+            const res = await fetch(`/events/${eventId}/feedback`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ email, feedback, rating })
+            });
+
+            const contentType = res.headers.get('content-type') || '';
+            let data = null;
+            if (contentType.includes('application/json')) {
+                data = await res.json();
+            } else {
+                const text = await res.text();
+                throw new Error('Unexpected server response: ' + text.slice(0, 300));
+            }
+
+            if (res.ok) {
+                showFeedbackResponse('success', data.message || 'Thank you — feedback submitted!');
+                document.getElementById('feedbackForm').reset();
+                document.querySelectorAll('#feedbackModal .stars .fa-star').forEach(s => s.classList.remove('selected'));
+            
+                setTimeout(() => {
                     closeFeedbackModal();
-                })
-                .catch(() => {
-                    Swal.fire('Error', 'Something went wrong. Please try again.', 'error');
-                });
-        });
-        // Enhanced toggle event join with SweetAlert confirmation
+                }, 1200);
+            } else {
+                const message = data.message || (data.errors ? Object.values(data.errors).flat().join(' ') : 'Submission failed.');
+                showFeedbackResponse('error', message);
+            }
+        } catch (err) {
+            console.error('Feedback submit error:', err);
+            showFeedbackResponse('error', 'Unable to send feedback. Please try again later.');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalBtnText;
+        }
+    });
+
+    //end of the feedback feature
         function toggleEventJoin(button) {
             const eventId = button.getAttribute('data-event-id');
             const isJoined = button.getAttribute('data-joined') === 'true';
             const eventTitle = button.getAttribute('data-event-title');
             const action = isJoined ? 'leave' : 'join';
-
-            // Show confirmation dialog
+          
             Swal.fire({
                 title: isJoined ? 'Leave Event?' : 'Join Event?',
                 html: `Are you sure you want to ${action} <strong>"${eventTitle}"</strong>?`,
@@ -696,7 +752,7 @@
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // User confirmed, proceed with the action
+                  
                     processEventAction(button, eventId, action, eventTitle);
                 }
             });

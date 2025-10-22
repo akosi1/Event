@@ -49,17 +49,20 @@ class CertificateController extends Controller
 
         $user = Auth::user();
         $fullName = $user->first_name . ' ' . $user->last_name;
+        $certificateTemplate = $event->certificate_template_image;
 
-        // load the certificate background image
-        $certificateTemplateImageFile = storage_path('app/public/' . $event->certificate_template_image);
+        // load the based64 image
+        $base64Data = substr($certificateTemplate, strpos($certificateTemplate, ',') + 1);
 
-        if(!file_exists($certificateTemplateImageFile)){
+
+        if(!$certificateTemplate){
             return response()->json([
-            'success' => false,
-            'message' => 'Certificate Template Not Found!',
+                'success' => false,
+                'message' => 'Certificate Template Not Found!',
             ]);
         }
-        $image =  Image::make($certificateTemplateImageFile);
+        //decode the based64 image
+        $image = Image::make(base64_decode($base64Data));
 
         // get image width and height
         $imgWidth = $image->width();
@@ -81,16 +84,13 @@ class CertificateController extends Controller
         });
 
 
-        $fileName = strtolower(str_replace(' ', '_', trim($user->first_name))) . '_certificate_' . time() . '.jpg';
-
-        $savePath = public_path('storage/certificates/' . $fileName);
-
-        $image->save($savePath);
+        $generatedBase64 = (string) $image->encode('jpg'); // raw binary
+        $generatedBase64 = 'data:image/jpeg;base64,' . base64_encode($generatedBase64);
 
         Certificate::create([
             'user_id' => $user->id,
             'event_id' => $event->id,
-            'certificate_path' => 'certificates/' . $fileName,
+            'certificate_path' => $generatedBase64,
         ]);
 
         return response()->json([

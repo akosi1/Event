@@ -126,16 +126,16 @@
                             </td>
                             <td class="py-2 align-middle">
                                 <div class="event-image-compact">
-                                    @if($event->image && file_exists(public_path('storage/' . $event->image)))
-                                        <img src="{{ asset('storage/' . $event->image) }}"
+                                    @if($event->image)
+                                        <img src="{{$event->image}}"
                                              alt="{{ $event->title }}"
                                              class="event-img-compact"
                                              onerror="this.parentElement.innerHTML='<div class=\'no-image-compact\'><i class=\'fas fa-image\'></i></div>'">
-                                    @elseif($event->image)
+                                    {{-- @elseif($event->image)
                                         <img src="{{ $event->image }}"
-                                             alt="{{ $event->title }}" ##goodshit na man
+                                             alt="{{ $event->title }}"
                                              class="event-img-compact"
-                                             onerror="this.parentElement.innerHTML='<div class=\'no-image-compact\'><i class=\'fas fa-image\'></i></div>'">
+                                             onerror="this.parentElement.innerHTML='<div class=\'no-image-compact\'><i class=\'fas fa-image\'></i></div>'"> --}}
                                     @else
                                         <div class="no-image-compact">
                                             <i class="fas fa-image"></i>

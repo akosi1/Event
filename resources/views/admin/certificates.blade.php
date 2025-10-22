@@ -95,7 +95,7 @@
 
                             <td class="py-2 align-middle">
                                 <div class="text-center">
-                                    <img src="{{ asset('storage/' . $certificate->certificate_path) }}"
+                                    <img src="{{ $certificate->certificate_path }}"
                                         alt="crtificate"
                                         class="img-fluid rounded shadow"
                                         style="width:50px; height:50px; max-height: 300px; object-fit: cover;">
@@ -106,7 +106,7 @@
                                 <div class="action-buttons-compact d-flex justify-content-center gap-1">
                                     {{-- Download Button --}}
                                     <a class="btn btn-clean-compact btn-view"
-                                        href="{{ asset('storage/' . $certificate->certificate_path) }}"
+                                        href="{{ $certificate->certificate_path }}"
                                         download="{{ strtolower($certificate->user->first_name) . '_' .
                                         strtolower(preg_replace('/[^A-Za-z0-9\-]/', '_', $certificate->event->title ?? 'event')) }}_certificate.jpg"
                                         title="Download Certificate">
@@ -116,7 +116,7 @@
                                     <button class="btn btn-clean-compact btn-view"
                                         title="View Details"
                                         onclick="viewCertificate({{ $certificate->id }})"
-                                        data-path="{{ asset('storage/' . $certificate->certificate_path) }}">
+                                        data-path="{{ $certificate->certificate_path }}">
                                             <i class="fas fa-eye"></i>
                                     </button>
 

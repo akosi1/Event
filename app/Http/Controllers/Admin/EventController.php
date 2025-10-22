@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Carbon\Carbon;
+use App\Models\Feedback;
+use App\Mail\PHPMailerService;
+use Illuminate\Support\Facades\Auth;
+
+
 
 class EventController extends Controller
 {
@@ -90,40 +95,23 @@ class EventController extends Controller
 
     public function store(Request $request)
     {
+        // dd($request->input('image'));
         $validated = $this->validateEventData($request);
 
         $fileFields = ['image', 'certificate_template_image'];
 
-        foreach($fileFields as $field){
-            if ($request->hasFile($field)) {
-                try {
-                    $image = $request->file($field);
+        foreach ($fileFields as $field) {
+            if ($request->filled($field)) {
+                $base64String = $request->input($field);
 
-                    // Validate the file is actually an image
-                    if (!$image->isValid()) {
-                        return back()->withErrors([$field => 'Invalid image file.'])->withInput();
-                    }
-
-                    // Create a unique filename with timestamp
-                    $fileName = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
-
-                    // Store the image in public disk
-                    $folder = $field === 'certificate_template_image' ? 'certificates' : 'events';
-                    $filePath = $image->storeAs($folder, $fileName, 'public');
-
-                    // Verify the file was actually stored
-                    if (!Storage::disk('public')->exists($filePath)) {
-                        return back()->withErrors([$field => 'Failed to store image.'])->withInput();
-                    }
-
-                    $validated[$field] = $filePath;
-                } catch (\Exception $e) {
-                    return back()->withErrors([$field => 'Failed to upload image: ' . $e->getMessage()])->withInput();
+                // Validate it's a proper base64 image
+                if (!preg_match('/^data:image\/(jpeg|png|jpg|gif|webp);base64,/', $base64String)) {
+                    return back()->withErrors([$field => 'Invalid base64 image format.'])->withInput();
                 }
+
+                $validated[$field] = $base64String;
             }
-
         }
-
         // Process department exclusivity
         $validated = $this->processDepartmentExclusivity($validated, $request);
 
@@ -353,7 +341,7 @@ class EventController extends Controller
             'department' => 'nullable|string|in:' . implode(',', array_keys(self::DEPARTMENTS)),
             'status' => 'required|in:active,postponed,cancelled',
             'cancel_reason' => 'required_if:status,postponed,cancelled|nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'image' => ['nullable', 'string', 'regex:/^data:image\/(jpeg|png|jpg|gif|webp);base64,/'],
             'remove_image' => 'nullable|boolean',
 
             // Exclusivity fields
@@ -392,27 +380,52 @@ class EventController extends Controller
         return $validated;
     }
     ##feeback
-    public function storeFeedback(Request $request, $id)
+     public function storeFeedback(Request $request, Event $event)
     {
-        // Validate feedback input
-        $validated = $request->validate([
+        $request->validate([
             'feedback' => 'required|string|max:1000',
             'rating' => 'nullable|integer|min:1|max:5',
         ]);
 
-        // Store feedback in your database (assuming you have a Feedback model)
-        \App\Models\Feedback::create([
-            'event_id' => $id,
-            'user_id' => auth()->id(),
-            'feedback' => $validated['feedback'],
-            'rating' => $validated['rating'] ?? null,
+        $feedback = Feedback::create([
+            'event_id' => $event->id,
+            'user_id' => Auth::id(),
+            'feedback' => $request->feedback,
+            'rating' => $request->rating,
         ]);
 
+        $mailer = new PHPMailerService();
+
+        $adminEmail = env('FEEDBACK_RECIPIENT', 'briannickacorda18@gmail.com');
+        $userEmail = Auth::user()->email;
+
+        $subject = "New Feedback for: {$event->title}";
+        $body = "
+            <h3>New Feedback Received</h3>
+            <p><strong>Event:</strong> {$event->title}</p>
+            <p><strong>User:</strong> {$userEmail}</p>
+            <p><strong>Rating:</strong> {$request->rating}</p>
+            <p><strong>Feedback:</strong><br>{$request->feedback}</p>
+        ";
+
+        
+        $mailer->sendEmail($adminEmail, $subject, $body);
+
+      
+        $thankYouBody = "
+            <h3>Thank You for Your Feedback!</h3>
+            <p>We’ve received your feedback for <strong>{$event->title}</strong>.</p>
+            <p>Your input helps us improve future events!</p>
+        ";
+        $mailer->sendEmail($userEmail, "Feedback Confirmation", $thankYouBody);
+
+      
         return response()->json([
             'success' => true,
-            'message' => 'Feedback submitted successfully!',
-        ], 201);
+            'message' => 'Feedback submitted successfully and email sent!',
+        ]);
     }
+
 
     /**
      * Process department exclusivity settings
