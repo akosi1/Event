@@ -1,21 +1,27 @@
 <!-- Navigation -->
-<nav class="navbar" id="navbar">
+<nav class="navbar">
     <div class="nav-container">
         <a href="{{ route('dashboard') }}" class="nav-brand">
-            <img src="{{ asset('images/logo.png') }}" alt="MCC Logo">
-            <span>MCC E&PO</span>
+            <i class="fas fa-calendar-alt"></i>
+            EventAps
         </a>
 
         <!-- Mobile toggle will be inserted here by JavaScript -->
 
         <div class="nav-content">
+            <!-- Certificates Button -->
+            <a href="{{ route('certificates') }}" class="nav-btn">
+                <i class="fas fa-medal"></i>
+                Certificates
+            </a>
+
             <!-- Dashboard Button -->
             <a href="{{ route('dashboard') }}" class="nav-btn">
                 <i class="fas fa-tachometer-alt"></i>
-                <span>Home</span>
+                Home
             </a>
 
-                        <!-- Department Filter -->
+            <!-- Department Filter -->
             <div class="dropdown" id="deptDropdown">
                 <button class="dropdown-btn" type="button">
                     <i class="fas fa-graduation-cap"></i>
@@ -51,39 +57,32 @@
                         </a>
                     @endforeach
 
-                    <div style="height: 1px; background: rgba(229, 62, 62, 0.2); margin: 0.5rem 0;"></div>
+                    <div style="height: 1px; background: #1a1a1a; margin: 0.5rem 0;"></div>
                     <a href="{{ route('dashboard', request()->except('department')) }}"
-                       class="dropdown-item clear-filter">
+                       class="dropdown-item">
                         <i class="fas fa-times"></i>
-                        <span>Clear Filter</span>
+                        Clear Filter
                     </a>
                 </div>
             </div>
-
-                        <!-- Certificates Button -->
-            <a href="{{ route('certificates') }}" class="nav-btn">
-                <i class="fas fa-medal"></i>
-                <span>Certificates</span>
-            </a>
-
 
             <!-- User Menu -->
             <div class="dropdown" id="userDropdown">
                 <button class="dropdown-btn user-btn" type="button">
                     <i class="fas fa-user-circle"></i>
-                    <span>{{ auth()->user()->first_name }}</span>
+                    {{ auth()->user()->first_name }}
                     <i class="fas fa-chevron-down"></i>
                 </button>
                 <div class="dropdown-menu right">
                     <a href="{{ route('profile.edit') }}" class="dropdown-item">
                         <i class="fas fa-user"></i>
-                        <span>Profile</span>
+                        Profile
                     </a>
                     <form method="POST" action="{{ route('logout') }}" style="margin: 0;">
                         @csrf
                         <button type="submit" class="dropdown-item logout">
                             <i class="fas fa-sign-out-alt"></i>
-                            <span>Logout</span>
+                            Logout
                         </button>
                     </form>
                 </div>
@@ -93,7 +92,7 @@
 </nav>
 
 <!-- Filter Status Banner -->
-@if(request('department'))
+<!-- @if(request('department'))
     <div class="filter-status">
         <div style="display: flex; align-items: center; gap: 0.75rem;">
             <i class="fas fa-filter"></i>
@@ -103,4 +102,4 @@
             <i class="fas fa-times"></i>
         </a>
     </div>
-@endif
+@endif -->
