@@ -1,9 +1,8 @@
-// Enhanced Navigation JavaScript for MCC E&PO - Complete Version
+// Enhanced Navigation JavaScript with Mobile Toggle - Fixed Version
 
 // Initialize navbar functionality
 document.addEventListener('DOMContentLoaded', function() {
     initializeNavbar();
-    initializeScrollBehavior();
     addSmoothAnimations();
     handleResponsiveBehavior();
 });
@@ -15,24 +14,6 @@ function initializeNavbar() {
     setupEventListeners();
 }
 
-// Navbar show/hide on scroll
-function initializeScrollBehavior() {
-    const navbar = document.getElementById('navbar');
-    let lastScroll = 0;
-
-    window.addEventListener('scroll', () => {
-        const currentScroll = window.pageYOffset;
-        
-        if (currentScroll > 200) {
-            navbar?.classList.add('scrolled');
-        } else {
-            navbar?.classList.remove('scrolled');
-        }
-        
-        lastScroll = currentScroll;
-    });
-}
-
 // Create mobile toggle button
 function createMobileToggle() {
     const navContainer = document.querySelector('.nav-container');
@@ -41,7 +22,6 @@ function createMobileToggle() {
     if (!existingToggle && navContainer) {
         const toggleBtn = document.createElement('button');
         toggleBtn.className = 'mobile-toggle';
-        toggleBtn.id = 'mobileToggle';
         toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
         toggleBtn.setAttribute('aria-label', 'Toggle navigation menu');
         
@@ -109,30 +89,6 @@ function setupEventListeners() {
         overlay.addEventListener('click', closeMobileMenu);
     }
     
-    // Close mobile menu when clicking a nav link
-    document.querySelectorAll('.nav-btn').forEach(link => {
-        link.addEventListener('click', () => {
-            const isMobile = window.innerWidth <= 768;
-            if (isMobile) {
-                setTimeout(() => {
-                    closeMobileMenu();
-                }, 300);
-            }
-        });
-    });
-    
-    // Close mobile menu when clicking dropdown items
-    document.querySelectorAll('.dropdown-item').forEach(item => {
-        item.addEventListener('click', () => {
-            const isMobile = window.innerWidth <= 768;
-            if (isMobile && (item.tagName === 'A' || item.tagName === 'BUTTON')) {
-                setTimeout(() => {
-                    closeMobileMenu();
-                }, 300);
-            }
-        });
-    });
-    
     // Handle window resize
     let resizeTimer;
     window.addEventListener('resize', function() {
@@ -143,16 +99,19 @@ function setupEventListeners() {
     // Handle escape key
     document.addEventListener('keydown', handleEscapeKey);
     
-    // Smooth scroll for all anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
+    // Prevent dropdown menu clicks from closing on mobile
+    const dropdownMenus = document.querySelectorAll('.dropdown-menu');
+    dropdownMenus.forEach(menu => {
+        menu.addEventListener('click', function(e) {
+            const isMobile = window.innerWidth <= 768;
+            // Allow clicks on links to go through
+            if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') {
+                if (isMobile) {
+                    // Close mobile menu after clicking a link
+                    setTimeout(() => {
+                        closeMobileMenu();
+                    }, 300);
+                }
             }
         });
     });
@@ -163,6 +122,7 @@ function toggleMobileMenu() {
     const navContent = document.querySelector('.nav-content');
     const overlay = document.querySelector('.mobile-overlay');
     const toggleBtn = document.querySelector('.mobile-toggle');
+    const body = document.body;
     
     if (!navContent) return;
     
@@ -185,27 +145,13 @@ function openMobileMenu() {
     navContent?.classList.add('show');
     overlay?.classList.add('show');
     toggleBtn?.classList.add('active');
-    
-    // Prevent body scroll and save scroll position
-    const scrollY = window.scrollY;
-    body.style.position = 'fixed';
-    body.style.top = `-${scrollY}px`;
-    body.style.width = '100%';
-    body.classList.add('menu-open');
-    
-    // Store scroll position
-    body.setAttribute('data-scroll-position', scrollY.toString());
+    body.style.overflow = 'hidden';
     
     // Update toggle icon
     const icon = toggleBtn?.querySelector('i');
     if (icon) {
         icon.className = 'fas fa-times';
     }
-    
-    // Add smooth fade-in effect
-    requestAnimationFrame(() => {
-        navContent?.style.setProperty('opacity', '1');
-    });
 }
 
 // Close mobile menu
@@ -218,17 +164,7 @@ function closeMobileMenu() {
     navContent?.classList.remove('show');
     overlay?.classList.remove('show');
     toggleBtn?.classList.remove('active');
-    
-    // Restore body scroll
-    const scrollY = body.getAttribute('data-scroll-position');
-    body.style.position = '';
-    body.style.top = '';
-    body.style.width = '';
-    body.classList.remove('menu-open');
-    
-    if (scrollY) {
-        window.scrollTo(0, parseInt(scrollY));
-    }
+    body.style.overflow = '';
     
     // Update toggle icon back to bars
     const icon = toggleBtn?.querySelector('i');
@@ -334,12 +270,16 @@ function addSmoothAnimations() {
     navBtns.forEach(btn => {
         btn.addEventListener('mouseenter', function() {
             if (window.innerWidth > 768) {
-                this.style.transition = 'all 0.3s ease';
+                this.style.transform = 'translateY(-2px)';
             }
+        });
+        
+        btn.addEventListener('mouseleave', function() {
+            this.style.transform = '';
         });
     });
     
-    // Add ripple effect to interactive elements
+    // Add ripple effect
     addRippleEffect();
 }
 
@@ -360,7 +300,7 @@ function addRippleEffect() {
             ripple.style.cssText = `
                 position: absolute;
                 border-radius: 50%;
-                background: rgba(229, 62, 62, 0.3);
+                background: rgba(255, 255, 255, 0.3);
                 width: ${size}px;
                 height: ${size}px;
                 left: ${x}px;
@@ -380,7 +320,7 @@ function addRippleEffect() {
         });
     });
     
-    // Add ripple animation to CSS if not exists
+    // Add ripple animation to CSS
     if (!document.querySelector('#ripple-styles')) {
         const style = document.createElement('style');
         style.id = 'ripple-styles';
@@ -392,14 +332,14 @@ function addRippleEffect() {
                 }
             }
             
-            @keyframes slideDown {
+            @keyframes dropdownEnter {
                 from {
-                    transform: translateY(-100%);
                     opacity: 0;
+                    transform: translateY(-10px) scale(0.95);
                 }
                 to {
-                    transform: translateY(0);
                     opacity: 1;
+                    transform: translateY(0) scale(1);
                 }
             }
         `;
@@ -414,36 +354,6 @@ function handleResponsiveBehavior() {
     if (navbar) {
         navbar.setAttribute('role', 'navigation');
         navbar.setAttribute('aria-label', 'Main navigation');
-    }
-    
-    // Improve touch interactions for mobile
-    if ('ontouchstart' in window) {
-        const navContent = document.querySelector('.nav-content');
-        let touchStartY = 0;
-        let touchEndY = 0;
-        
-        navContent?.addEventListener('touchstart', function(e) {
-            touchStartY = e.changedTouches[0].screenY;
-        }, { passive: true });
-        
-        navContent?.addEventListener('touchend', function(e) {
-            touchEndY = e.changedTouches[0].screenY;
-            handleSwipeGesture();
-        }, { passive: true });
-        
-        function handleSwipeGesture() {
-            // Close menu on swipe left
-            if (touchStartY - touchEndY > 50) {
-                // Swipe up - do nothing
-            } else if (touchEndY - touchStartY > 50) {
-                // Swipe down - do nothing
-            } else if (touchStartX - touchEndX > 100) {
-                // Swipe left - close menu
-                if (window.innerWidth <= 768) {
-                    closeMobileMenu();
-                }
-            }
-        }
     }
     
     // Add keyboard navigation support
@@ -469,65 +379,7 @@ function handleResponsiveBehavior() {
                 items[nextIndex].focus();
             }
         }
-        
-        // Handle Enter key on dropdown buttons
-        if (e.key === 'Enter' && activeElement?.classList.contains('dropdown-btn')) {
-            e.preventDefault();
-            activeElement.click();
-        }
     });
-    
-    // Add focus styles for keyboard navigation
-    const style = document.createElement('style');
-    style.textContent = `
-        .nav-btn:focus,
-        .dropdown-btn:focus,
-        .dropdown-item:focus {
-            outline: 2px solid #e53e3e;
-            outline-offset: 2px;
-        }
-        
-        .nav-btn:focus-visible,
-        .dropdown-btn:focus-visible,
-        .dropdown-item:focus-visible {
-            outline: 2px solid #e53e3e;
-            outline-offset: 2px;
-        }
-        
-        /* Smooth scroll behavior */
-        html {
-            scroll-behavior: smooth;
-        }
-        
-        /* Improve text rendering on mobile */
-        @media (max-width: 768px) {
-            .nav-btn,
-            .dropdown-btn,
-            .dropdown-item {
-                -webkit-font-smoothing: antialiased;
-                -moz-osx-font-smoothing: grayscale;
-                text-rendering: optimizeLegibility;
-            }
-        }
-        
-        /* Add haptic feedback effect */
-        @media (max-width: 768px) {
-            .nav-btn:active,
-            .dropdown-btn:active,
-            .dropdown-item:active {
-                transform: scale(0.98);
-            }
-        }
-    `;
-    document.head.appendChild(style);
-    
-    // Add viewport meta tag if not exists
-    if (!document.querySelector('meta[name="viewport"]')) {
-        const meta = document.createElement('meta');
-        meta.name = 'viewport';
-        meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover';
-        document.head.appendChild(meta);
-    }
 }
 
 // Export functions for external use
@@ -535,9 +387,5 @@ window.navbarUtils = {
     toggleMobileMenu,
     closeMobileMenu,
     openMobileMenu,
-    closeAllDropdowns,
-    initializeNavbar
+    closeAllDropdowns
 };
-
-// Log initialization
-console.log('MCC E&PO Navigation initialized successfully');
