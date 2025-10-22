@@ -7,7 +7,8 @@
     <title>{{ config('app.name', 'EventAP') }} - Certificates</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="{{ asset('user/dashboard/dashboard.css') }}" rel="stylesheet">
-    <link href="{{ asset('user/nav/css/navbar.css') }}" rel="stylesheet">
+    <link href="{{ asset('user/footer/footer.css') }}" rel="stylesheet">
+    <!-- <link href="{{ asset('user/nav/css/navbar.css') }}" rel="stylesheet"> -->
 
     <!-- SweetAlert2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.min.css" rel="stylesheet">
@@ -221,82 +222,7 @@
             </div>
         </div>
     </div>
-
-    <!-- Footer (unchanged) -->
-    <footer class="site-footer">
-        <div class="footer-content">
-            <div class="footer-grid">
-                <div class="footer-section">
-                    <h3><i class="fas fa-calendar-alt"></i> MCC E&PO</h3>
-                    <p>Your premier platform for discovering and managing university events. Stay connected with your campus community.</p>
-                    <div class="social-links">
-                        <a href="#" class="social-link" title="Facebook">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                        <a href="#" class="social-link" title="Twitter">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" class="social-link" title="Instagram">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                        <a href="#" class="social-link" title="LinkedIn">
-                            <i class="fab fa-linkedin-in"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <div class="footer-section">
-                    <h3><i class="fas fa-link"></i> Quick Links</h3>
-                    <div class="footer-links">
-                        <a href="{{ route('dashboard') }}">
-                            <i class="fas fa-home"></i> Home
-                        </a>
-                        <a href="#">
-                            <i class="fas fa-calendar-check"></i> My Events
-                        </a>
-                        <a href="#">
-                            <i class="fas fa-graduation-cap"></i> Departments
-                        </a>
-                        <a href="#">
-                            <i class="fas fa-info-circle"></i> About Us
-                        </a>
-                    </div>
-                </div>
-
-                <div class="footer-section">
-                    <h3><i class="fas fa-question-circle"></i> Support</h3>
-                    <div class="footer-links">
-                        <a href="#">
-                            <i class="fas fa-life-ring"></i> Help Center
-                        </a>
-                        <a href="#">
-                            <i class="fas fa-file-alt"></i> Terms of Service
-                        </a>
-                        <a href="#">
-                            <i class="fas fa-shield-alt"></i> Privacy Policy
-                        </a>
-                        <a href="#">
-                            <i class="fas fa-envelope"></i> Contact Us
-                        </a>
-                    </div>
-                </div>
-
-                <div class="footer-section">
-                    <h3><i class="fas fa-map-marker-alt"></i> Contact Info</h3>
-                    <div class="footer-links">
-                        <p><i class="fas fa-map-pin"></i> Bunakan, Madridejos Community College</p>
-                        <p><i class="fas fa-phone"></i> +63 XXX XXX XXXX</p>
-                        <p><i class="fas fa-envelope"></i> events-org.com</p>
-                        <p><i class="fas fa-clock"></i> Mon - Fri: 8:00 AM - 5:00 PM</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="footer-bottom">
-                <p>&copy; {{ date('Y') }} MCC E&PO. All rights reserved. | Designed with <i class="fas fa-heart" style="color: #ef4444;"></i> for students</p>
-            </div>
-        </div>
-    </footer>
+@include('layouts.footer')
 
     <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.all.min.js"></script>

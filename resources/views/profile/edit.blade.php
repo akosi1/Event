@@ -26,5 +26,4 @@
             </div>
         </div>
     </div>
-    <link href="{{ asset('user/nav/css/navbar.css') }}" rel="stylesheet">
 </x-app-layout>

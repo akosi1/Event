@@ -8,7 +8,7 @@
     <title>{{ config('app.name', 'EventAP') }} - Dashboard</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="{{ asset('user/dashboard/dashboard.css') }}" rel="stylesheet">
-    <link href="{{ asset('user/nav/css/navbar.css') }}" rel="stylesheet">
+    <!-- <link href="{{ asset('user/nav/css/navbar.css') }}" rel="stylesheet"> -->
     <link href="{{ asset('user/footer/footer.css') }}" rel="stylesheet">
     
     <!-- SweetAlert2 CSS -->
@@ -605,7 +605,7 @@
     </div>
 </div>
     <!-- Include Navigation Script -->
-    <script src="{{ asset('user/nav/js/navbar.js') }}"></script>
+    <!-- <script src="{{ asset('user/nav/js/navbar.js') }}"></script> -->
 
     <!-- Toast container -->
     <div id="toastContainer"></div>
