@@ -1,18 +1,12 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # Force HTTPS
-    RewriteCond %{HTTPS} !=on
-    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    # Force HTTPS (only if not already HTTPS)
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
-    # Block direct access to /public or any subpaths inside it (return 403)
-    RewriteCond %{THE_REQUEST} \s/public([^\s]*) [NC]
-    RewriteRule ^public - [F,L]
-
-    # Redirect all normal requests through Laravel's front controller
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ public/index.php/$1 [L]
+    # Route all requests to public/ (Laravel front controller)
+    RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>
 
 # Block common attack patterns in query strings
@@ -23,7 +17,7 @@
     RewriteRule .* - [F,L]
 </IfModule>
 
-# Disable TRACE method (security)
+# Disable TRACE method (XSS protection)
 TraceEnable off
 
 # Deny access to sensitive files
