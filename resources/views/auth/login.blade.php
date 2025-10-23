@@ -252,10 +252,10 @@
                     <h3>10. Contact Information</h3>
                     <p>For questions, concerns, or support regarding these Terms and Conditions or the use of the MCC Event and Portfolio Organizer System, please contact us at:</p>
                     <p class="contact-info">
-                        <strong>Email:</strong> support@mcc-epo.edu<br>
+                        <strong>Email:</strong> events@gmail.com<br>
                         <strong>Subject Line:</strong> User Support - Terms and Conditions Inquiry
                     </p>
-                    <p>We aim to respond to all inquiries within 2-3 business days.</p>
+                    <!-- <p>We aim to respond to all inquiries within 2-3 business days.</p> -->
                 </div>
 
                 <div class="terms-section terms-footer-section">
