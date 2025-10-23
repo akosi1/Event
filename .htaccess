@@ -1,15 +1,15 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # Force HTTPS (redirect all non-HTTPS requests)
+    # Force HTTPS
     RewriteCond %{HTTPS} !=on
     RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-    # Redirect any requests explicitly using /public to root
-    RewriteCond %{THE_REQUEST} \s/public/([^\s]*) [NC]
-    RewriteRule ^public/(.*)$ /$1 [L,R=301]
+    # Block direct access to /public or any subpaths inside it (return 403)
+    RewriteCond %{THE_REQUEST} \s/public([^\s]*) [NC]
+    RewriteRule ^public - [F,L]
 
-    # Point all requests to Laravel's public/index.php
+    # Redirect all normal requests through Laravel's front controller
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.*)$ public/index.php/$1 [L]
