@@ -895,7 +895,7 @@
                 <span class="red-text">Organizer</span>
             </h1>
             <p class="hero-subtitle">Madridejos Community College</p>
-
+            <input type="hidden" name="g-recaptcha-response" id="recaptchaResponse">
             <!-- CTA Button -->
             <div class="cta-buttons">
                 <a href="{{ route('login') }}" class="btn btn-secondary">
@@ -1233,7 +1233,7 @@
             </div>
         </div>
     </section>
-
+    <script src="https://www.google.com/recaptcha/api.js?render={{ env('RECAPTCHA_SITE_KEY') }}"></script>
     @include('layouts.footer')
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
