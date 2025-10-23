@@ -1,3 +1,4 @@
+
 @extends('admin.layouts.app')
 @section('title', 'Dashboard')
 @section('page-title', 'Dashboard')
@@ -72,7 +73,7 @@
     </div>
 </div>
 
-<!-- Recent Events Section --> 
+<!-- Recent Events Section -->
 <div class="row mt-4">
     <div class="col-md-12">
         <div class="card">

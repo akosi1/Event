@@ -364,7 +364,7 @@
 
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <img src="{{ asset('images/admin.png') }}" alt="EventAP Logo">
+            <img src="{{ asset('images/logo.png') }}" alt="EventAP Logo">
             <h4>Event & Portfolio Organizer</h4>
             <small>Admin Panel</small>
             <button class="sidebar-close" id="close" aria-label="Close Sidebar">
