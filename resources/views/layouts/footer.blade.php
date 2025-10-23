@@ -45,8 +45,8 @@
                         <a href="#">
                             <i class="fas fa-life-ring"></i> Help Center
                         </a>
-                        <a href="#">
-                            <i class="fas fa-file-alt"></i> Terms of Service
+                        <a href="{{ route('login') }}">
+                            <i class="fas fa-file-alt"></i> View Terms and Conditions
                         </a>
                         <a href="#">
                             <i class="fas fa-shield-alt"></i> Privacy Policy

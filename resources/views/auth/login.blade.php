@@ -145,6 +145,9 @@
                             <a href="{{ route('password.request') }}"><i class="fas fa-key"></i> Forgot your
                                 password?</a>
                         </div>
+                        <div class="terms-link">
+                            <a href="#" id="viewTermsBtn"><i class="fas fa-file-contract"></i> View Terms and Conditions</a>
+                        </div>
                         <div class="signup-link">
                             <a href="{{ route('ms365.verify') }}" class="btn-secondary">Create account with ms365
                                 email</a>
@@ -155,6 +158,113 @@
                         </div>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- Terms Modal --}}
+    <div class="terms-modal" id="termsModal">
+        <div class="terms-modal-content">
+            <div class="terms-modal-header">
+                <h2>User Terms and Conditions</h2>
+                <button class="terms-close-btn" id="closeTermsBtn">&times;</button>
+            </div>
+            <div class="terms-modal-body">
+                <div class="terms-section">
+                    <h3>1. Acceptance of Terms</h3>
+                    <p>By creating an account or accessing the MCC Event and Portfolio Organizer System, you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions. If you do not agree with any part of these terms, you must not use this system.</p>
+                </div>
+
+                <div class="terms-section">
+                    <h3>2. User Accounts</h3>
+                    <p>To access the full features of the system, you must register for an account by providing accurate, complete, and current information. You are solely responsible for maintaining the confidentiality of your account credentials, including your password. Any activity that occurs under your account is your responsibility. If you suspect unauthorized access to your account, you must notify the system administrator immediately.</p>
+                </div>
+
+                <div class="terms-section">
+                    <h3>3. Proper Use of the System</h3>
+                    <p>This platform is intended exclusively for event management and portfolio organization purposes. Users agree to use the system in a lawful and respectful manner. Prohibited behaviors include, but are not limited to:</p>
+                    <ul>
+                        <li>Posting spam, false information, or misleading content</li>
+                        <li>Uploading offensive, defamatory, or inappropriate materials</li>
+                        <li>Impersonating other individuals or organizations</li>
+                        <li>Disrupting the normal operation of the system</li>
+                    </ul>
+                </div>
+
+                <div class="terms-section">
+                    <h3>4. Content Ownership</h3>
+                    <p>You retain full ownership of all portfolios, documents, images, and other materials you upload to the system. By uploading content, you grant the MCC Event and Portfolio Organizer System a non-exclusive, royalty-free license to display, store, and distribute your content solely for the purpose of providing the service. You represent and warrant that you have the necessary rights to upload and share all content you submit.</p>
+                </div>
+
+                <div class="terms-section">
+                    <h3>5. Privacy and Data Use</h3>
+                    <p>The system collects limited personal information necessary for account creation and management, including your name, email address, department affiliation, and uploaded files. This information is used exclusively for:</p>
+                    <ul>
+                        <li>Account authentication and management</li>
+                        <li>Event coordination and portfolio display</li>
+                        <li>Communication regarding system updates or events</li>
+                    </ul>
+                    <p>We are committed to protecting your privacy and will not share your personal information with third parties without your consent, except as required by law.</p>
+                </div>
+
+                <div class="terms-section">
+                    <h3>6. Prohibited Activities</h3>
+                    <p>Users must not engage in any activity that compromises the security, integrity, or availability of the system. This includes:</p>
+                    <ul>
+                        <li>Attempting to gain unauthorized access to system resources or other user accounts</li>
+                        <li>Uploading malicious software, viruses, or harmful code</li>
+                        <li>Reverse engineering, decompiling, or attempting to extract source code</li>
+                        <li>Using automated tools or bots to access the system</li>
+                        <li>Overloading system resources or attempting denial-of-service attacks</li>
+                    </ul>
+                </div>
+
+                <div class="terms-section">
+                    <h3>7. Account Termination</h3>
+                    <p>The system administrator reserves the right to suspend or terminate user accounts at any time, with or without notice, for violations of these Terms and Conditions. Reasons for account termination may include, but are not limited to:</p>
+                    <ul>
+                        <li>Violation of proper use guidelines</li>
+                        <li>Posting inappropriate or offensive content</li>
+                        <li>Engaging in prohibited activities</li>
+                        <li>Providing false or misleading information during registration</li>
+                    </ul>
+                    <p>Users whose accounts have been terminated may not re-register without explicit permission from the administrator.</p>
+                </div>
+
+                <div class="terms-section">
+                    <h3>8. System Updates and Maintenance</h3>
+                    <p>The MCC Event and Portfolio Organizer System may undergo periodic maintenance, updates, and improvements. During these periods, the system may be temporarily unavailable. We will make reasonable efforts to notify users in advance of scheduled maintenance, but we do not guarantee uninterrupted access to the system.</p>
+                </div>
+
+                <div class="terms-section">
+                    <h3>9. Limitation of Liability</h3>
+                    <p>The MCC Event and Portfolio Organizer System is provided "as is" without warranties of any kind, either express or implied. The developers and administrators are not responsible for:</p>
+                    <ul>
+                        <li>Loss of data due to technical failures or user error</li>
+                        <li>Misuse of information by other users</li>
+                        <li>Damages resulting from unauthorized access to user accounts</li>
+                        <li>Interruptions in service or system availability</li>
+                    </ul>
+                    <p>Users are advised to maintain backups of important documents and information stored on the system.</p>
+                </div>
+
+                <div class="terms-section">
+                    <h3>10. Contact Information</h3>
+                    <p>For questions, concerns, or support regarding these Terms and Conditions or the use of the MCC Event and Portfolio Organizer System, please contact us at:</p>
+                    <p class="contact-info">
+                        <strong>Email:</strong> support@mcc-epo.edu<br>
+                        <strong>Subject Line:</strong> User Support - Terms and Conditions Inquiry
+                    </p>
+                    <p>We aim to respond to all inquiries within 2-3 business days.</p>
+                </div>
+
+                <div class="terms-section terms-footer-section">
+                    <p><strong>Last Updated:</strong> October 23, 2025</p>
+                    <p>By continuing to use this system, you acknowledge that you have read and accepted these Terms and Conditions.</p>
+                </div>
+            </div>
+            <div class="terms-modal-footer">
+                <button class="btn-accept-terms" id="acceptTermsBtn">I Understand</button>
             </div>
         </div>
     </div>
@@ -304,6 +414,49 @@
                             showToast('error', 'Verification Failed', 'Please try again.');
                         });
                 });
+            });
+
+            // ===== TERMS MODAL FUNCTIONALITY =====
+            const termsModal = document.getElementById('termsModal');
+            const viewTermsBtn = document.getElementById('viewTermsBtn');
+            const closeTermsBtn = document.getElementById('closeTermsBtn');
+            const acceptTermsBtn = document.getElementById('acceptTermsBtn');
+
+            // Open modal
+            if (viewTermsBtn) {
+                viewTermsBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    termsModal.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                });
+            }
+
+            // Close modal
+            function closeModal() {
+                termsModal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            if (closeTermsBtn) {
+                closeTermsBtn.addEventListener('click', closeModal);
+            }
+
+            if (acceptTermsBtn) {
+                acceptTermsBtn.addEventListener('click', closeModal);
+            }
+
+            // Close when clicking outside
+            termsModal.addEventListener('click', function(e) {
+                if (e.target === termsModal) {
+                    closeModal();
+                }
+            });
+
+            // Close with Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && termsModal.classList.contains('active')) {
+                    closeModal();
+                }
             });
         });
     </script>
