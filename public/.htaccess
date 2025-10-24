@@ -1,33 +1,22 @@
 <IfModule mod_rewrite.c>
-
-    <IfModule mod_negotiation.c>
-        Options -MultiViews -Indexes
-    </IfModule>
-
     RewriteEngine On
     RewriteBase /
 
-    # Redirect /public or /public/index.php to root
-    RewriteCond %{THE_REQUEST} \s/public/index\.php [NC,OR]
-    RewriteCond %{THE_REQUEST} \s/public/ [NC]
-    RewriteRule ^public(/.*)?$ / [L,R=301]
+    # Force HTTPS
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
-    # Handle Authorization Header
-    RewriteCond %{HTTP:Authorization} .
-    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+    # Redirect /public to root (cleanup)
+    RewriteCond %{THE_REQUEST} \s/public [NC]
+    RewriteRule ^public(/.*)?$ / [R=301,L]
 
-    # Handle X-XSRF-Token Header
-    RewriteCond %{HTTP:x-xsrf-token} .
-    RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
-
-    # Redirect Trailing Slashes If Not A Folder...
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_URI} (.+)/$
-    RewriteRule ^ %1 [L,R=301]
-
-    # Send Requests To Front Controller...
-    RewriteCond %{REQUEST_FILENAME} !-d
+    # Handle Laravel routes
     RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^ index.php [L]
-
 </IfModule>
+
+# Deny access to sensitive files
+<FilesMatch "\.(env|config|ini|log|git|sql|sh|bash)$">
+    Require all denied
+</FilesMatch>
