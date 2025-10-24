@@ -167,6 +167,7 @@ class Event extends Model
               ->orWhereJsonContains('allowed_departments', $department);
         });
     }
+    
 
     public function isAvailableForUserDepartment($userDepartment): bool
     {

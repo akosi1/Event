@@ -68,7 +68,6 @@
             margin-bottom: 20px;
         }
 
-        /* Password toggle icon */
         .password-toggle {
             position: absolute;
             right: 16px;
@@ -88,74 +87,122 @@
         .form-control:focus ~ .password-toggle {
             color: #6b2c91;
         }
+
+        #verification_code {
+            text-align: center;
+            font-size: 24px;
+            letter-spacing: 8px;
+        }
+
+        .form-disabled {
+            pointer-events: none;
+            opacity: 0.7;
+        }
     </style>
 
     <div class="auth-wrapper">
         <div class="auth-container">
-            <div class="auth-header">
-                <h1>Welcome Back</h1>
-                <p>Sign in to your E&amp;P-O account</p>
-            </div>
-
-            <div class="auth-form" id="authForm">
-                <x-auth-session-status class="mb-4" :status="session('status')" />
-
-                <form method="POST" action="{{ route('login') }}" id="loginForm">
-                    @csrf
-
-                    {{-- Email Field --}}
-                    <div class="form-group">
-                        <div class="input-wrapper">
-                            <input id="email" type="email" name="email" value="{{ old('email') }}"
-                                class="form-control @error('email') input-error @enderror" placeholder=" " required
-                                autocomplete="username" autofocus oninput="this.value = this.value.replace(/\s+/g, '')"
-                                onblur="this.value = this.value.trim()">
-                            <label class="input-label">Email Address</label>
-                            <i class="fas fa-envelope input-icon"></i>
+            @if (session('needs_verification'))
+                <!-- VERIFICATION STEP -->
+                <div class="auth-header">
+                    <h1>Verify Your Identity</h1>
+                    <p>We sent a 6-digit code to <strong>{{ session('login_verification.email') }}</strong></p>
+                </div>
+                <div class="auth-form">
+                    <form method="POST" action="{{ route('login.verify') }}" id="verifyForm">
+                        @csrf
+                        <div class="form-group">
+                            <div class="input-wrapper">
+                                <input id="verification_code" type="text" name="verification_code"
+                                    class="form-control @error('verification_code') input-error @enderror"
+                                    placeholder=" " required maxlength="6" inputmode="numeric"
+                                    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,6)"
+                                    autocomplete="off" autofocus>
+                                <label class="input-label">Verification Code</label>
+                                <i class="fas fa-key input-icon"></i>
+                            </div>
+                            @error('verification_code')
+                                <div class="error-msg"><i class="fas fa-exclamation-circle"></i>{{ $message }}</div>
+                            @enderror
                         </div>
-                        @error('email')
-                            <div class="error-msg"><i class="fas fa-exclamation-circle"></i>{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    {{-- Password Field --}}
-                    <div class="form-group">
-                        <div class="input-wrapper">
-                            <input id="password" type="password" name="password"
-                                class="form-control @error('password') input-error @enderror" placeholder=" " required
-                                autocomplete="current-password" oninput="this.value = this.value.replace(/\s+/g, '')"
-                                onblur="this.value = this.value.trim()">
-                            <label class="input-label">Password</label>
-                            <i class="fas fa-lock input-icon"></i>
-                            <i class="fas fa-eye password-toggle" id="togglePassword"></i>
+                        <button type="submit" class="btn-submit">
+                            <i class="fas fa-check"></i> Verify & Sign In
+                        </button>
+                        <div class="form-footer">
+                            <p class="text-center" style="margin-top: 15px;">
+                                Didn’t receive the code? 
+                                <a href="{{ route('login') }}" style="color:#6b2c91;">Go back to resend</a>
+                            </p>
+                            <div class="back-link">
+                                <a href="{{ url('/') }}" class="btn-secondary">Back to main page</a>
+                            </div>
                         </div>
-                        @error('password')
-                            <div class="error-msg"><i class="fas fa-exclamation-circle"></i>{{ $message }}</div>
-                        @enderror
-                    </div>
+                    </form>
+                </div>
+            @else
+                <!-- ORIGINAL LOGIN FORM WITH 3-ATTEMPT LOCKOUT -->
+                <div class="auth-header">
+                    <h1>Welcome Back</h1>
+                    <p>Sign in to your E&amp;P-O account</p>
+                </div>
+                <div class="auth-form" id="authForm">
+                    <x-auth-session-status class="mb-4" :status="session('status')" />
 
-                    <input type="hidden" name="g-recaptcha-response" id="recaptchaResponse">
+                    <form method="POST" action="{{ route('login.store') }}" id="loginForm">
+                        @csrf
 
-                    <button type="submit" class="btn-submit" id="submitBtn">
-                        <i class="fas fa-sign-in-alt"></i> Sign in
-                    </button>
+                        {{-- Email Field --}}
+                        <div class="form-group">
+                            <div class="input-wrapper">
+                                <input id="email" type="email" name="email" value="{{ old('email') }}"
+                                    class="form-control @error('email') input-error @enderror" placeholder=" " required
+                                    autocomplete="username" autofocus oninput="this.value = this.value.replace(/\s+/g, '')"
+                                    onblur="this.value = this.value.trim()">
+                                <label class="input-label">Email Address</label>
+                                <i class="fas fa-envelope input-icon"></i>
+                            </div>
+                            @error('email')
+                                <div class="error-msg"><i class="fas fa-exclamation-circle"></i>{{ $message }}</div>
+                            @enderror
+                        </div>
 
-                    <div class="form-footer">
-                        <div class="forgot-password">
-                            <a href="{{ route('password.request') }}"><i class="fas fa-key"></i> Forgot your
-                                password?</a>
+                        {{-- Password Field --}}
+                        <div class="form-group">
+                            <div class="input-wrapper">
+                                <input id="password" type="password" name="password"
+                                    class="form-control @error('password') input-error @enderror" placeholder=" " required
+                                    autocomplete="current-password" oninput="this.value = this.value.replace(/\s+/g, '')"
+                                    onblur="this.value = this.value.trim()">
+                                <label class="input-label">Password</label>
+                                <i class="fas fa-lock input-icon"></i>
+                                <i class="fas fa-eye password-toggle" id="togglePassword"></i>
+                            </div>
+                            @error('password')
+                                <div class="error-msg"><i class="fas fa-exclamation-circle"></i>{{ $message }}</div>
+                            @enderror
                         </div>
-                        <div class="signup-link">
-                            <a href="{{ route('ms365.verify') }}" class="btn-secondary">Create account with ms365
-                                email</a>
+
+                        <input type="hidden" name="g-recaptcha-response" id="recaptchaResponse">
+
+                        <button type="submit" class="btn-submit" id="submitBtn">
+                            <i class="fas fa-sign-in-alt"></i> Sign in
+                        </button>
+
+                        <div class="form-footer">
+                            <div class="forgot-password">
+                                <a href="{{ route('password.request') }}"><i class="fas fa-key"></i> Forgot your password?</a>
+                            </div>
+                            <div class="signup-link">
+                                <a href="{{ route('ms365.verify') }}" class="btn-secondary">Create account with ms365 email</a>
+                            </div>
+                            <div class="divider"><span>or</span></div>
+                            <div class="back-link">
+                                <a href="{{ url('/') }}" class="btn-secondary">Back to main page</a>
+                            </div>
                         </div>
-                        <div class="divider"><span>or</span></div>
-                        <div class="back-link">
-                            <a href="{{ url('/') }}" class="btn-secondary">Back to main page</a>
-                        </div>
-                    </div>
-                </form>
-            </div>
+                    </form>
+                </div>
+            @endif
         </div>
     </div>
 
@@ -165,28 +212,25 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const togglePassword = document.getElementById('togglePassword');
+            const passwordInput = document.getElementById('password');
+            if (togglePassword && passwordInput) {
+                togglePassword.addEventListener('click', function() {
+                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordInput.setAttribute('type', type);
+                    this.classList.toggle('fa-eye');
+                    this.classList.toggle('fa-eye-slash');
+                });
+            }
+
+            // Only initialize lockout logic on the login form (not verification)
             const authForm = document.getElementById('authForm');
             const submitBtn = document.getElementById('submitBtn');
             const loginForm = document.getElementById('loginForm');
-            const togglePassword = document.getElementById('togglePassword');
-            const passwordInput = document.getElementById('password');
             let interval = null;
             let isSubmitting = false;
 
-            // Password visibility toggle
-            togglePassword.addEventListener('click', function() {
-                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                passwordInput.setAttribute('type', type);
-                
-                // Toggle eye icon
-                this.classList.toggle('fa-eye');
-                this.classList.toggle('fa-eye-slash');
-            });
-
-            // Utility: Format time as MM:SS
-            const formatTime = (s) => `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
-
-            // Lockout Popup
+            // Lockout popup
             const lockoutPopup = document.createElement('div');
             lockoutPopup.className = 'popup-vertical';
             lockoutPopup.id = 'lockoutPopup';
@@ -201,12 +245,14 @@
                 <div class="progress-line"><div class="progress-fill" id="progressFill"></div></div>`;
             document.body.appendChild(lockoutPopup);
 
+            const formatTime = (s) => `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
+
             function startLockout(endTime) {
                 if (interval) clearInterval(interval);
                 localStorage.setItem('lockoutEnd', endTime);
-                authForm.classList.add('form-disabled');
+                if (authForm) authForm.classList.add('form-disabled');
                 lockoutPopup.classList.add('active');
-                submitBtn.disabled = true;
+                if (submitBtn) submitBtn.disabled = true;
 
                 const countdownEl = document.getElementById('countdownDisplay');
                 const progressEl = document.getElementById('progressFill');
@@ -218,9 +264,9 @@
                     if (remain <= 0) {
                         clearInterval(interval);
                         localStorage.removeItem('lockoutEnd');
-                        authForm.classList.remove('form-disabled');
+                        if (authForm) authForm.classList.remove('form-disabled');
                         lockoutPopup.classList.remove('active');
-                        submitBtn.disabled = false;
+                        if (submitBtn) submitBtn.disabled = false;
                         showToast('success', 'Account Unlocked', 'You can now log in again.');
                         return;
                     }
@@ -237,19 +283,7 @@
                 startLockout(parseInt(stored));
             }
 
-            // Loading popup
-            const loadingPopup = document.createElement('div');
-            loadingPopup.className = 'popup-vertical';
-            loadingPopup.id = 'loadingPopup';
-            loadingPopup.innerHTML = `
-                <div class="icon-circle"><i class="fas fa-spinner fa-spin"></i></div>
-                <div class="content-area">
-                    <h3>Please Wait</h3>
-                    <div class="loading-text"><i class="fas fa-spinner fa-spin"></i> Signing in...</div>
-                </div>`;
-            document.body.appendChild(loadingPopup);
-
-            // SweetAlert-style toast
+            // Toast helper
             function showToast(type, title, text) {
                 const toast = document.createElement('div');
                 toast.className = 'popup-vertical ' + type;
@@ -266,9 +300,9 @@
                 }, 3000);
             }
 
-            // Handle backend validation messages
+            // Handle backend errors (lockout or remaining attempts)
             @if ($errors->has('locked_out'))
-                const lockoutEnd = {{ $errors->first('lockout_end') ?? 'null' }};
+                const lockoutEnd = {{ $errors->first('lockout_end') }};
                 if (lockoutEnd) startLockout(lockoutEnd);
             @elseif ($errors->has('failed_attempt'))
                 const remaining = {{ $errors->first('remaining') }};
@@ -276,35 +310,40 @@
                     `${remaining} ${remaining === 1 ? 'attempt' : 'attempts'} remaining`);
             @endif
 
-            // Submit with reCAPTCHA
-            loginForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                // Prevent double submission
-                if (isSubmitting) {
-                    return;
-                }
-                
-                isSubmitting = true;
-                submitBtn.disabled = true;
-                loadingPopup.classList.add('active');
-                
-                grecaptcha.ready(() => {
-                    grecaptcha.execute('{{ env('RECAPTCHA_SITE_KEY') }}', {
-                            action: 'login'
-                        })
-                        .then(token => {
-                            document.getElementById('recaptchaResponse').value = token;
-                            loginForm.submit();
-                        })
-                        .catch(() => {
-                            loadingPopup.classList.remove('active');
-                            submitBtn.disabled = false;
-                            isSubmitting = false;
-                            showToast('error', 'Verification Failed', 'Please try again.');
-                        });
+            // Submit login form with reCAPTCHA
+            if (loginForm) {
+                loginForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    if (isSubmitting) return;
+                    isSubmitting = true;
+                    if (submitBtn) submitBtn.disabled = true;
+
+                    const loadingPopup = document.createElement('div');
+                    loadingPopup.className = 'popup-vertical';
+                    loadingPopup.innerHTML = `
+                        <div class="icon-circle"><i class="fas fa-spinner fa-spin"></i></div>
+                        <div class="content-area">
+                            <h3>Please Wait</h3>
+                            <div class="loading-text"><i class="fas fa-spinner fa-spin"></i> Signing in...</div>
+                        </div>`;
+                    document.body.appendChild(loadingPopup);
+                    loadingPopup.classList.add('active');
+
+                    grecaptcha.ready(() => {
+                        grecaptcha.execute('{{ env('RECAPTCHA_SITE_KEY') }}', { action: 'login' })
+                            .then(token => {
+                                document.getElementById('recaptchaResponse').value = token;
+                                loginForm.submit();
+                            })
+                            .catch(() => {
+                                loadingPopup.remove();
+                                if (submitBtn) submitBtn.disabled = false;
+                                isSubmitting = false;
+                                showToast('error', 'Verification Failed', 'Please try again.');
+                            });
+                    });
                 });
-            });
+            }
         });
     </script>
 </x-guest-layout>

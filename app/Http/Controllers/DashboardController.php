@@ -13,47 +13,53 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
-        $query = Event::where('status', 'active')
-                      ->whereNull('parent_event_id'); 
+        // ✅ Use 'joins' instead of 'registrations'
+        $query = Event::with('joins.user')
+            ->where('status', 'active')
+            ->whereNull('parent_event_id');
 
-        // Department filter - now handles exclusive events properly
         if ($request->filled('department')) {
             $query->forDepartment($request->department);
         } else {
-            // If no department filter, show events available for user's department
             if ($user->department) {
                 $query->forDepartment($user->department);
             }
         }
 
-        // Search filter
         if ($request->filled('search')) {
-            $query->where(function ($q) use ($request) {
-                $q->where('title', 'like', '%' . $request->search . '%')
-                  ->orWhere('description', 'like', '%' . $request->search . '%')
-                  ->orWhere('location', 'like', '%' . $request->search . '%');
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('location', 'like', "%{$search}%");
             });
         }
 
-        $events = $query->orderBy('date', 'asc')->paginate(12);
+        $events = $query->orderBy('date', 'asc')
+                        ->orderBy('start_time', 'asc')
+                        ->paginate(12);
 
-        // Add is_joined attribute for each event
-        $events->getCollection()->transform(function ($event) {
-            $userId = auth()->id();
-            $eventDate = Carbon::parse($event->date)->format('Y-m-d');
-            $endTime = Carbon::parse($event->end_time)->format('H:i:s');
-            $end = Carbon::parse("{$eventDate} {$endTime}", 'Asia/Manila');
-            
-            $event->is_joined = $event->isJoinedByUser(auth()->id());
-            $event->join_status = $event->joinStatus($userId);
-            $event->hasEnded = $end->isPast();
+        $events->getCollection()->transform(function ($event) use ($user) {
+            $eventDate = $event->date ? Carbon::parse($event->date)->format('Y-m-d') : null;
+            $endTime = $event->end_time ? Carbon::parse($event->end_time)->format('H:i:s') : '23:59:59';
+
+            if ($eventDate) {
+                $end = Carbon::createFromFormat('Y-m-d H:i:s', "{$eventDate} {$endTime}", 'Asia/Manila');
+                $event->hasEnded = $end->isPast();
+            } else {
+                $event->hasEnded = true;
+            }
+
+            // ✅ These methods already use 'joins', so they work
+            $event->is_joined = $event->isJoinedByUser($user->id);
+            $event->join_status = $event->joinStatus($user->id);
 
             return $event;
         });
 
         $certificates = Certificate::with('event')
-        ->where('user_id', $user->id)
-        ->get();
+            ->where('user_id', $user->id)
+            ->get();
 
         return view('dashboard', compact('events', 'certificates'));
     }
