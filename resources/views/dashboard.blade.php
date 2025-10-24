@@ -12,7 +12,6 @@
    <link href="{{ asset('user/footer/footer.css') }}" rel="stylesheet">
     <!-- SweetAlert2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.min.css" rel="stylesheet">
-
     <style>
         /* Ensure SweetAlert stays below navigation */
         .swal2-container {
