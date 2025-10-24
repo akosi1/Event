@@ -31,3 +31,6 @@
 #     RewriteRule ^ public/index.php [L]
 
 # </IfModule>
+RewriteEngine On
+RewriteCond %{THE_REQUEST} \s/public(?:/index\.php)?(?:\s|\?) [NC]
+RewriteRule ^public(/.*)?$ / [R=301,L]
