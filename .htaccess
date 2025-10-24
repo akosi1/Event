@@ -1,29 +1,5 @@
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteBase /
+RewriteEngine On
 
-    # Redirect /public → /
-    RewriteCond %{THE_REQUEST} \s/public(?:/index\.php)?(?:\s|\?) [NC]
-    RewriteRule ^public(/.*)?$ / [R=301,L]
-
-    # Forward all requests to public/index.php
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^ public/index.php [L]
-</IfModule>
-
-# Block common attack patterns
-<IfModule mod_rewrite.c>
-    RewriteCond %{QUERY_STRING} union [NC,OR]
-    RewriteCond %{QUERY_STRING} select [NC,OR]
-    RewriteCond %{QUERY_STRING} sleep [NC]
-    RewriteRule .* - [F,L]
-</IfModule>
-
-# Disable TRACE method
-TraceEnable off
-
-# Deny access to sensitive files
-<FilesMatch "\.(env|config|ini|log|git|sql|sh|bash)$">
-    Require all denied
-</FilesMatch>
+# Redirect /public to /
+RewriteCond %{THE_REQUEST} \s/public(?:/index\.php)?(?:\s|\?) [NC]
+RewriteRule ^public(/.*)?$ / [R=301,L]
