@@ -14,4 +14,3 @@ class ExampleUnitTest extends TestCase
         $this->assertTrue(true);
     }
 }
-

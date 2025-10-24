@@ -60,7 +60,9 @@
         Route::prefix('events/')->name('events.')->group(function () {
             Route::post('{event}/join', [EventJoinController::class, 'join'])->name('join');
             Route::delete('{event}/leave', [EventJoinController::class, 'leave'])->name('leave');
-            Route::post('{id}/feedback', [EventController::class, 'storeFeedback'])->name('feedback');
+          Route::post('{event}/feedback', [EventController::class, 'storeFeedback'])->name('events.feedback');
+
+
         });
     });
 

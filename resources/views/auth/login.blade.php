@@ -67,6 +67,27 @@
             margin-top: -10px;
             margin-bottom: 20px;
         }
+
+        /* Password toggle icon */
+        .password-toggle {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+            transition: color 0.3s ease;
+            z-index: 4;
+            font-size: 16px;
+        }
+
+        .password-toggle:hover {
+            color: #6b2c91;
+        }
+
+        .form-control:focus ~ .password-toggle {
+            color: #6b2c91;
+        }
     </style>
 
     <div class="auth-wrapper">
@@ -106,6 +127,7 @@
                                 onblur="this.value = this.value.trim()">
                             <label class="input-label">Password</label>
                             <i class="fas fa-lock input-icon"></i>
+                            <i class="fas fa-eye password-toggle" id="togglePassword"></i>
                         </div>
                         @error('password')
                             <div class="error-msg"><i class="fas fa-exclamation-circle"></i>{{ $message }}</div>
@@ -146,7 +168,20 @@
             const authForm = document.getElementById('authForm');
             const submitBtn = document.getElementById('submitBtn');
             const loginForm = document.getElementById('loginForm');
+            const togglePassword = document.getElementById('togglePassword');
+            const passwordInput = document.getElementById('password');
             let interval = null;
+            let isSubmitting = false;
+
+            // Password visibility toggle
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                
+                // Toggle eye icon
+                this.classList.toggle('fa-eye');
+                this.classList.toggle('fa-eye-slash');
+            });
 
             // Utility: Format time as MM:SS
             const formatTime = (s) => `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
@@ -244,7 +279,16 @@
             // Submit with reCAPTCHA
             loginForm.addEventListener('submit', function(e) {
                 e.preventDefault();
+                
+                // Prevent double submission
+                if (isSubmitting) {
+                    return;
+                }
+                
+                isSubmitting = true;
+                submitBtn.disabled = true;
                 loadingPopup.classList.add('active');
+                
                 grecaptcha.ready(() => {
                     grecaptcha.execute('{{ env('RECAPTCHA_SITE_KEY') }}', {
                             action: 'login'
@@ -255,6 +299,8 @@
                         })
                         .catch(() => {
                             loadingPopup.classList.remove('active');
+                            submitBtn.disabled = false;
+                            isSubmitting = false;
                             showToast('error', 'Verification Failed', 'Please try again.');
                         });
                 });

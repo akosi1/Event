@@ -1,3 +1,4 @@
+
 <!-- Footer -->
     <footer class="site-footer">
         <div class="footer-content">
@@ -24,17 +25,20 @@
                 <div class="footer-section">
                     <h3><i class="fas fa-link"></i> Quick Links</h3>
                     <div class="footer-links">
-                        <a href="#">
+
+                        <a href="{{ url('/dashboard') }}">
                             <i class="fas fa-home"></i> Home
                         </a>
+
                         <a href="#">
-                            <i class="fas fa-calendar-check"></i> My Events
+                            <i class="fas fa-backward"></i> Front pages
                         </a>
+                        <a href="{{ url('/certificates') }}">
+                            <i class="fas fa-certificate"></i> Certificates
+                        </a>
+
                         <a href="#">
-                            <i class="fas fa-graduation-cap"></i> Departments
-                        </a>
-                        <a href="#about">
-                            <i class="fas fa-info-circle"></i> About Us
+                            <i class="fas fa-user-graduate"></i> Departments
                         </a>
                     </div>
                 </div>
@@ -45,8 +49,8 @@
                         <a href="#">
                             <i class="fas fa-life-ring"></i> Help Center
                         </a>
-                        <a href="#">
-                            <i class="fas fa-file-alt"></i> Terms of Service
+                        <a href="{{ route('login') }}">
+                            <i class="fas fa-file-alt"></i> View Terms and Conditions
                         </a>
                         <a href="#">
                             <i class="fas fa-shield-alt"></i> Privacy Policy
@@ -72,4 +76,4 @@
                 <p>&copy; 2025 MCC E&PO. All rights reserved. | Designed with <i class="fas fa-heart" style="color: #ef4444;"></i> for students</p>
             </div>
         </div>
-    </footer>
+ </footer>

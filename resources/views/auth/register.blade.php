@@ -194,6 +194,28 @@
                         Password must be at least 12 characters with uppercase, lowercase, number, and symbol.
                     </div>
 
+                    {{-- Terms and Conditions Checkbox --}}
+                    <div class="form-group">
+                        <div class="terms-checkbox-wrapper">
+                            <input 
+                                type="checkbox" 
+                                id="terms_accepted" 
+                                name="terms_accepted" 
+                                value="1"
+                                {{ old('terms_accepted') ? 'checked' : '' }}
+                                required
+                                class="terms-checkbox"
+                            >
+                            <label for="terms_accepted" class="terms-label">
+                                I have read and agree to the 
+                                <a href="javascript:void(0)" onclick="openTermsModal()" class="terms-link">
+                                    Terms and Conditions
+                                </a>
+                            </label>
+                        </div>
+                        <x-input-error :messages="$errors->get('terms_accepted')" class="error-msg" />
+                    </div>
+
                     <input type="hidden" name="role" value="student">
                     <input type="hidden" name="status" value="active">
 
@@ -217,6 +239,9 @@
             </div>
         </div>
     </div>
+
+    {{-- Include Terms and Conditions Modal --}}
+    @include('layouts.term_condition')
 
     <script>
         function togglePasswordVisibility(fieldId) {
@@ -285,6 +310,15 @@
                         return false;
                     }
                 }
+
+                // Check terms and conditions
+                const termsCheckbox = document.getElementById('terms_accepted');
+                if (!termsCheckbox.checked) {
+                    e.preventDefault();
+                    alert('You must accept the Terms and Conditions to register.');
+                    termsCheckbox.focus();
+                    return false;
+                }
             });
         });
     </script>
@@ -311,6 +345,75 @@
             color: #ccc;
             margin: 8px 0 16px;
             text-align: center;
+        }
+
+        /* Terms and Conditions Checkbox Styling */
+        .terms-checkbox-wrapper {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .terms-checkbox-wrapper:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .terms-checkbox-wrapper.accepted {
+            background: rgba(107, 44, 145, 0.1);
+            border-color: #6b2c91;
+        }
+
+        .terms-checkbox {
+            width: 20px;
+            height: 20px;
+            min-width: 20px;
+            cursor: pointer;
+            accent-color: #6b2c91;
+            margin-top: 2px;
+        }
+
+        .terms-label {
+            color: #fff;
+            font-size: 14px;
+            line-height: 1.6;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .terms-link {
+            color: #a78bfa;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid transparent;
+        }
+
+        .terms-link:hover {
+            color: #c4b5fd;
+            border-bottom-color: #c4b5fd;
+        }
+
+        @media (max-width: 768px) {
+            .terms-checkbox-wrapper {
+                padding: 12px;
+            }
+
+            .terms-label {
+                font-size: 13px;
+            }
+
+            .terms-checkbox {
+                width: 18px;
+                height: 18px;
+                min-width: 18px;
+            }
         }
     </style>
 </x-guest-layout>

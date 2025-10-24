@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Carbon\Carbon;
+use App\Models\Feedback;
+use App\Mail\PHPMailerService;
+use Illuminate\Support\Facades\Auth;
+
+
 
 class EventController extends Controller
 {
@@ -375,27 +380,52 @@ class EventController extends Controller
         return $validated;
     }
     ##feeback
-    public function storeFeedback(Request $request, $id)
+     public function storeFeedback(Request $request, Event $event)
     {
-        // Validate feedback input
-        $validated = $request->validate([
+        $request->validate([
             'feedback' => 'required|string|max:1000',
             'rating' => 'nullable|integer|min:1|max:5',
         ]);
 
-        // Store feedback in your database (assuming you have a Feedback model)
-        \App\Models\Feedback::create([
-            'event_id' => $id,
-            'user_id' => auth()->id(),
-            'feedback' => $validated['feedback'],
-            'rating' => $validated['rating'] ?? null,
+        $feedback = Feedback::create([
+            'event_id' => $event->id,
+            'user_id' => Auth::id(),
+            'feedback' => $request->feedback,
+            'rating' => $request->rating,
         ]);
 
+        $mailer = new PHPMailerService();
+
+        $adminEmail = env('FEEDBACK_RECIPIENT', 'briannickacorda18@gmail.com');
+        $userEmail = Auth::user()->email;
+
+        $subject = "New Feedback for: {$event->title}";
+        $body = "
+            <h3>New Feedback Received</h3>
+            <p><strong>Event:</strong> {$event->title}</p>
+            <p><strong>User:</strong> {$userEmail}</p>
+            <p><strong>Rating:</strong> {$request->rating}</p>
+            <p><strong>Feedback:</strong><br>{$request->feedback}</p>
+        ";
+
+        
+        $mailer->sendEmail($adminEmail, $subject, $body);
+
+      
+        $thankYouBody = "
+            <h3>Thank You for Your Feedback!</h3>
+            <p>We’ve received your feedback for <strong>{$event->title}</strong>.</p>
+            <p>Your input helps us improve future events!</p>
+        ";
+        $mailer->sendEmail($userEmail, "Feedback Confirmation", $thankYouBody);
+
+      
         return response()->json([
             'success' => true,
-            'message' => 'Feedback submitted successfully!',
-        ], 201);
+            'message' => 'Feedback submitted successfully and email sent!',
+        ]);
     }
+
 
     /**
      * Process department exclusivity settings
