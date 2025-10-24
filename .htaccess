@@ -7,7 +7,7 @@
 
     # Route all requests to public/ (Laravel front controller)
     RewriteCond %{THE_REQUEST} \s/public(?:/index\.php)?(?:\s|\?) [NC]
-    RewriteRule ^public/?(.*)$ /$1 [R=301,L]
+    RewriteRule ^public(/.*)?$ / [R=301,L]
 
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
