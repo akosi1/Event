@@ -8,7 +8,7 @@
     RewriteBase /
 
     # Redirect /public or /public/index.php to root
-    RewriteCond %{THE_REQUEST} \s/index\.php [NC,OR]
+    RewriteCond %{THE_REQUEST} \s/public(?:/index\.php)?(?:\s|\?) [NC]
     # RewriteCond %{THE_REQUEST} \s/public/ [NC]
     RewriteRule ^public(/.*)?$ / [L,R=301]
 
