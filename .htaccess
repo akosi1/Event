@@ -1,2 +1,19 @@
-RewriteEngine On
-RewriteRule ^public(/.*)?$ / [R=301,L]
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Redirect /public URLs to root
+    RewriteRule ^public(/.*)?$ / [R=301,L]
+
+    # Route all requests to public folder
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# Deny access to sensitive files
+<FilesMatch "\.(env|config|ini|log|git|sql|sh|bash)$">
+    Require all denied
+</FilesMatch>
+
+# Disable TRACE method (XSS protection)
+TraceEnable off
