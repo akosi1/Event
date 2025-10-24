@@ -6,7 +6,10 @@
     RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
     # Route all requests to public/ (Laravel front controller)
-    RewriteRule ^(.*)$ public/$1 [L]
+    RewriteRule %{REQUEST_URI} !^/public/
+    RewriteRule %{REQUEST_FILENAME} !-f
+    RewriteRule %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ public/index.php$1 [L]
 </IfModule>
 
 # Block common attack patterns in query strings
