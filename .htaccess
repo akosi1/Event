@@ -1,3 +1,4 @@
 RewriteEngine On
-RewriteCond %{THE_REQUEST} \s/public(?:/index\.php)?(?:\s|\?) [NC]
-RewriteRule ^public(/.*)?$ / [R=301,L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [L]
