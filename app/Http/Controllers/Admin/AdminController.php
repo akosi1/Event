@@ -3,14 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Event;
-use App\Models\Certificate;
-use App\Models\User;
+use App\Models\{Event, Certificate, User, EventJoin};
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\{Auth, DB, Hash, Storage};
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Carbon\Carbon;
 
@@ -24,7 +19,7 @@ class AdminController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        return view('admin.login'); // Make sure this view exists
+        return view('admin.login');
     }
 
     // Handle admin login
@@ -59,35 +54,71 @@ class AdminController extends Controller
         return redirect()->route('admin.login');
     }
 
-    // =============== DASHBOARD & OTHER METHODS (unchanged below) ===============
+    // =============== DASHBOARD METHOD - UPDATED ===============
 
     public function dashboard(Request $request)
     {
         $currentYear = Carbon::now()->year;
+        $perPage = $request->get('per_page', 5);
 
+        // Basic stats
         $totalEvents = Event::count();
         $totalUsers = User::where('role', '!=', 'admin')->count();
         $totalAdmins = User::where('role', 'admin')->count();
 
-        $monthlyEvents = Event::selectRaw('MONTHNAME(date) as month, COUNT(*) as count')
-            ->whereYear('date', $currentYear)
-            ->groupBy('month', DB::raw('MONTH(date)'))
-            ->orderBy(DB::raw('MONTH(date)'))
-            ->get();
+        // Monthly events data
+        $monthlyEvents = Event::select(
+            DB::raw('MONTH(date) as month_num'),
+            DB::raw('MONTHNAME(date) as month'),
+            DB::raw('COUNT(*) as count')
+        )
+        ->whereYear('date', $currentYear)
+        ->groupBy('month_num', 'month', DB::raw('MONTH(date)'))
+        ->orderBy(DB::raw('MONTH(date)'))
+        ->get();
 
-        $locationData = Event::selectRaw('location, COUNT(*) as count')
+        // Location data
+        $locationData = Event::select('location', DB::raw('COUNT(*) as count'))
             ->groupBy('location')
-            ->orderBy('count', 'desc')
+            ->orderByDesc('count')
+            ->limit(7)
             ->get();
 
-        $eventNamesData = Event::selectRaw('title, COUNT(*) as count')
+        // Event names data
+        $eventNamesData = Event::select('title', DB::raw('COUNT(*) as count'))
             ->groupBy('title')
-            ->orderBy('count', 'desc')
+            ->orderByDesc('count')
             ->limit(10)
             ->get();
 
-        $perPage = $request->get('per_page', 5);
-        $allEvents = Event::latest()->paginate($perPage, ['*'], 'page', $request->get('page', 1));
+        // Event Joins Status Data (NEW)
+        $eventJoinsStatusData = [
+            'pending' => EventJoin::where('approved', false)->count(),
+            'approved' => EventJoin::where('approved', true)->count()
+        ];
+
+        // Monthly Event Joins Data (NEW)
+        $monthlyEventJoins = EventJoin::select(
+            DB::raw('MONTH(joined_at) as month_num'),
+            DB::raw('MONTHNAME(joined_at) as month'),
+            DB::raw('SUM(CASE WHEN approved = 1 THEN 1 ELSE 0 END) as approved'),
+            DB::raw('SUM(CASE WHEN approved = 0 THEN 1 ELSE 0 END) as pending')
+        )
+        ->whereYear('joined_at', $currentYear)
+        ->groupBy('month_num', 'month', DB::raw('MONTH(joined_at)'))
+        ->orderBy(DB::raw('MONTH(joined_at)'))
+        ->get();
+
+        // Top Events by Join Count (NEW)
+        $topEventsByJoins = Event::select('events.id', 'events.title', DB::raw('COUNT(event_joins.id) as join_count'))
+            ->leftJoin('event_joins', 'events.id', '=', 'event_joins.event_id')
+            ->groupBy('events.id', 'events.title')
+            ->orderByDesc('join_count')
+            ->limit(10)
+            ->get();
+
+        // Recent events with pagination
+        $allEvents = Event::latest('date')->paginate($perPage);
         $allEvents->appends($request->query());
 
         return view('admin.dashboard', compact(
@@ -98,10 +129,15 @@ class AdminController extends Controller
             'monthlyEvents',
             'locationData',
             'eventNamesData',
+            'eventJoinsStatusData',
+            'monthlyEventJoins',
+            'topEventsByJoins',
             'allEvents',
             'perPage'
         ));
     }
+
+    // =============== OTHER METHODS (unchanged) ===============
 
     public function allEvents()
     {
