@@ -1,0 +1,18 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # ✅ If someone visits /public or /public/anything, redirect to root
+    RewriteCond %{THE_REQUEST} \s/public[\/\s?]
+    RewriteRule ^public(/.*)?$ / [L,R=301]
+
+    # ✅ Forward all other requests to the real Laravel front controller
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# Deny direct access to sensitive files
+<FilesMatch "\.(env|config|ini|log|git|sql|sh|bash)$">
+    Require all denied
+</FilesMatch>
+
+Options -Indexes
