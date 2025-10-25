@@ -1,5 +1,4 @@
 <IfModule mod_rewrite.c>
-
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
     </IfModule>
@@ -7,7 +6,7 @@
     RewriteEngine On
     RewriteBase /
 
-    # Redirect /public or /public/index.php to root
+    # Redirect /public or /public/index.php to root (optional cleanup)
     RewriteCond %{THE_REQUEST} \s/public/index\.php [NC,OR]
     RewriteCond %{THE_REQUEST} \s/public/ [NC]
     RewriteRule ^public(/.*)?$ / [L,R=301]
@@ -16,18 +15,14 @@
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
-    # Handle X-XSRF-Token Header
-    RewriteCond %{HTTP:x-xsrf-token} .
-    RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
-
-    # Redirect Trailing Slashes If Not A Folder...
+    # Redirect Trailing Slashes If Not A Folder
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
 
-    # Send Requests To Front Controller...
+    # Send Requests To Front Controller
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
-
 </IfModule>
+
