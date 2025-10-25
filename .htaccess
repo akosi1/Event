@@ -10,7 +10,7 @@
 
   
     RewriteCond %{THE_REQUEST} \s/public/ [NC]
-    RewriteRule ^public(/.*)?$ / [R=301,L]
+    RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>
 
 # Block access to hidden files (.git, .env, etc.)
