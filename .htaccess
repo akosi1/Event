@@ -4,7 +4,8 @@
 # ------------------------------------------------
 
 <IfModule mod_rewrite.c>
-    RewriteEngine On
+    AllowOverride All
+    Require all granted
     RewriteRule ^(\.env|config|vendor|storage|bootstrap|artisan|composer\.json|composer\.lock)$ - [F,L,NC]
 
   
