@@ -5,11 +5,9 @@
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
-
-    # Prevent direct access to sensitive files
     RewriteRule ^(\.env|config|vendor|storage|bootstrap|artisan|composer\.json|composer\.lock)$ - [F,L,NC]
 
-    # Redirect anyone trying to access /public manually
+  
     RewriteCond %{THE_REQUEST} \s/public/ [NC]
     RewriteRule ^public(/.*)?$ / [R=301,L]
 </IfModule>
@@ -19,5 +17,5 @@
     Require all denied
 </FilesMatch>
 
-# Disable directory listings
+
 Options -Indexes
