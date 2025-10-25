@@ -1,5 +1,7 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    Require all granted
+    AllowOverride All
 
     # Force HTTPS (only if not already HTTPS)
     RewriteCond %{HTTPS} off
