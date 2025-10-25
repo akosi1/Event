@@ -43,7 +43,7 @@
                                     autofocus 
                                     autocomplete="given-name" 
                                     class="form-control"
-                                    oninput="this.value = this.value.replace(/\s+/g, '')"
+                                    oninput="this.value = this.value.replace(/[0-9\s]/g, '')"
                                     onblur="this.value = this.value.trim()"
                                 >
                                 <label class="input-label">First Name</label>
@@ -63,7 +63,7 @@
                                     required 
                                     autocomplete="family-name" 
                                     class="form-control"
-                                    oninput="this.value = this.value.replace(/\s+/g, '')"
+                                    oninput="this.value = this.value.replace(/[0-9\s]/g, '')"
                                     onblur="this.value = this.value.trim()"
                                 >
                                 <label class="input-label">Last Name</label>
@@ -83,7 +83,7 @@
                                 placeholder=" " 
                                 autocomplete="additional-name" 
                                 class="form-control"
-                                oninput="this.value = this.value.replace(/\s+/g, '')"
+                                oninput="this.value = this.value.replace(/[0-9\s]/g, '')"
                                 onblur="this.value = this.value.trim()"
                             >
                             <label class="input-label">Middle Name (Optional)</label>
@@ -246,7 +246,7 @@
     <script>
         function togglePasswordVisibility(fieldId) {
             const field = document.getElementById(fieldId);
-            const button = field.nextElementSibling;
+            const button = field.parentElement.querySelector('.password-toggle');
             const type = field.getAttribute('type') === 'password' ? 'text' : 'password';
             field.setAttribute('type', type);
             button.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
@@ -311,6 +311,18 @@
                     }
                 }
 
+                // Check if name fields contain numbers
+                const nameFields = ['first_name', 'last_name', 'middle_name'];
+                for (const fieldId of nameFields) {
+                    const field = document.getElementById(fieldId);
+                    if (field && field.value && /[0-9]/.test(field.value)) {
+                        e.preventDefault();
+                        alert(`"${field.previousElementSibling?.textContent || fieldId}" must not contain numbers.`);
+                        field.focus();
+                        return false;
+                    }
+                }
+
                 // Check terms and conditions
                 const termsCheckbox = document.getElementById('terms_accepted');
                 if (!termsCheckbox.checked) {
@@ -339,6 +351,10 @@
             color: #aaa;
             cursor: pointer;
             font-size: 14px;
+            z-index: 10;
+        }
+        .password-toggle:hover {
+            color: #666;
         }
         .password-policy {
             font-size: 0.75rem;

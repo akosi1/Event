@@ -51,6 +51,7 @@
                             >
                             <label class="input-label" for="password">{{ __('Password') }}</label>
                             <i class="fas fa-lock input-icon"></i>
+                            <i class="fas fa-eye toggle-password" onclick="togglePassword('password', this)" style="cursor: pointer; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #666; z-index: 10;"></i>
                         </div>
                         <x-input-error :messages="$errors->get('password')" class="mt-2" />
                     </div>
@@ -71,6 +72,7 @@
                             >
                             <label class="input-label" for="password_confirmation">{{ __('Confirm Password') }}</label>
                             <i class="fas fa-lock input-icon"></i>
+                            <i class="fas fa-eye toggle-password" onclick="togglePassword('password_confirmation', this)" style="cursor: pointer; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #666; z-index: 10;"></i>
                         </div>
                         <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
                     </div>
@@ -100,9 +102,30 @@
             background: url("{{ asset('images/mcc background.jpg') }}") center/cover no-repeat;
             position: relative;
         }
+        
+        .input-wrapper {
+            position: relative;
+        }
+        
+        .toggle-password:hover {
+            color: #333;
+        }
     </style>
 
     <script>
+        function togglePassword(inputId, icon) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             const form = document.getElementById('resetPasswordForm');
             const passwordInput = document.getElementById('password');

@@ -1,6 +1,6 @@
 {{-- Terms and Conditions Modal Component --}}
 <div id="termsModal" class="terms-modal" style="display: none;">
-    <div class="terms-modal-overlay"></div>
+    <div class="terms-modal-overlay" onclick="closeTermsModal()"></div>
     <div class="terms-modal-content">
         <!-- Header -->
         <div class="terms-modal-header">
@@ -130,6 +130,14 @@
 </div>
 
 <style>
+    /* Prevent body scroll when modal is open */
+    body.modal-open {
+        overflow: hidden !important;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+    }
+
     /* Modal Overlay */
     .terms-modal {
         position: fixed;
@@ -143,29 +151,34 @@
         justify-content: center;
         padding: 20px;
         animation: fadeIn 0.3s ease;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .terms-modal-overlay {
-        position: absolute;
+        position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
         background: rgba(0, 0, 0, 0.7);
         backdrop-filter: blur(4px);
+        z-index: 1;
     }
 
     .terms-modal-content {
         position: relative;
         width: 100%;
         max-width: 800px;
-        max-height: 90vh;
+        max-height: 85vh;
         background: white;
         border-radius: 16px;
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
         display: flex;
         flex-direction: column;
         animation: slideUp 0.4s ease;
+        z-index: 2;
+        margin: auto;
     }
 
     @keyframes fadeIn {
@@ -191,6 +204,7 @@
         padding: 24px 30px;
         border-radius: 16px 16px 0 0;
         position: relative;
+        flex-shrink: 0;
     }
 
     .terms-modal-header h2 {
@@ -235,8 +249,11 @@
     .terms-modal-body {
         padding: 30px;
         overflow-y: auto;
+        overflow-x: hidden;
         flex: 1;
         background: #f8f9fa;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
     }
 
     .terms-modal-body::-webkit-scrollbar {
@@ -343,6 +360,7 @@
         display: flex;
         justify-content: flex-end;
         gap: 12px;
+        flex-shrink: 0;
     }
 
     .btn-modal-close,
@@ -382,64 +400,132 @@
         box-shadow: 0 6px 16px rgba(107, 44, 145, 0.4);
     }
 
-    /* Responsive */
+    /* Mobile Responsive */
     @media (max-width: 768px) {
         .terms-modal {
             padding: 10px;
+            align-items: flex-start;
         }
 
         .terms-modal-content {
-            max-height: 95vh;
+            max-height: 90vh;
+            margin: 20px auto;
         }
 
         .terms-modal-header {
-            padding: 20px;
+            padding: 20px 16px;
         }
 
         .terms-modal-header h2 {
-            font-size: 20px;
+            font-size: 18px;
+            padding-right: 30px;
+        }
+
+        .terms-modal-header p {
+            font-size: 12px;
+        }
+
+        .terms-close-btn {
+            width: 32px;
+            height: 32px;
+            font-size: 16px;
+            top: 16px;
+            right: 16px;
         }
 
         .terms-modal-body {
-            padding: 20px;
+            padding: 16px;
         }
 
         .terms-section {
             padding: 16px;
+            margin-bottom: 12px;
         }
 
         .terms-section h3 {
-            font-size: 16px;
+            font-size: 15px;
+        }
+
+        .terms-section h3 i {
+            font-size: 14px;
         }
 
         .terms-section p,
         .terms-section ul li {
             font-size: 13px;
+            line-height: 1.6;
         }
 
         .terms-modal-footer {
-            padding: 16px 20px;
-            flex-wrap: wrap;
+            padding: 16px;
+            gap: 10px;
         }
 
         .btn-modal-close,
         .btn-modal-accept {
             flex: 1;
             justify-content: center;
-            min-width: 120px;
+            min-width: 100px;
+            padding: 10px 16px;
+            font-size: 14px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .terms-modal {
+            padding: 5px;
+        }
+
+        .terms-modal-content {
+            max-height: 92vh;
+            border-radius: 12px;
+            margin: 10px auto;
+        }
+
+        .terms-modal-header {
+            padding: 16px 12px;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .terms-modal-header h2 {
+            font-size: 16px;
+        }
+
+        .terms-modal-body {
+            padding: 12px;
+        }
+
+        .terms-section {
+            padding: 12px;
+        }
+
+        .terms-modal-footer {
+            padding: 12px;
+            border-radius: 0 0 12px 12px;
         }
     }
 </style>
 
 <script>
     function openTermsModal() {
-        document.getElementById('termsModal').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
+        const modal = document.getElementById('termsModal');
+        modal.style.display = 'flex';
+        document.body.classList.add('modal-open');
+        
+        // Prevent scroll to top when opening
+        const scrollY = window.scrollY;
+        document.body.style.top = `-${scrollY}px`;
     }
 
     function closeTermsModal() {
-        document.getElementById('termsModal').style.display = 'none';
-        document.body.style.overflow = 'auto';
+        const modal = document.getElementById('termsModal');
+        modal.style.display = 'none';
+        document.body.classList.remove('modal-open');
+        
+        // Restore scroll position
+        const scrollY = document.body.style.top;
+        document.body.style.top = '';
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
     }
 
     function acceptTerms() {
@@ -456,11 +542,15 @@
         closeTermsModal();
     }
 
-    // Close modal when clicking outside
-    document.addEventListener('click', function(event) {
+    // Close modal when clicking on overlay
+    document.addEventListener('DOMContentLoaded', function() {
         const modal = document.getElementById('termsModal');
-        if (event.target === modal) {
-            closeTermsModal();
+        if (modal) {
+            modal.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    closeTermsModal();
+                }
+            });
         }
     });
 
@@ -473,4 +563,17 @@
             }
         }
     });
+
+    // Prevent scroll issues on iOS
+    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        document.addEventListener('touchmove', function(e) {
+            const modal = document.getElementById('termsModal');
+            if (modal && modal.style.display === 'flex') {
+                const modalBody = document.querySelector('.terms-modal-body');
+                if (modalBody && !modalBody.contains(e.target)) {
+                    e.preventDefault();
+                }
+            }
+        }, { passive: false });
+    }
 </script>
