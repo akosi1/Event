@@ -1,7 +1,6 @@
 # Root .htaccess (outside /public)
 # ------------------------------------------------
-# DO NOT rewrite into /public. Let Apache serve /public directly.
-# This file only exists to prevent exposure of sensitive files.
+# WARNING DO NOT TOUCH THIS
 # ------------------------------------------------
 
 <IfModule mod_rewrite.c>
