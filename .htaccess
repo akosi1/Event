@@ -3,14 +3,23 @@
 # WARNING DO NOT TOUCH THIS
 # ------------------------------------------------
 
+mod_rewrite.c>
+RewriteEngine On
+AllowOverride All
+Require all granted
+
+RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
 <IfModule mod_rewrite.c>
-    AllowOverride All
-    Require all granted
+    # AllowOverride All
+     # Require all granted
     RewriteRule ^(\.env|config|vendor|storage|bootstrap|artisan|composer\.json|composer\.lock)$ - [F,L,NC]
 
   
     RewriteCond %{THE_REQUEST} \s/public/ [NC]
-    RewriteRule ^(.*)$ public/$1 [L]
+    # RewriteRule ^(.*)$ public/$1 [L]
+     RewriteRule ^public(/.*)?$ / [R=301,L]
 </IfModule>
 
 # Block access to hidden files (.git, .env, etc.)
