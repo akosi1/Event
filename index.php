@@ -4,4 +4,4 @@
  * Safe workaround for servers that cannot change DocumentRoot.
  */
 
-require __DIR__ . '/public/index.php';
+require __DIR__ . '/index.php';
