@@ -1,31 +1,20 @@
- # RewriteEngine On
+ RewriteEngine On
 
-# RewriteCond %{REQUEST_FILENAME} -d [OR]
-# RewriteCond %{REQUEST_FILENAME} -f
-# RewriteRule ^ ^$1 [N]
+RewriteCond %{REQUEST_FILENAME} -d [OR]
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ ^$1 [N]
 
-# RewriteCond %{REQUEST_URI} (\.\w+$) [NC]
-# RewriteRule ^(.*)$ public/$1 
+RewriteCond %{REQUEST_URI} (\.\w+$) [NC]
+RewriteRule ^(.*)$ public/$1 
 
-# RewriteCond %{REQUEST_FILENAME} !-d
-# RewriteCond %{REQUEST_FILENAME} !-f
-# RewriteRule ^ server.php
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ server.php
+
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
     </IfModule>
 
-    RewriteEngine On
-
-    # If request maps to an existing file or folder — serve it directly
-    RewriteCond %{REQUEST_FILENAME} -f [OR]
-    RewriteCond %{REQUEST_FILENAME} -d
-    RewriteRule ^ - [L]
-
-    # If request looks like a static asset (has extension) — route to public/<that>
-    RewriteCond %{REQUEST_URI} (\.\w+)$ [NC]
-    RewriteRule ^(.*)$ public/$1 [L]
-
-    # Otherwise, route everything to public/ (so app entry will handle)
-    RewriteRule ^(.*)$ public/$1 [L]
-</IfModule>
+ 
