@@ -15,12 +15,12 @@
     RewriteCond %{THE_REQUEST} /public/ [NC]
     RewriteRule ^(.*)$ - [R=404,L]
 
-    # Handle assets like CSS, JS, and images correctly
-    RewriteRule ^(assets|css|js|images|favicons|fonts)/(.*)$ public/$1/$2 [L,NC]
+    # Allow asset files inside the public folder to be served directly
+    RewriteCond %{REQUEST_FILENAME} -d [OR]
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^(.*)$ public/$1 [L]
 
-    # Rewrite all other requests to server.php in the public directory
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_FILENAME} !-f
+    # Rewrite all other requests to index.php in the public directory
     RewriteRule ^(.*)$ public/index.php [L]
 
     # Handle Authorization Header
