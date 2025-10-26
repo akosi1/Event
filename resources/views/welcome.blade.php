@@ -66,8 +66,7 @@
         }
 
         .bg-image.bg2 {
-            background-image: url('/images/mcc background11
-                .jpg');
+            background-image: url('/images/mcc backgrounbackground1.jpg')
         }
 
         .bg-image.bg3 {
