@@ -5,26 +5,23 @@
 
     RewriteEngine On
 
-    # Redirect /public to the root URL
-    RewriteRule ^public/?$ / [L,R=301]
-
-    # Stop processing if the request is for a real directory or file inside 'public'
-    RewriteCond %{REQUEST_FILENAME} -d [OR]
-    RewriteCond %{REQUEST_FILENAME} -f
-    RewriteRule ^ public%{REQUEST_URI} [L]
-    
-    # Check if the requested URI (after rewrite) is a real file
-    RewriteCond %{REQUEST_FILENAME} !-f
-    # Check if the requested URI (after rewrite) is a real directory
-    RewriteCond %{REQUEST_FILENAME} !-d
-    # If not a file or directory, rewrite to index.php
-    RewriteRule ^(.*)$ public/index.php [L]
-
     # Deny direct access to sensitive files, including .env
     <Files ~ "^(\.env)">
         Order allow,deny
         Deny from all
     </Files>
+
+    # Redirect /public to the root URL and stop processing
+    RewriteCond %{THE_REQUEST} /public/ [NC]
+    RewriteRule ^public/?$ / [L,R=301]
+    
+    # Allow asset files inside the public folder to be served directly
+    RewriteCond %{REQUEST_FILENAME} -d [OR]
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^(.*)$ public/$1 [L]
+
+    # Rewrite all other requests to index.php in the public directory
+    RewriteRule ^(.*)$ public/index.php [L]
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
