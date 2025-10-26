@@ -1,6 +1,32 @@
-Options +FollowSymLinks -MultiViews
-# Turn mod_rewrite on
-RewriteEngine On
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
 
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^public/(.*)$ public/index.php?id=$1 [L,QSA,NC]
+    RewriteEngine On
+
+    # Redirect /public to the root URL
+    RewriteRule ^public/?$ / [L,R=301]
+
+    # Stop processing if the request is for a real directory or file inside 'public'
+    RewriteCond %{REQUEST_FILENAME} -d [OR]
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ public%{REQUEST_URI} [L]
+    
+    # Check if the requested URI (after rewrite) is a real file
+    RewriteCond %{REQUEST_FILENAME} !-f
+    # Check if the requested URI (after rewrite) is a real directory
+    RewriteCond %{REQUEST_FILENAME} !-d
+    # If not a file or directory, rewrite to index.php
+    RewriteRule ^(.*)$ public/index.php [L]
+
+    # Deny direct access to sensitive files, including .env
+    <Files ~ "^(\.env)">
+        Order allow,deny
+        Deny from all
+    </Files>
+
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+</IfModule>
