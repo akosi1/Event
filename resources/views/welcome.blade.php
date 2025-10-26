@@ -62,13 +62,13 @@
         }
 
         .bg-image.bg1 {
-         background-image: url('/images/mcc background.jpg');
-
+         
+  background-image: url('{{ asset('images/mcc background2.jpg') }}');
 
         }
 
         .bg-image.bg2 {
-          background-image: url('/images/mcc background.jpg');
+        background-image: url('{{ asset('images/mcc background2.jpg') }}');
         }
 
         .bg-image.bg3 {
