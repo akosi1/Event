@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>MCC Event & Portfolio Organizer</title>
-     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
-    <link href="{{ asset('user/footer/footer.css') }}" rel="stylesheet">    
+    # <link rel="stylesheet" href="{{ asset('css/style.css') }}"/>
+  #  <link href="{{ asset('user/footer/footer.css') }}" rel="stylesheet"/>    
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
