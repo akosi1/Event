@@ -5,27 +5,12 @@
 
     RewriteEngine On
 
-    # Deny direct access to sensitive files, including .env
-    <Files ~ "^(\.env)">
-        Order allow,deny
-        Deny from all
-    </Files>
-
-    # Force a 404 Not Found error for requests explicitly containing '/public/'
-    RewriteCond %{THE_REQUEST} /public/ [NC]
-    RewriteRule ^(.*)$ - [R=404,L]
-
-    # Handle assets like CSS, JS, and images correctly
-    RewriteCond %{REQUEST_FILENAME} -d [OR]
-    RewriteCond %{REQUEST_FILENAME} -f
-    RewriteRule ^ public%{REQUEST_URI} [L]
-
-    # If the URL is not a real file or directory, redirect to index.php
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^(.*)$ public/index.php [L]
-
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Redirect all other requests to index.php
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
 </IfModule>
