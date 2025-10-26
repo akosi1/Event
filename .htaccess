@@ -1,31 +1,4 @@
 <IfModule mod_rewrite.c>
-    <IfModule mod_negotiation.c>
-        Options -MultiViews -Indexes
-    </IfModule>
-
     RewriteEngine On
-
-    # Deny direct access to sensitive files, including .env
-    <Files ~ "^(\.env)">
-        Order allow,deny
-        Deny from all
-    </Files>
-
-    # Force a 404 Not Found error for requests explicitly containing '/public/'
-    RewriteCond %{THE_REQUEST} /public/ [NC]
-    RewriteRule ^(.*)$ - [R=404,L]
-
-    # Stop processing if the request is for a real directory or file inside the public folder
-    RewriteCond %{REQUEST_FILENAME} -d [OR]
-    RewriteCond %{REQUEST_FILENAME} -f
     RewriteRule ^(.*)$ public/$1 [L]
-
-    # Rewrite all other requests to index.php in the public directory
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^(.*)$ public/index.php [L]
-
-    # Handle Authorization Header
-    RewriteCond %{HTTP:Authorization} .
-    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 </IfModule>
