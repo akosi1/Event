@@ -1,5 +1,17 @@
+# <IfModule mod_rewrite.c>
+#    RewriteEngine on     
+#    RewriteCond %{REQUEST_URI} !^public
+ #   RewriteRule ^(.*)$ public/$1 [L]
+# </IfModule>
+
 <IfModule mod_rewrite.c>
-   RewriteEngine on     
-   RewriteCond %{REQUEST_URI} !^public
-   RewriteRule ^(.*)$ public/$1 [L]
+    RewriteEngine On
+
+    # Serve existing files/folders directly (css, images, js)
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Otherwise forward to server.php (or index.php if your entry point is index.php)
+    RewriteRule ^ server.php [L]
 </IfModule>
