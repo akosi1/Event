@@ -62,15 +62,15 @@
         }
 
         .bg-image.bg1 {
-            background-image: url('/images/mcc background.jpg');
+            background-image: url('/images/mcc background11.jpg');
         }
 
         .bg-image.bg2 {
-            background-image: url('/images/mcc background1.jpg');
+            background-image: url('/images/mcc background11.jpg');
         }
 
         .bg-image.bg3 {
-            background-image: url('/images/mcc background2.jpg');
+            background-image: url('/images/mcc background21.jpg');
         }
 
         /* Hero Section */
@@ -886,7 +886,7 @@
         <div class="hero-container">
             <!-- Logo -->
             <div class="logo-section">
-                <img src="/../images/logo.png" alt="MCC Logo">
+                <img src="images/logo.png" alt="MCC Logo">
             </div>
 
             <!-- Header -->
