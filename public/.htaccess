@@ -5,7 +5,7 @@
 
     RewriteEngine On
 
-    # Redirect Trailing Slashes...
+    # Redirect to the main index.php if the URL is not a real file or directory
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
