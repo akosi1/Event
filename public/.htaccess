@@ -7,5 +7,5 @@
     RewriteRule ^ - [L]
 
     # Redirect everything else to server.php
-    RewriteRule ^ index.php [L]
+    RewriteRule ^ server.php [L]
 </IfModule>
