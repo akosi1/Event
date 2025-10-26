@@ -62,15 +62,16 @@
         }
 
         .bg-image.bg1 {
-            background-image: url('/../images/mcc background.jpg');
+            background-image: url('{{ asset('images/mcc background.jpg') }}');
+
         }
 
         .bg-image.bg2 {
-            background-image: url('/../images/mcc background1.jpg');
-        }
+            background-image: url('{{ asset('images/mcc background1.jpg') }}');
 
         .bg-image.bg3 {
-            background-image: url('/../images/mcc background2.jpg');
+            background-image: url('{{ asset('images/mcc background2.jpg') }}');
+
         }
 
         /* Hero Section */
