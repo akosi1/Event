@@ -1,7 +1,7 @@
 <x-guest-layout>
-    <link rel="stylesheet" href="{{ asset('user/auth/auth.css') }}">
+    <link rel="stylesheet" href="{{ asset('public/user/auth/auth.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <link rel="preload" as="image" href="{{ asset('images/mcc background.jpg') }}">
+    <link rel="preload" as="image" href="{{ asset('public/images/mcc background.jpg') }}">
 
     <style>
         * {
@@ -17,7 +17,7 @@
         }
 
         body {
-            background: url("{{ asset('images/mcc background.jpg') }}") center/cover no-repeat;
+            background: url("{{ asset('public/images/mcc background.jpg') }}") center/cover no-repeat;
             margin: 0;
         }
 
