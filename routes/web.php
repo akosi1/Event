@@ -18,7 +18,7 @@
 
     // Welcome page (public)
     Route::get('/', fn() => view('welcome'))->name('welcome');
-);
+
 
 Route::get('/public', function () {
     abort(404);
