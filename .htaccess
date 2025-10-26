@@ -3,4 +3,4 @@ Options +FollowSymLinks -MultiViews
 RewriteEngine On
 
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^/public/(.*)$ public/index.php?id=$1 [L,QSA,NC
+RewriteRule ^public/(.*)$ public/index.php?id=$1 [L,QSA,NC
