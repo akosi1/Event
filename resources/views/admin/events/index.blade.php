@@ -306,7 +306,7 @@
 @endpush
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="{{ asset('js/admin/events-index.js') }}"></script>
+<script src="{{ asset('public/js/admin/events-index.js') }}"></script>
 @if(session('success'))
 <script>
 document.addEventListener('DOMContentLoaded', function() {
