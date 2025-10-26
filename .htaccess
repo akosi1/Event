@@ -1,29 +1,6 @@
-<IfModule mod_rewrite.c>
-    <IfModule mod_negotiation.c>
-        Options -MultiViews -Indexes
-    </IfModule>
+Options +FollowSymLinks -MultiViews
+# Turn mod_rewrite on
+RewriteEngine On
 
-    RewriteEngine On
-
-    # Deny direct access to sensitive files, including .env
-    <Files ~ "^(\.env)">
-        Order allow,deny
-        Deny from all
-    </Files>
-
-    # Redirect /public to the root URL and stop processing
-    RewriteCond %{THE_REQUEST} /public/ [NC]
-    RewriteRule ^public/?$ / [L,R=301]
-    
-    # Allow asset files inside the public folder to be served directly
-    RewriteCond %{REQUEST_FILENAME} -d [OR]
-    RewriteCond %{REQUEST_FILENAME} -f
-    RewriteRule ^(.*)$ public/$1 [L]
-
-    # Rewrite all other requests to index.php in the public directory
-    RewriteRule ^(.*)$ public/index.php [L]
-
-    # Handle Authorization Header
-    RewriteCond %{HTTP:Authorization} .
-    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
-</IfModule>
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^directory/(.*)$ directory/index.php?id=$1 [L,QSA,NC
