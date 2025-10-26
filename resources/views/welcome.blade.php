@@ -4,7 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>MCC Event & Portfolio Organizer</title>
-    <link href="{{ asset('public/user/footer/footer.css') }}" rel="stylesheet">    
+    <link href="{{ asset('user/footer/footer.css') }}" rel="stylesheet">    
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Roboto+Condensed:wght@300;400;700&display=swap" rel="stylesheet">
@@ -65,11 +66,11 @@
         }
 
         .bg-image.bg2 {
-            background-image: url('/images/mcc backgrounbackground1.jpg')
+            background-image: url('/images/mcc background1.jpg');
         }
 
         .bg-image.bg3 {
-           background-image: url('/images/mcc background2.jpg');
+            background-image: url('/images/mcc background2.jpg');
         }
 
         /* Hero Section */
@@ -885,7 +886,7 @@
         <div class="hero-container">
             <!-- Logo -->
             <div class="logo-section">
-                <img src="{{ asset('public/images/logo.png') }}" alt="MCC Logo">
+                <img src="images/logo.png" alt="MCC Logo">
             </div>
 
             <!-- Header -->
