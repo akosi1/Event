@@ -1,25 +1,11 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # Disable directory listing
-    Options -MultiViews -Indexes
-
-    #  If request is for an existing file or folder, serve it directly
+    # If the request is for an existing file or directory, serve it directly
     RewriteCond %{REQUEST_FILENAME} -f [OR]
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^ - [L]
 
-    # Redirect requests that include /public to root (avoid duplicate paths)
-    RewriteCond %{THE_REQUEST} \s/public[\/\s?]
-    RewriteRule ^public(/.*)?$ / [L,R=301]
-
-    # Send everything else to Laravel (inside public)
-    RewriteRule ^ server.php [L]
+    # Otherwise, send everything to public/
+    RewriteRule ^ public/$1 [L]
 </IfModule>
-
-# Block sensitive files
-<FilesMatch "\.(env|config|ini|log|git|sql|sh|bash)$">
-    Require all denied
-</FilesMatch>
-
-Options -Indexes
