@@ -4,7 +4,7 @@
         <div class="footer-content">
             <div class="footer-grid">
                 <div class="footer-section">
-                    <h3><img src="images/logo.png" alt="MCC Logo"></i> MCC E&PO</h3>
+                    <h3><img src="public/images/logo.png" alt="MCC Logo"></i> MCC E&PO</h3>
                     <p>Your premier platform for discovering and managing university events. Stay connected with your campus community.</p>
                     <div class="social-links">
                         <a href="#" class="social-link" title="Facebook">
