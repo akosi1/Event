@@ -127,7 +127,7 @@
                             <td class="py-2 align-middle">
                                 <div class="event-image-compact">
                                     @if($event->image)
-                                       <img src="{{$event->public/image}}"
+                                        <img src="{{$event->image}}"
                                              alt="{{ $event->title }}"
                                              class="event-img-compact"
                                              onerror="this.parentElement.innerHTML='<div class=\'no-image-compact\'><i class=\'fas fa-image\'></i></div>'">
@@ -141,7 +141,7 @@
                                             <i class="fas fa-image"></i>
                                         </div>
                                     @endif
-                                </>
+                                </div>
                             </td>
                             <td class="py-2 align-middle">
                                 <div>
@@ -302,11 +302,11 @@
 </form>
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('public/css/admin/events-index.css') }}">
+<link rel="stylesheet" href="{{ asset('css/admin/events-index.css') }}">
 @endpush
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="{{ asset('public/js/admin/events-index.js') }}"></script>
+<script src="{{ asset('js/admin/events-index.js') }}"></script>
 @if(session('success'))
 <script>
 document.addEventListener('DOMContentLoaded', function() {
