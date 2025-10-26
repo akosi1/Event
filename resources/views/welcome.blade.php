@@ -62,15 +62,16 @@
         }
 
         .bg-image.bg1 {
-            background-image: url('/images/mcc background11.jpg');
+            background-image: url('/images/mcc background.jpg');
         }
 
         .bg-image.bg2 {
-            background-image: url('/images/mcc background11.jpg');
+            background-image: url('/images/mcc background11
+                .jpg');
         }
 
         .bg-image.bg3 {
-            background-image: url('/images/mcc background21.jpg');
+            background-image: url('/images/mcc background2.jpg');
         }
 
         /* Hero Section */
