@@ -127,7 +127,7 @@
                             <td class="py-2 align-middle">
                                 <div class="event-image-compact">
                                     @if($event->image)
-                                        <img src="{{ asset('public/storage/' . $event->image) }}"
+                                       <img src="{{$event->image}}"
                                              alt="{{ $event->title }}"
                                              class="event-img-compact"
                                              onerror="this.parentElement.innerHTML='<div class=\'no-image-compact\'><i class=\'fas fa-image\'></i></div>'">
