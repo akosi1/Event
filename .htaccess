@@ -1,24 +1,29 @@
-RewriteEngine On
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
 
+    RewriteEngine On
 
-#----------------------------------------------
-# | this code use for remove public directory |
-#----------------------------------------------
+    # Deny direct access to sensitive files, including .env
+    <Files ~ "^(\.env)">
+        Order allow,deny
+        Deny from all
+    </Files>
 
+    # Force a 404 Not Found error for requests explicitly containing '/public/'
+    RewriteCond %{THE_REQUEST} /public/ [NC]
+    RewriteRule ^(.*)$ - [R=404,L]
 
+    # Handle assets like CSS, JS, and images correctly
+    RewriteRule ^(assets|css|js|images|favicons|fonts)/(.*)$ public/$1/$2 [L,NC]
 
+    # Rewrite all other requests to server.php in the public directory
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^(.*)$ public/server.php [L]
 
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)/$ /$1 [L,R=301]
-RewriteCond %{REQUEST_URI} !(\.ico|\.css|\.js|\.png|\.jpg|\.gif|robots\.txt|\.eot|\.svg|\.ttf|\.woff|\.woff2|\.otf|\.pdf)$ [NC]
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^ server.php
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_FILENAME} !-f
-# RewriteCond %{REQUEST_URI} !^/public/
-RewriteRule ^(login|uploads|assets|css|js|images|ca|favicons|fonts|)/(.*)$ public/$1/$2 [L,NC]
-
-
-RewriteCond %{HTTP:Authorization} ^(.*)
-RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+</IfModule>
