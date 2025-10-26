@@ -885,7 +885,7 @@
         <div class="hero-container">
             <!-- Logo -->
             <div class="logo-section">
-                <img src="public/images/logo.png" alt="MCC Logo">
+                <img src="{{ asset('public/images/logo.png') }}" alt="MCC Logo">
             </div>
 
             <!-- Header -->
