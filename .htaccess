@@ -14,7 +14,7 @@
     RewriteRule ^public(/.*)?$ / [L,R=301]
 
     # Send everything else to Laravel (inside public)
-    RewriteRule ^ public/index.php [L]
+    RewriteRule ^ server.php
 </IfModule>
 
 # Block sensitive files
