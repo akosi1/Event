@@ -1,11 +1,5 @@
 <IfModule mod_rewrite.c>
-    RewriteEngine On
-
-    # Allow direct access to existing files
-    RewriteCond %{REQUEST_FILENAME} -f [OR]
-    RewriteCond %{REQUEST_FILENAME} -d
-    RewriteRule ^ - [L]
-
-    # Redirect everything else to server.php
-    RewriteRule ^ index.php [L]
+   RewriteEngine on     
+   RewriteCond %{REQUEST_URI} !^public
+   RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>
