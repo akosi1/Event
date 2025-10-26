@@ -18,9 +18,11 @@
 
     // Welcome page (public)
     Route::get('/', fn() => view('welcome'))->name('welcome');
+);
 
 Route::get('/public', function () {
     abort(404);
+});
     /*
     |--------------------------------------------------------------------------
     | Guest Routes (MS365 & OTP Verification)
