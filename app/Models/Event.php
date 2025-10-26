@@ -59,7 +59,7 @@ class Event extends Model
 
     public function hasImage(): bool
     {
-        return !empty($this->image) && file_exists(public_path('storage/' . $this->image));
+        return !empty($this->image) && file_exists(public_path('public/storage/' . $this->image));
     }
 
     public function getImageUrlAttribute(): string
