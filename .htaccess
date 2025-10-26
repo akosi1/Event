@@ -21,7 +21,7 @@
     # Rewrite all other requests to server.php in the public directory
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^(.*)$ public/server.php [L]
+    RewriteRule ^(.*)$ public/index.php [L]
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
