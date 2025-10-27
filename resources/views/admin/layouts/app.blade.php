@@ -359,12 +359,12 @@
     <button class="sidebar-toggle" id="toggle" aria-label="Toggle Sidebar">
         <i class="fas fa-bars"></i>
     </button>
-
+    
     <div class="sidebar-overlay" id="overlay"></div>
 
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <img src="{{ asset('logo.png') }}" alt="EventAP Logo">
+            <img src="{{ asset('images/logo.png') }}" alt="EventAP Logo">
             <h4>Event & Portfolio Organizer</h4>
             <small>Admin Panel</small>
             <button class="sidebar-close" id="close" aria-label="Close Sidebar">
