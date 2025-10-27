@@ -1,0 +1,38 @@
+# Laravel & PHP
+/vendor/
+vendor/
+.env
+.env.*
+.phpunit.result.cache
+Homestead.yaml
+Homestead.json
+.idea/
+.vscode/
+.phpstorm.meta.php
+# /public/storage
+# /storage/*.key
+# /storage/app/public
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/testing/*
+/storage/framework/views/*
+/bootstrap/cache/*.php
+
+# Node / Frontend
+/node_modules/
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+vite.config.local.js
+
+# OS / Misc
+.DS_Store
+Thumbs.db
+*.swp
+*.bak
+*.tmp
+*.log
+
+# Composer dependencies
+composer.lock
+

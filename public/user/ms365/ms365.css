@@ -1,0 +1,550 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(74, 26, 92, 0.8) 0%, rgba(107, 44, 145, 0.8) 50%, rgba(61, 26, 120, 0.8) 100%);
+    z-index: 1;
+}
+
+.auth-wrapper {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+    z-index: 2;
+    opacity: 0;
+    visibility: hidden;
+}
+
+.auth-wrapper.loaded {
+    opacity: 1;
+    visibility: visible;
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(15px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+.auth-container {
+    background: transparent;
+    width: 100%;
+    max-width: 420px;
+    padding: 40px;
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.auth-header h1 {
+    font-size: 38px;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+    font-family: 'Oswald', sans-serif;
+    text-transform: uppercase;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.auth-header p {
+    color: #e0e0e0;
+    font-size: 15px;
+    font-weight: 400;
+    font-family: 'Roboto Condensed', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.auth-form {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+    scrollbar-width: none;
+    padding-right: 5px;
+}
+
+.auth-form::-webkit-scrollbar {
+    display: none;
+}
+
+.auth-form:hover,
+.auth-form:focus-within {
+    scrollbar-width: auto;
+}
+
+.auth-form:hover::-webkit-scrollbar,
+.auth-form:focus-within::-webkit-scrollbar {
+    width: 8px;
+}
+
+.auth-form:hover::-webkit-scrollbar-track,
+.auth-form:focus-within::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.auth-form:hover::-webkit-scrollbar-thumb,
+.auth-form:focus-within::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+}
+
+.form-group {
+    margin-bottom: 22px;
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+.form-control {
+    width: 100%;
+    padding: 18px 18px 8px 50px;
+    border: 2px solid #ddd;
+    border-radius: 0;
+    font-size: 16px;
+    outline: none;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    font-family: 'Poppins', sans-serif;
+    font-weight: 400;
+    color: #000000;
+}
+
+.form-control:focus {
+    border-color: #6b2c91;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 4px 15px rgba(107, 44, 145, 0.2);
+}
+
+.form-control.input-error {
+    border-color: #ff6b6b;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.2);
+}
+
+.input-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    color: #666;
+    transition: color 0.3s ease;
+    z-index: 3;
+}
+
+.form-control:focus ~ .input-icon {
+    color: #6b2c91;
+}
+
+.form-control.input-error ~ .input-icon {
+    color: #ff6b6b;
+}
+
+.input-label {
+    position: absolute;
+    left: 50px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+    font-size: 16px;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    background: transparent;
+    padding: 0 5px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 400;
+}
+
+.form-control:focus + .input-label,
+.form-control:not(:placeholder-shown) + .input-label {
+    top: 6px;
+    transform: translateY(0);
+    font-size: 11px;
+    color: #6b2c91;
+    background: rgba(255, 255, 255, 1);
+    left: 45px;
+    font-weight: 600;
+}
+
+.form-control.input-error:focus + .input-label,
+.form-control.input-error:not(:placeholder-shown) + .input-label {
+    color: #ff6b6b;
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 20px 16px;
+    background: linear-gradient(135deg, #e53e3e 0%, #d53f41 100%);
+    color: white;
+    border: none;
+    border-radius: 0;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    font-family: 'Oswald', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    box-shadow: 0 4px 15px rgba(229, 62, 62, 0.3);
+    outline: none;
+    line-height: 1.4;
+}
+
+.btn-submit i {
+    font-size: 20px;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(229, 62, 62, 0.4);
+    background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+}
+
+.btn-submit:active {
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    display: inline-block;
+    width: 100%;
+    padding: 10px 16px;
+    background: transparent;
+    color: #ffffff;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 0;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.3s ease;
+    margin-top: 8px;
+    font-family: 'Poppins', sans-serif;
+    outline: none;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.8);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+}
+
+.btn-secondary:active {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: white;
+    color: #6b2c91;
+    transform: translateY(0);
+}
+
+.form-footer {
+    text-align: center;
+}
+
+.divider {
+    position: relative;
+    margin: 20px 0;
+    text-align: center;
+}
+
+.divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.divider span {
+    background: transparent;
+    padding: 0 15px;
+    color: #ffffff;
+    font-size: 14px;
+    position: relative;
+    font-family: 'Poppins', sans-serif;
+}
+
+.signup-link p {
+    color: #ffffff;
+    font-size: 15px;
+    margin-bottom: 8px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.error-msg {
+    color: #ff6b6b;
+    font-size: 12px;
+    margin-top: 6px;
+    font-family: 'Poppins', sans-serif;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    padding: 8px 12px;
+    background: rgba(255, 107, 107, 0.15);
+    border-left: 3px solid #ff6b6b;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.mb-4 div {
+    padding: 10px 14px;
+    background: rgba(217, 237, 247, 0.95);
+    border: 1px solid #bee5eb;
+    border-radius: 4px;
+    color: #0c5460;
+    font-size: 13px;
+    margin-bottom: 18px;
+}
+
+.error-list {
+    margin-bottom: 20px;
+    padding: 12px 16px;
+    background: rgba(255, 243, 205, 0.95);
+    border: 1px solid #fde300;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #856404;
+}
+
+.error-list strong {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.error-list ul {
+    margin-left: 20px;
+    margin-top: 8px;
+}
+
+.error-list li {
+    margin-bottom: 4px;
+}
+
+@media (max-width: 768px) {
+    .auth-container {
+        padding: 30px 20px;
+        max-width: 100%;
+    }
+
+    .auth-header h1 {
+        font-size: 32px;
+        letter-spacing: 0.5px;
+    }
+
+    .auth-header p {
+        font-size: 14px;
+    }
+
+    .form-control {
+        padding: 16px 14px 6px 45px;
+        font-size: 15px;
+    }
+
+    .input-icon {
+        left: 14px;
+        width: 16px;
+        height: 16px;
+    }
+
+    .input-label {
+        left: 45px;
+        font-size: 15px;
+    }
+
+    .form-control:focus + .input-label,
+    .form-control:not(:placeholder-shown) + .input-label {
+        font-size: 10px;
+        left: 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    .auth-wrapper {
+        padding: 15px;
+    }
+
+    .auth-container {
+        padding: 25px 18px;
+    }
+
+    .auth-header {
+        margin-bottom: 25px;
+    }
+
+    .auth-header h1 {
+        font-size: 28px;
+        margin-bottom: 6px;
+    }
+
+    .auth-header p {
+        font-size: 13px;
+    }
+
+    .form-control {
+        padding: 14px 12px 5px 42px;
+        font-size: 14px;
+    }
+
+    .input-icon {
+        left: 13px;
+        width: 15px;
+        height: 15px;
+    }
+
+    .input-label {
+        left: 42px;
+        font-size: 14px;
+    }
+
+    .form-control:focus + .input-label,
+    .form-control:not(:placeholder-shown) + .input-label {
+        font-size: 10px;
+        left: 38px;
+    }
+
+    .btn-submit {
+        font-size: 16px;
+        letter-spacing: 2px;
+        padding: 18px 14px;
+    }
+
+    .btn-secondary {
+        padding: 12px 14px;
+        font-size: 14px;
+    }
+
+    .form-group {
+        margin-bottom: 18px;
+    }
+
+    .signup-link p {
+        font-size: 14px;
+    }
+
+    .divider {
+        margin: 16px 0;
+    }
+
+    .divider span {
+        font-size: 13px;
+        padding: 0 12px;
+    }
+}
+
+@media (max-width: 360px) {
+    .auth-wrapper {
+        padding: 10px;
+    }
+
+    .auth-container {
+        padding: 20px 15px;
+    }
+
+    .auth-header h1 {
+        font-size: 24px;
+    }
+
+    .auth-header p {
+        font-size: 12px;
+    }
+
+    .form-control {
+        padding: 13px 10px 4px 38px;
+        font-size: 13px;
+    }
+
+    .input-icon {
+        left: 11px;
+        width: 14px;
+        height: 14px;
+    }
+
+    .input-label {
+        left: 38px;
+        font-size: 13px;
+    }
+
+    .form-control:focus + .input-label,
+    .form-control:not(:placeholder-shown) + .input-label {
+        font-size: 9px;
+        left: 34px;
+    }
+
+    .btn-submit {
+        padding: 16px 12px;
+        font-size: 15px;
+        letter-spacing: 1.5px;
+    }
+
+    .btn-submit i {
+        font-size: 18px;
+    }
+
+    .btn-secondary {
+        padding: 11px 12px;
+        font-size: 13px;
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    .signup-link p {
+        font-size: 13px;
+    }
+
+    .divider {
+        margin: 14px 0;
+    }
+
+    .divider span {
+        font-size: 12px;
+        padding: 0 10px;
+    }
+
+    .error-msg {
+        font-size: 11px;
+        padding: 6px 10px;
+    }
+
+    .error-list {
+        padding: 10px 12px;
+        font-size: 11px;
+    }
+}
