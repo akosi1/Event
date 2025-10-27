@@ -878,13 +878,13 @@
 
     <!-- Hero Section -->
     <section class="hero" id="home">
-        <!-- Floating orbs -->
+        <!-- Floating orbs --
         <div class="bg-decoration circle-1"></div>
         <div class="bg-decoration circle-2"></div>
         <div class="bg-decoration circle-3"></div>
 
         <div class="hero-container">
-            <!-- Logo -->
+            < !-- Logo -->
             <div class="logo-section">
                 <img src="public/images/logo.png" alt="MCC Logo">
             </div>
