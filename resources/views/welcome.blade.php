@@ -62,15 +62,15 @@
         }
 
         .bg-image.bg1 {
-            background-image: url('public/images/mcc background.jpg');
+            background-image: url('/images/mcc background.jpg');
         }
 
         .bg-image.bg2 {
-            background-image: url('public/images/mcc background1.jpg');
+            background-image: url('/images/mcc background1.jpg');
         }
 
         .bg-image.bg3 {
-            background-image: url('public/images/mcc background2.jpg');
+            background-image: url('/images/mcc background2.jpg');
         }
 
         /* Hero Section */
@@ -878,15 +878,15 @@
 
     <!-- Hero Section -->
     <section class="hero" id="home">
-        <!-- Floating orbs --
+        <!-- Floating orbs -->
         <div class="bg-decoration circle-1"></div>
         <div class="bg-decoration circle-2"></div>
         <div class="bg-decoration circle-3"></div>
 
         <div class="hero-container">
-            < !-- Logo -->
+            <!-- Logo -->
             <div class="logo-section">
-                <img src="public/images/logo.png" alt="MCC Logo">
+                <img src="images/logo.png" alt="MCC Logo">
             </div>
 
             <!-- Header -->
@@ -895,7 +895,7 @@
                 <span class="red-text">Organizer</span>
             </h1>
             <p class="hero-subtitle">Madridejos Community College</p>
-            <input type="hidden" name="g-recaptcha-response" id="recaptchaResponse">
+
             <!-- CTA Button -->
             <div class="cta-buttons">
                 <a href="{{ route('login') }}" class="btn btn-secondary">
@@ -1233,7 +1233,7 @@
             </div>
         </div>
     </section>
-    <script src="https://www.google.com/recaptcha/api.js?render={{ env('RECAPTCHA_SITE_KEY') }}"></script>
+
     @include('layouts.footer')
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
