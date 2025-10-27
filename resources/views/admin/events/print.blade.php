@@ -25,6 +25,129 @@
             .calendar-card:hover { transform: none; }
         }
 
+        /* Settings Panel */
+        .settings-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            padding: 20px;
+            width: 320px;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+        }
+        .settings-header h3 {
+            font-size: 18px;
+            color: #2c3e50;
+        }
+        .close-settings {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+        .close-settings:hover { color: #333; }
+        .settings-section {
+            margin-bottom: 20px;
+        }
+        .settings-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .logo-upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+        }
+        .logo-upload-area:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        .logo-upload-area.has-logo {
+            border-style: solid;
+            border-color: #667eea;
+        }
+        .logo-preview {
+            max-width: 100px;
+            max-height: 100px;
+            margin: 10px auto;
+            display: none;
+        }
+        .logo-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .settings-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: 'Times New Roman', Times, serif;
+        }
+        .settings-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .settings-btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+        }
+        .btn-reset {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-reset:hover {
+            background: #c82333;
+        }
+        .settings-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            z-index: 999;
+            transition: all 0.3s;
+        }
+        .settings-toggle:hover {
+            background: #5568d3;
+            transform: rotate(90deg);
+        }
+
         /* Header */
         .official-header { text-align: center; border-bottom: 3px solid #000; padding-bottom: 15px; margin-bottom: 30px; }
         .header-logos { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
@@ -81,6 +204,69 @@
         .badge-exclusive { background: #fff3cd; color: #856404; }
         .badge-open { background: #d4edda; color: #155724; }
 
+        /* Signature Mode Toggle */
+        .signature-mode-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .mode-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .mode-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+        .mode-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        /* Signature Upload Area */
+        .signature-upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+        .signature-upload-area:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        .signature-upload-area.has-signature {
+            border-style: solid;
+            border-color: #667eea;
+        }
+        .signature-upload-icon {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .signature-preview {
+            display: none;
+            margin-top: 15px;
+        }
+        .signature-preview img {
+            max-width: 300px;
+            max-height: 100px;
+            object-fit: contain;
+        }
+        .draw-mode {
+            display: none;
+        }
+
         /* Signature */
         .signature-section { margin-top: 80px; page-break-inside: avoid; }
         .signature-label { font-size: 12px; font-weight: bold; margin-bottom: 5px; }
@@ -107,19 +293,66 @@
         .print-footer { margin-top: 40px; padding-top: 20px; border-top: 2px solid #000; text-align: center; font-size: 11px; page-break-inside: avoid; }
         .empty-state { text-align: center; padding: 80px 20px; color: #999; }
         .empty-state h3 { font-size: 24px; margin-bottom: 10px; color: #666; }
-
-        /* Icons */
-        .icon-location::before { content: "\f3c5"; font-family: "Font Awesome 6 Free"; font-weight: 900; margin-right: 5px; }
-        .icon-users::before { content: "\f0c0"; font-family: "Font Awesome 6 Free"; font-weight: 900; margin-right: 5px; }
-        .icon-calendar::before { content: "\f073"; font-family: "Font Awesome 6 Free"; font-weight: 900; margin-right: 5px; }
     </style>
 </head>
 <body>
+    <!-- Settings Toggle Button -->
+    <button class="settings-toggle no-print" onclick="toggleSettings()">
+        <i class="fas fa-cog"></i>
+    </button>
+
+    <!-- Settings Panel -->
+    <div class="settings-panel no-print" id="settingsPanel" style="display: none;">
+        <div class="settings-header">
+            <h3><i class="fas fa-sliders-h"></i> Settings</h3>
+            <button class="close-settings" onclick="toggleSettings()">×</button>
+        </div>
+
+        <!-- Left Logo -->
+        <div class="settings-section">
+            <label class="settings-label">Left Logo</label>
+            <div class="logo-upload-area" id="leftLogoArea" onclick="document.getElementById('leftLogoFile').click()">
+                <i class="fas fa-image" style="font-size: 32px; color: #ccc;"></i>
+                <p style="margin: 10px 0 0 0; font-size: 12px; color: #999;">Click to upload</p>
+                <div class="logo-preview" id="leftLogoPreview">
+                    <img id="leftLogoImg" alt="Left Logo">
+                </div>
+            </div>
+            <input type="file" id="leftLogoFile" accept="image/*" style="display: none;" onchange="handleLogoUpload(event, 'left')">
+        </div>
+
+        <!-- Right Logo -->
+        <div class="settings-section">
+            <label class="settings-label">Right Logo</label>
+            <div class="logo-upload-area" id="rightLogoArea" onclick="document.getElementById('rightLogoFile').click()">
+                <i class="fas fa-image" style="font-size: 32px; color: #ccc;"></i>
+                <p style="margin: 10px 0 0 0; font-size: 12px; color: #999;">Click to upload</p>
+                <div class="logo-preview" id="rightLogoPreview">
+                    <img id="rightLogoImg" alt="Right Logo">
+                </div>
+            </div>
+            <input type="file" id="rightLogoFile" accept="image/*" style="display: none;" onchange="handleLogoUpload(event, 'right')">
+        </div>
+
+        <!-- Document Description -->
+        <div class="settings-section">
+            <label class="settings-label">Document Description</label>
+            <input type="text" class="settings-input" id="documentDesc" value="EVENTS SUMMARY REPORT" oninput="updateDescription()">
+        </div>
+
+        <!-- Reset Button -->
+        <button class="settings-btn btn-reset" onclick="resetSettings()">
+            <i class="fas fa-undo"></i> Reset to Default
+        </button>
+    </div>
+
     <div class="print-container">
         <!-- Header -->
         <div class="official-header">
             <div class="header-logos">
-                <div class="logo-left"><img src="{{ $summaryData['left_logo'] }}" alt="Left Logo"></div>
+                <div class="logo-left">
+                    <img id="headerLeftLogo" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='%23667eea'/%3E%3Ctext x='50' y='60' text-anchor='middle' fill='white' font-size='40' font-weight='bold'%3EL%3C/text%3E%3C/svg%3E" alt="Left Logo">
+                </div>
                 <div class="header-text">
                     <p>Republic of the Philippines</p>
                     <p>Region VII, Central Visayas</p>
@@ -127,91 +360,69 @@
                     <h1>MADRIDEJOS COMMUNITY COLLEGE</h1>
                     <p class="address">Crossing Bunakan, Madridejos, Cebu</p>
                 </div>
-                <div class="logo-right"><img src="{{ $summaryData['right_logo'] }}" alt="Right Logo"></div>
+                <div class="logo-right">
+                    <img id="headerRightLogo" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='%23764ba2'/%3E%3Ctext x='50' y='60' text-anchor='middle' fill='white' font-size='40' font-weight='bold'%3ER%3C/text%3E%3C/svg%3E" alt="Right Logo">
+                </div>
             </div>
         </div>
 
         <div class="office-title">OFFICE OF THE COLLEGE PRESIDENT</div>
-        <div class="document-info"><p>{{ $summaryData['description'] }}</p></div>
+        <div class="document-info"><p id="documentDescription">EVENTS SUMMARY REPORT</p></div>
 
         <!-- Summary -->
         <div class="summary-info-bar">
             <div class="summary-info-item">
                 <span class="summary-info-label">Total Events:</span>
-                <span class="summary-info-value">{{ $summaryData['total_events'] }}</span>
+                <span class="summary-info-value" id="totalEvents">6</span>
             </div>
             <div class="summary-info-item">
                 <span class="summary-info-label">Active:</span>
-                <span class="summary-info-value" style="color: #28a745;">{{ $summaryData['active_count'] }}</span>
+                <span class="summary-info-value" style="color: #28a745;" id="activeEvents">4</span>
             </div>
             <div class="summary-info-item">
                 <span class="summary-info-label">Postponed:</span>
-                <span class="summary-info-value" style="color: #ffc107;">{{ $summaryData['postponed_count'] }}</span>
+                <span class="summary-info-value" style="color: #ffc107;" id="postponedEvents">1</span>
             </div>
             <div class="summary-info-item">
                 <span class="summary-info-label">Cancelled:</span>
-                <span class="summary-info-value" style="color: #dc3545;">{{ $summaryData['cancelled_count'] }}</span>
+                <span class="summary-info-value" style="color: #dc3545;" id="cancelledEvents">1</span>
             </div>
         </div>
 
         <div class="section-divider"></div>
 
-        <!-- Events -->
-        @if($summaryData['events']->count() > 0)
-        <div class="events-calendar-grid">
-            @foreach($summaryData['events'] as $index => $event)
+        <!-- Events Grid -->
+        <div class="events-calendar-grid" id="eventsGrid">
+            <!-- Sample Events - Replace with your data -->
             <div class="calendar-card">
-                <div class="calendar-date-section status-{{ $event->status }}">
-                    <div class="event-number">#{{ $index + 1 }}</div>
-                    <div class="calendar-month">{{ $event->date->format('F') }}</div>
-                    <div class="calendar-day">{{ $event->date->format('d') }}</div>
-                    <div class="calendar-year">{{ $event->date->format('Y') }}</div>
-                    @if($event->start_time)
+                <div class="calendar-date-section status-active">
+                    <div class="event-number">#1</div>
+                    <div class="calendar-month">October</div>
+                    <div class="calendar-day">18</div>
+                    <div class="calendar-year">2025</div>
                     <div class="calendar-time">
-                        <i class="fas fa-clock"></i>
-                        {{ $event->start_time->format('h:i A') }}
-                        @if($event->end_time) - {{ $event->end_time->format('h:i A') }} @endif
+                        <i class="fas fa-clock"></i> 09:00 AM - 05:00 PM
                     </div>
-                    @endif
                 </div>
                 <div class="calendar-content">
-                    <h3 class="event-card-title">{{ $event->title }}</h3>
-                    <p class="event-card-description">{{ $event->description }}</p>
+                    <h3 class="event-card-title">gfgdgd</h3>
+                    <p class="event-card-description">Sample event description goes here...</p>
                     <div class="event-card-location">
-                        <i class="fas fa-map-marker-alt"></i> {{ $event->location }}
+                        <i class="fas fa-map-marker-alt"></i> Main Campus
                     </div>
                     <div class="event-card-meta">
-                        <span class="badge badge-{{ $event->status }}">{{ ucfirst($event->status) }}</span>
-                        @if($event->is_exclusive)
-                            <span class="badge badge-exclusive">Exclusive</span>
-                        @else
-                            <span class="badge badge-open">Open to All</span>
-                        @endif
-                        @if($event->is_recurring)
-                            <span class="badge badge-recurring">Recurring</span>
-                        @endif
+                        <span class="badge badge-active">Active</span>
+                        <span class="badge badge-open">Open to All</span>
                     </div>
                     <div class="event-card-footer">
-                        @if($event->department)
-                        <div style="font-size: 11px; color: #666; font-weight: 600;">{{ $event->department }}</div>
-                        @else
-                        <div></div>
-                        @endif
+                        <div style="font-size: 11px; color: #666; font-weight: 600;">BSIT</div>
                         <div class="participants-badge">
-                            <i class="fas fa-users"></i> {{ $event->joinedUsers->count() }}
+                            <i class="fas fa-users"></i> 1
                         </div>
                     </div>
                 </div>
             </div>
-            @endforeach
         </div>
-        @else
-        <div class="empty-state">
-            <div style="font-size: 64px; margin-bottom: 20px;">📅</div>
-            <h3>No Events Found</h3>
-            <p>There are no events to display in this calendar.</p>
-        </div>
-        @endif
 
         <!-- Signature -->
         <div class="signature-section">
@@ -278,12 +489,80 @@
         <!-- Footer -->
         <div class="print-footer">
             <p>This is a computer-generated document. No signature is required.</p>
-            <p>© {{ date('Y') }} Event Management System. All rights reserved.</p>
-            <p style="margin-top: 10px;">Generated: {{ $summaryData['generated_at'] }}</p>
+            <p>© <span id="currentYear"></span> Event Management System. All rights reserved.</p>
+            <p style="margin-top: 10px;">Generated: <span id="generatedDate"></span></p>
         </div>
     </div>
 
     <script>
+        // Initialize
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+        document.getElementById('generatedDate').textContent = new Date().toLocaleString();
+
+        // Settings Panel
+        function toggleSettings() {
+            const panel = document.getElementById('settingsPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Logo Upload
+        function handleLogoUpload(e, side) {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 2 * 1024 * 1024) {
+                alert('File too large (max 2MB)');
+                return;
+            }
+            if (!file.type.match('image.*')) {
+                alert('Please upload an image');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const imgData = event.target.result;
+                if (side === 'left') {
+                    document.getElementById('leftLogoImg').src = imgData;
+                    document.getElementById('leftLogoPreview').style.display = 'block';
+                    document.getElementById('leftLogoArea').classList.add('has-logo');
+                    document.getElementById('headerLeftLogo').src = imgData;
+                } else {
+                    document.getElementById('rightLogoImg').src = imgData;
+                    document.getElementById('rightLogoPreview').style.display = 'block';
+                    document.getElementById('rightLogoArea').classList.add('has-logo');
+                    document.getElementById('headerRightLogo').src = imgData;
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Update Description
+        function updateDescription() {
+            const desc = document.getElementById('documentDesc').value;
+            document.getElementById('documentDescription').textContent = desc;
+        }
+
+        // Reset Settings
+        function resetSettings() {
+            if (!confirm('Reset all settings to default?')) return;
+            
+            // Reset logos
+            document.getElementById('headerLeftLogo').src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='%23667eea'/%3E%3Ctext x='50' y='60' text-anchor='middle' fill='white' font-size='40' font-weight='bold'%3EL%3C/text%3E%3C/svg%3E";
+            document.getElementById('headerRightLogo').src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='%23764ba2'/%3E%3Ctext x='50' y='60' text-anchor='middle' fill='white' font-size='40' font-weight='bold'%3ER%3C/text%3E%3C/svg%3E";
+            
+            document.getElementById('leftLogoPreview').style.display = 'none';
+            document.getElementById('rightLogoPreview').style.display = 'none';
+            document.getElementById('leftLogoArea').classList.remove('has-logo');
+            document.getElementById('rightLogoArea').classList.remove('has-logo');
+            document.getElementById('leftLogoFile').value = '';
+            document.getElementById('rightLogoFile').value = '';
+            
+            // Reset description
+            document.getElementById('documentDesc').value = 'EVENTS SUMMARY REPORT';
+            document.getElementById('documentDescription').textContent = 'EVENTS SUMMARY REPORT';
+        }
+
+        // Signature Drawing
         let mode = 'draw', uploadedSig = null;
         const canvas = document.getElementById('signatureCanvas');
         const ctx = canvas.getContext('2d');
@@ -407,6 +686,98 @@
                 }
             }, 100);
         }
+
+        // Load notifications data (if available)
+        function loadNotificationsData(data) {
+            if (!data || !data.data) return;
+            
+            const eventsGrid = document.getElementById('eventsGrid');
+            eventsGrid.innerHTML = '';
+            
+            let activeCount = 0, postponedCount = 0, cancelledCount = 0;
+            
+            data.data.forEach((notification, index) => {
+                if (!notification.data) return;
+                
+                const eventData = notification.data;
+                const status = 'active'; // You can determine status from your data
+                
+                if (status === 'active') activeCount++;
+                else if (status === 'postponed') postponedCount++;
+                else if (status === 'cancelled') cancelledCount++;
+                
+                const card = document.createElement('div');
+                card.className = 'calendar-card';
+                
+                const date = new Date(notification.created_at);
+                const monthNames = ["January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December"];
+                
+                card.innerHTML = `
+                    <div class="calendar-date-section status-${status}">
+                        <div class="event-number">#${index + 1}</div>
+                        <div class="calendar-month">${monthNames[date.getMonth()]}</div>
+                        <div class="calendar-day">${date.getDate()}</div>
+                        <div class="calendar-year">${date.getFullYear()}</div>
+                        <div class="calendar-time">
+                            <i class="fas fa-clock"></i> ${date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                    </div>
+                    <div class="calendar-content">
+                        <h3 class="event-card-title">${eventData.event_title || 'Event'}</h3>
+                        <p class="event-card-description">${notification.message || 'No description available'}</p>
+                        <div class="event-card-location">
+                            <i class="fas fa-map-marker-alt"></i> Main Campus
+                        </div>
+                        <div class="event-card-meta">
+                            <span class="badge badge-${status}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>
+                            <span class="badge badge-open">Open to All</span>
+                        </div>
+                        <div class="event-card-footer">
+                            <div style="font-size: 11px; color: #666; font-weight: 600;">${eventData.user_department || ''}</div>
+                            <div class="participants-badge">
+                                <i class="fas fa-users"></i> 1
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                eventsGrid.appendChild(card);
+            });
+            
+            // Update summary
+            document.getElementById('totalEvents').textContent = data.total || data.data.length;
+            document.getElementById('activeEvents').textContent = activeCount;
+            document.getElementById('postponedEvents').textContent = postponedCount;
+            document.getElementById('cancelledEvents').textContent = cancelledCount;
+        }
+
+        // Example: Load your notifications data
+        // Uncomment and modify this section when you have the data
+        /*
+        const notificationsData = {
+            "current_page": 1,
+            "data": [
+                {
+                    "id": 6,
+                    "type": "event_join",
+                    "message": "User   Nih (BSIT) joined \"gfgdgd\"",
+                    "data": {
+                        "user_id": 2,
+                        "event_id": 9,
+                        "user_name": "User   Nih",
+                        "event_title": "gfgdgd",
+                        "user_department": "BSIT"
+                    },
+                    "is_read": true,
+                    "created_at": "2025-10-18T15:56:34.000000Z"
+                }
+            ],
+            "total": 6
+        };
+        
+        loadNotificationsData(notificationsData);
+        */
     </script>
 </body>
 </html>
