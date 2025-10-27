@@ -3,7 +3,7 @@
 @section('page-title', 'Edit Event')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/admin/events-create.css') }}">
+<link rel="stylesheet" href="{{ asset('public/css/admin/events-create.css') }}">
 <style>
     .exclusivity-card, .recurrence-card {
         border: 1px solid #e3e6f0;

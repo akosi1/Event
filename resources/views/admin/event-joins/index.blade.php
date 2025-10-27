@@ -254,7 +254,7 @@
 </script>
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/admin/events-index.css') }}">
+<link rel="stylesheet" href="{{ asset('public/css/admin/events-index.css') }}">
 @endpush
 
 @push('scripts')

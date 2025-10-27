@@ -1,12 +1,48 @@
-<IfModule mod_rewrite.c>
-    <IfModule mod_negotiation.c>
-        Options -MultiViews -Indexes
-    </IfModule>
+# ===============================================================
+# Laravel Public/.htaccess — Secure + Hostinger Compatible
+# ===============================================================
 
-    RewriteEngine On
+  RewriteEngine On
 
-    # Redirect Trailing Slashes...
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^ index.php [L]
-</IfModule>
+  # 🚫 Block any manual request that includes "/public" in the URL
+  # Works on LiteSpeed because it inspects the raw browser request
+  RewriteCond %{THE_REQUEST} "\s/public([/?#\s]|$)" [NC]
+  RewriteRule ^ - [R=403,L]
+
+  # Handle Authorization Header
+  RewriteCond %{HTTP:Authorization} .
+  RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+  # 🚀 Laravel Routing
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule ^ index.php [L]
+
+
+# ===============================================================
+# Security Hardening
+# ===============================================================
+
+# 🔒 Block hidden/system files
+RedirectMatch 404 /\.env
+RedirectMatch 404 /\.git
+RedirectMatch 404 /\.ht
+RedirectMatch 404 /\.env\..*
+RedirectMatch 404 /\.DS_Store
+
+# 🔒 Block internal Laravel directories
+RedirectMatch 404 ^/(storage|vendor|bootstrap|resources|config)/.*
+
+# 🔒 Disable directory browsing
+Options -Indexes
+
+# ===============================================================
+# Security Headers (optional)
+# ===============================================================
+
+  Header always set X-XSS-Protection "1; mode=block"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "no-referrer"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), fullscreen=(self)"

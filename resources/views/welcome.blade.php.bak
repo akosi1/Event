@@ -4,7 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>MCC Event & Portfolio Organizer</title>
-    <link href="{{ asset('user/footer/footer.css') }}" rel="stylesheet">    
+    # <link rel="stylesheet" href="{{ asset('css/style.css') }}"/>
+  #  <link href="{{ asset('user/footer/footer.css') }}" rel="stylesheet"/>    
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -62,15 +63,18 @@
         }
 
         .bg-image.bg1 {
-            background-image: url('/images/mcc background.jpg');
+         
+  background-image: url('{{ asset('images/mcc background.jpg') }}');
+
         }
 
         .bg-image.bg2 {
-            background-image: url('/images/mcc background1.jpg');
+        background-image: url('{{ asset('images/mcc background1.jpg') }}');
         }
 
         .bg-image.bg3 {
-            background-image: url('/images/mcc background2.jpg');
+            background-image: url('{{ asset('images/mcc background2.jpg') }}');
+
         }
 
         /* Hero Section */
@@ -886,7 +890,7 @@
         <div class="hero-container">
             <!-- Logo -->
             <div class="logo-section">
-                <img src="images/logo.png" alt="MCC Logo">
+              <img src="{{ asset('images/logo.png') }}" alt="MCC Logos">
             </div>
 
             <!-- Header -->
@@ -895,7 +899,7 @@
                 <span class="red-text">Organizer</span>
             </h1>
             <p class="hero-subtitle">Madridejos Community College</p>
-
+            <input type="hidden" name="g-recaptcha-response" id="recaptchaResponse">
             <!-- CTA Button -->
             <div class="cta-buttons">
                 <a href="{{ route('login') }}" class="btn btn-secondary">
@@ -1233,7 +1237,7 @@
             </div>
         </div>
     </section>
-
+    <script src="https://www.google.com/recaptcha/api.js?render={{ env('RECAPTCHA_SITE_KEY') }}"></script>
     @include('layouts.footer')
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
