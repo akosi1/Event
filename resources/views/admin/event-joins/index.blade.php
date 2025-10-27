@@ -4,13 +4,23 @@
 
 @section('content')
 <div class="container-fluid px-4">
-    <!-- Header -->
+    <!-- Header with Print Settings Button -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="h4 fw-bold mb-1">
                 <i class="fas fa-users text-primary me-2"></i>Event Join Requests
             </h2>
             <p class="text-muted mb-0">{{ $eventJoins->total() }} total requests</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#printSettingsModal">
+                <i class="fas fa-cog me-2"></i>Print Settings
+            </button>
+            <a href="{{ route('admin.event-joins.print', request()->query()) }}" 
+               target="_blank" 
+               class="btn btn-primary">
+                <i class="fas fa-print me-2"></i>Print Summary
+            </a>
         </div>
     </div>
 
@@ -41,7 +51,6 @@
         </div>
     </div>
 
-
     @if($eventJoins->count())
         <!-- Event Joins Table -->
         <div class="card border-0 shadow-sm">
@@ -60,14 +69,14 @@
                     <tbody id="eventJoinsTableBody">
                         @foreach($eventJoins as $join)
                         <tr class="join-row compact-row"
-                        data-searchable="{{ strtolower($join->user->first_name . ' ' . $join->user->email . ' ' . $join->user->email . ' ' . $join->event->title) }}"
-                        data-event-id="{{ $join->event_id }}">
+                            data-searchable="{{ strtolower($join->user->first_name . ' ' . $join->user->last_name . ' ' . $join->user->email . ' ' . $join->event->title) }}"
+                            data-event-id="{{ $join->event_id }}">
                             <td class="ps-3 py-2 align-middle">
                                 <span class="text-muted fw-medium small">#{{ $join->id }}</span>
                             </td>
                             <td class="py-2 align-middle">
                                 <div>
-                                    <strong>{{ $join->user->first_name . $join->user->first_name }}</strong>
+                                    <strong>{{ $join->user->first_name }} {{ $join->user->last_name }}</strong>
                                     <small class="text-muted d-block">{{ $join->user->email ?? '' }}</small>
                                 </div>
                             </td>
@@ -97,7 +106,6 @@
                                         <form action="{{ route('admin.event-joins.approve', $join) }}" method="POST">
                                             @csrf
                                             <button class="btn btn-success btn-sm" title="Approve">
-                                                {{-- <i class="fas fa-check"></i> --}}
                                                 Approve
                                             </button>
                                         </form>
@@ -122,31 +130,10 @@
                 </span>
             </div>
             <nav aria-label="Pagination">
-                <ul class="pagination pagination-sm mb-0">
-                    @if ($eventJoins->onFirstPage())
-                        <li class="page-item disabled"><span class="page-link"><i class="fas fa-chevron-left"></i></span></li>
-                    @else
-                        <li class="page-item"><a class="page-link" href="{{ $eventJoins->previousPageUrl() }}"><i class="fas fa-chevron-left"></i></a></li>
-                    @endif
-
-                    @foreach ($eventJoins->getUrlRange(1, $eventJoins->lastPage()) as $page => $url)
-                        @if ($page == $eventJoins->currentPage())
-                            <li class="page-item active"><span class="page-link">{{ $page }}</span></li>
-                        @else
-                            <li class="page-item"><a class="page-link" href="{{ $url }}">{{ $page }}</a></li>
-                        @endif
-                    @endforeach
-
-                    @if ($eventJoins->hasMorePages())
-                        <li class="page-item"><a class="page-link" href="{{ $eventJoins->nextPageUrl() }}"><i class="fas fa-chevron-right"></i></a></li>
-                    @else
-                        <li class="page-item disabled"><span class="page-link"><i class="fas fa-chevron-right"></i></span></li>
-                    @endif
-                </ul>
+                {{ $eventJoins->links() }}
             </nav>
         </div>
         @endif
-
     @else
         <div class="card border-0 shadow-sm">
             <div class="card-body text-center py-5">
@@ -159,57 +146,129 @@
         </div>
     @endif
 </div>
+
+<!-- Print Settings Modal -->
+<div class="modal fade" id="printSettingsModal" tabindex="-1" aria-labelledby="printSettingsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="printSettingsModalLabel">
+                    <i class="fas fa-cog me-2"></i>Print Summary Settings
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('admin.event-joins.update-print-settings') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body">
+                    <div class="row g-4">
+                        <!-- Left Logo -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Left Logo</label>
+                            <div class="text-center mb-3">
+                                <img id="leftLogoPreview" 
+                                     src="{{ $printSettings?->left_logo_url ?? asset('images/default-left-logo.png') }}" 
+                                     alt="Left Logo" 
+                                     class="img-thumbnail mb-2"
+                                     style="max-height: 150px; object-fit: contain;">
+                            </div>
+                            <input type="file" name="left_logo" class="form-control" accept="image/*" id="leftLogoInput">
+                            <small class="text-muted">Recommended: 200x200px, PNG or JPG</small>
+                        </div>
+
+                        <!-- Right Logo -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Right Logo (SAIL)</label>
+                            <div class="text-center mb-3">
+                                <img id="rightLogoPreview" 
+                                     src="{{ $printSettings?->right_logo_url ?? asset('images/default-right-logo.png') }}" 
+                                     alt="Right Logo" 
+                                     class="img-thumbnail mb-2"
+                                     style="max-height: 150px; object-fit: contain;">
+                            </div>
+                            <input type="file" name="right_logo" class="form-control" accept="image/*" id="rightLogoInput">
+                            <small class="text-muted">Recommended: 200x200px, PNG or JPG</small>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Header Description</label>
+                            <textarea name="description" class="form-control" rows="3" placeholder="Enter header description for print summary...">{{ $printSettings?->description ?? '' }}</textarea>
+                            <small class="text-muted">This will appear in the center of the print header</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Save Settings
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Live Search
         const searchInput = document.getElementById('liveSearchInput');
         const tableRows = document.querySelectorAll('#eventJoinsTableBody .join-row');
-        const searchResultsInfo = document.getElementById('searchResultsInfo');
-        const searchResultsText = document.getElementById('searchResultsText');
-        const eventFilter = document.getElementById('eventFilter'); // optional event filter
 
-        function filterEventJoins() {
-            const query = searchInput.value.trim().toLowerCase();
-            const selectedEvent = eventFilter ? eventFilter.value : '';
-            let visibleCount = 0;
+        searchInput.addEventListener('input', function() {
+            const query = this.value.trim().toLowerCase();
 
             tableRows.forEach(row => {
                 const searchable = row.dataset.searchable || '';
-                const rowEventId = row.dataset.eventId || '';
-
-                // Check both search query and event filter
-                const matchesSearch = query === '' || searchable.includes(query);
-                const matchesEvent = selectedEvent === '' || rowEventId === selectedEvent;
-
-                if(matchesSearch && matchesEvent) {
+                if(query === '' || searchable.includes(query)) {
                     row.style.display = '';
-                    visibleCount++;
                 } else {
                     row.style.display = 'none';
                 }
             });
+        });
 
-            // Show search info if no rows match
-            if(query && visibleCount === 0) {
-                if(searchResultsInfo) {
-                    searchResultsInfo.style.display = 'block';
-                    searchResultsText.textContent = `No users match "${query}".`;
-                }
-            } else if(searchResultsInfo) {
-                searchResultsInfo.style.display = 'none';
+        // Image Preview for Left Logo
+        document.getElementById('leftLogoInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('leftLogoPreview').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
             }
-        }
+        });
 
-        // Trigger search on input and filter change
-        searchInput.addEventListener('input', filterEventJoins);
-        if(eventFilter) eventFilter.addEventListener('change', filterEventJoins);
+        // Image Preview for Right Logo
+        document.getElementById('rightLogoInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('rightLogoPreview').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
     });
-
 </script>
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('public/css/admin/events-index.css') }}">
 @endpush
+
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@if(session('success'))
+<script>
+    Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: '{{ session('success') }}',
+        timer: 3000,
+        showConfirmButton: false
+    });
+</script>
+@endif
 @endpush
 @endsection

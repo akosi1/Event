@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Event;
+use App\Models\PrintSummary;
 use App\Services\EventRecurrenceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -13,8 +14,6 @@ use Carbon\Carbon;
 use App\Models\Feedback;
 use App\Mail\PHPMailerService;
 use Illuminate\Support\Facades\Auth;
-
-
 
 class EventController extends Controller
 {
@@ -85,7 +84,131 @@ class EventController extends Controller
         // Append query parameters to pagination links
         $events->appends($request->query());
 
-        return view('admin.events.index', compact('events'));
+        // Get print settings for the modal
+        $printSettings = PrintSummary::first();
+
+        return view('admin.events.index', compact('events', 'printSettings'));
+    }
+
+    /**
+     * Generate and display print summary for events
+     */
+    public function print(Request $request)
+    {
+        $query = Event::with(['parentEvent', 'childEvents', 'joinedUsers'])
+                      ->whereNull('parent_event_id'); // Only show parent events
+
+        // Apply same filters as index page
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('title', 'like', '%' . $request->search . '%')
+                  ->orWhere('description', 'like', '%' . $request->search . '%')
+                  ->orWhere('location', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('department')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('department', $request->department)
+                  ->orWhereJsonContains('allowed_departments', $request->department);
+            });
+        }
+
+        if ($request->filled('exclusivity')) {
+            if ($request->exclusivity === 'exclusive') {
+                $query->where('is_exclusive', true);
+            } elseif ($request->exclusivity === 'open') {
+                $query->where('is_exclusive', false);
+            }
+        }
+
+        if ($request->filled('recurrence')) {
+            if ($request->recurrence === 'recurring') {
+                $query->where('is_recurring', true);
+            } elseif ($request->recurrence === 'one_time') {
+                $query->where('is_recurring', false);
+            }
+        }
+
+        // Get all records for printing (no pagination)
+        $events = $query->orderBy('date', 'desc')->get();
+        
+        // Generate summary data with statistics
+        $summaryData = PrintSummary::generateEventsSummary($events);
+
+        return view('admin.events.print', compact('summaryData'));
+    }
+
+    /**
+     * Update print settings for events (logos and description)
+     */
+    public function updatePrintSettings(Request $request)
+    {
+        $request->validate([
+            'events_left_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'events_right_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'events_description' => 'nullable|string|max:500',
+        ]);
+
+        // Get or create print settings
+        $settings = PrintSummary::firstOrCreate([]);
+
+        // Handle left logo upload
+        if ($request->hasFile('events_left_logo')) {
+            // Delete old logo if exists
+            if ($settings->events_left_logo_path) {
+                $oldPath = public_path('storage/logos/' . $settings->events_left_logo_path);
+                if (file_exists($oldPath)) {
+                    @unlink($oldPath);
+                }
+            }
+
+            $leftLogo = $request->file('events_left_logo');
+            $leftLogoName = 'events_left_logo_' . time() . '_' . uniqid() . '.' . $leftLogo->extension();
+            
+            // Create directory if it doesn't exist
+            if (!file_exists(public_path('storage/logos'))) {
+                mkdir(public_path('storage/logos'), 0755, true);
+            }
+            
+            $leftLogo->move(public_path('storage/logos'), $leftLogoName);
+            $settings->events_left_logo_path = $leftLogoName;
+        }
+
+        // Handle right logo upload
+        if ($request->hasFile('events_right_logo')) {
+            // Delete old logo if exists
+            if ($settings->events_right_logo_path) {
+                $oldPath = public_path('storage/logos/' . $settings->events_right_logo_path);
+                if (file_exists($oldPath)) {
+                    @unlink($oldPath);
+                }
+            }
+
+            $rightLogo = $request->file('events_right_logo');
+            $rightLogoName = 'events_right_logo_' . time() . '_' . uniqid() . '.' . $rightLogo->extension();
+            
+            // Create directory if it doesn't exist
+            if (!file_exists(public_path('storage/logos'))) {
+                mkdir(public_path('storage/logos'), 0755, true);
+            }
+            
+            $rightLogo->move(public_path('storage/logos'), $rightLogoName);
+            $settings->events_right_logo_path = $rightLogoName;
+        }
+
+        // Update description
+        if ($request->filled('events_description')) {
+            $settings->events_description = $request->events_description;
+        }
+
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Print settings updated successfully!');
     }
 
     public function create()
@@ -95,7 +218,6 @@ class EventController extends Controller
 
     public function store(Request $request)
     {
-        // dd($request->input('image'));
         $validated = $this->validateEventData($request);
 
         $fileFields = ['image', 'certificate_template_image'];
@@ -112,6 +234,7 @@ class EventController extends Controller
                 $validated[$field] = $base64String;
             }
         }
+
         // Process department exclusivity
         $validated = $this->processDepartmentExclusivity($validated, $request);
 
@@ -214,10 +337,7 @@ class EventController extends Controller
                     return back()->withErrors(['image' => 'Failed to upload image: ' . $e->getMessage()])->withInput();
                 }
             }
-
         }
-
-
 
         // Process department exclusivity
         $validated = $this->processDepartmentExclusivity($validated, $request);
@@ -260,62 +380,6 @@ class EventController extends Controller
 
         return redirect()->route('admin.events.index')
                         ->with('success', $message);
-    }
-
-    /**
-     * Generate print summary for events
-     */
-    public function printSummary(Request $request)
-    {
-        $query = Event::with(['childEvents', 'joinedUsers']);
-
-        // Apply same filters as index
-        if ($request->filled('search')) {
-            $query->where(function ($q) use ($request) {
-                $q->where('title', 'like', '%' . $request->search . '%')
-                  ->orWhere('description', 'like', '%' . $request->search . '%')
-                  ->orWhere('location', 'like', '%' . $request->search . '%');
-            });
-        }
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->filled('department')) {
-            $query->where(function ($q) use ($request) {
-                $q->where('department', $request->department)
-                  ->orWhereJsonContains('allowed_departments', $request->department);
-            });
-        }
-
-        $events = $query->orderBy('date', 'desc')->get();
-
-        // Calculate statistics
-        $stats = [
-            'total' => $events->count(),
-            'active' => $events->where('status', 'active')->count(),
-            'postponed' => $events->where('status', 'postponed')->count(),
-            'cancelled' => $events->where('status', 'cancelled')->count(),
-            'exclusive' => $events->where('is_exclusive', true)->count(),
-            'open' => $events->where('is_exclusive', false)->count(),
-            'recurring' => $events->where('is_recurring', true)->count(),
-            'one_time' => $events->where('is_recurring', false)->count(),
-            'by_department' => $events->where('is_exclusive', true)
-                                    ->whereNotNull('department')
-                                    ->groupBy('department')
-                                    ->map->count(),
-            'upcoming' => $events->where('date', '>=', now())->count(),
-            'past' => $events->where('date', '<', now())->count(),
-            'total_participants' => $events->sum(function($event) {
-                return $event->joinedUsers->count();
-            }),
-            'participants_by_department' => $events->flatMap(function($event) {
-                return $event->joinedUsers;
-            })->groupBy('department')->map->count(),
-        ];
-
-        return view('admin.events.print-summary', compact('events', 'stats', 'request'));
     }
 
     /**
@@ -379,8 +443,11 @@ class EventController extends Controller
 
         return $validated;
     }
-    ##feeback
-     public function storeFeedback(Request $request, Event $event)
+
+    /**
+     * Store feedback for an event
+     */
+    public function storeFeedback(Request $request, Event $event)
     {
         $request->validate([
             'feedback' => 'required|string|max:1000',
@@ -408,24 +475,20 @@ class EventController extends Controller
             <p><strong>Feedback:</strong><br>{$request->feedback}</p>
         ";
 
-        
         $mailer->sendEmail($adminEmail, $subject, $body);
 
-      
         $thankYouBody = "
             <h3>Thank You for Your Feedback!</h3>
-            <p>We’ve received your feedback for <strong>{$event->title}</strong>.</p>
+            <p>We've received your feedback for <strong>{$event->title}</strong>.</p>
             <p>Your input helps us improve future events!</p>
         ";
         $mailer->sendEmail($userEmail, "Feedback Confirmation", $thankYouBody);
 
-      
         return response()->json([
             'success' => true,
             'message' => 'Feedback submitted successfully and email sent!',
         ]);
     }
-
 
     /**
      * Process department exclusivity settings

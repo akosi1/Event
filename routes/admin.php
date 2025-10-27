@@ -32,6 +32,21 @@ Route::middleware(['admin'])->group(function () {
     Route::post('event-joins/{eventJoin}/approve', [EventJoinController::class, 'approve'])->name('event-joins.approve');
     Route::post('event-joins/{eventJoin}/reject', [EventJoinController::class, 'reject'])->name('event-joins.reject');
 });
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('event-joins/print', [EventJoinController::class, 'print'])
+        ->name('event-joins.print');
+});
+
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::post('event-joins/update-print-settings', [EventJoinController::class, 'updatePrintSettings'])
+        ->name('event-joins.update-print-settings');
+        
+         Route::get('/events/print', [EventController::class, 'print'])->name('events.print');
+         Route::post('/events/update-print-settings', [EventController::class, 'updatePrintSettings'])
+        ->name('events.update-print-settings');
+
+
+});
 
     // Users resource routes
     Route::resource('/users', UserController::class)->names('admin.users');
