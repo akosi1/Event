@@ -24,6 +24,9 @@
 
     RewriteEngine On
 
+     RewriteCond %{REQUEST_URI} (\.\w+$) [NC]
+     RewriteRule ^(.*)$ public/$1 
+
     # If the request is NOT a real file or directory,
     # then send it to index.php (Laravel)
     RewriteCond %{REQUEST_FILENAME} !-d
