@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\{Event, EventJoin, Notification, PrintSummary};
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class EventJoinController extends Controller
 {
@@ -15,6 +16,7 @@ class EventJoinController extends Controller
     {
         $query = EventJoin::with(['user', 'event', 'approvedBy']);
 
+        // Optional filters
         if ($request->filled('event_id')) {
             $query->where('event_id', $request->event_id);
         }
@@ -24,25 +26,25 @@ class EventJoinController extends Controller
         }
 
         if ($request->filled('approved')) {
-            $approved = $request->approved === '1';
+            $approved = $request->approved === '1' ? true : false;
             $query->where('approved', $approved);
         }
 
         if ($request->filled('search')) {
             $search = strtolower($request->search);
-            $query->where(function ($q) use ($search) {
-                $q->whereHas('user', function ($q2) use ($search) {
-                    $q2->whereRaw('LOWER(first_name) LIKE ?', ["%{$search}%"])
-                       ->orWhereRaw('LOWER(last_name) LIKE ?', ["%{$search}%"])
-                       ->orWhereRaw('LOWER(email) LIKE ?', ["%{$search}%"]);
-                })->orWhereHas('event', function ($q2) use ($search) {
-                    $q2->whereRaw('LOWER(title) LIKE ?', ["%{$search}%"]);
-                });
+            $query->whereHas('user', function ($q) use ($search) {
+                $q->whereRaw('LOWER(first_name) LIKE ?', ["%{$search}%"])
+                  ->orWhereRaw('LOWER(last_name) LIKE ?', ["%{$search}%"])
+                  ->orWhereRaw('LOWER(email) LIKE ?', ["%{$search}%"]);
+            })->orWhereHas('event', function ($q) use ($search) {
+                $q->whereRaw('LOWER(title) LIKE ?', ["%{$search}%"]);
             });
         }
 
         $eventJoins = $query->orderBy('joined_at', 'desc')->paginate(15);
         $events = Event::orderBy('date', 'asc')->get();
+        
+        // Get print settings for the modal
         $printSettings = PrintSummary::first();
 
         return view('admin.event-joins.index', compact('eventJoins', 'events', 'printSettings'));
@@ -55,6 +57,7 @@ class EventJoinController extends Controller
     {
         $query = EventJoin::with(['user', 'event', 'approvedBy']);
 
+        // Apply same filters as index page
         if ($request->filled('event_id')) {
             $query->where('event_id', $request->event_id);
         }
@@ -64,31 +67,32 @@ class EventJoinController extends Controller
         }
 
         if ($request->filled('approved')) {
-            $approved = $request->approved === '1';
+            $approved = $request->approved === '1' ? true : false;
             $query->where('approved', $approved);
         }
 
         if ($request->filled('search')) {
             $search = strtolower($request->search);
-            $query->where(function ($q) use ($search) {
-                $q->whereHas('user', function ($q2) use ($search) {
-                    $q2->whereRaw('LOWER(first_name) LIKE ?', ["%{$search}%"])
-                       ->orWhereRaw('LOWER(last_name) LIKE ?', ["%{$search}%"])
-                       ->orWhereRaw('LOWER(email) LIKE ?', ["%{$search}%"]);
-                })->orWhereHas('event', function ($q2) use ($search) {
-                    $q2->whereRaw('LOWER(title) LIKE ?', ["%{$search}%"]);
-                });
+            $query->whereHas('user', function ($q) use ($search) {
+                $q->whereRaw('LOWER(first_name) LIKE ?', ["%{$search}%"])
+                  ->orWhereRaw('LOWER(last_name) LIKE ?', ["%{$search}%"])
+                  ->orWhereRaw('LOWER(email) LIKE ?', ["%{$search}%"]);
+            })->orWhereHas('event', function ($q) use ($search) {
+                $q->whereRaw('LOWER(title) LIKE ?', ["%{$search}%"]);
             });
         }
 
+        // Get all records for printing (no pagination)
         $eventJoins = $query->orderBy('joined_at', 'desc')->get();
+        
+        // Generate summary data with statistics
         $summaryData = PrintSummary::generateEventJoinsSummary($eventJoins);
 
         return view('admin.event-joins.print', compact('summaryData'));
     }
 
     /**
-     * Update print settings (store images as Base64)
+     * Update print settings (logos and description)
      */
     public function updatePrintSettings(Request $request)
     {
@@ -98,19 +102,54 @@ class EventJoinController extends Controller
             'description' => 'nullable|string|max:500',
         ]);
 
+        // Get or create print settings
         $settings = PrintSummary::firstOrCreate([]);
 
-        // Convert uploaded images to Base64
+        // Handle left logo upload
         if ($request->hasFile('left_logo')) {
+            // Delete old logo if exists
+            if ($settings->left_logo_path) {
+                $oldPath = public_path('storage/logos/' . $settings->left_logo_path);
+                if (file_exists($oldPath)) {
+                    @unlink($oldPath);
+                }
+            }
+
             $leftLogo = $request->file('left_logo');
-            $settings->left_logo_base64 = $this->convertToBase64($leftLogo);
+            $leftLogoName = 'left_logo_' . time() . '_' . uniqid() . '.' . $leftLogo->extension();
+            
+            // Create directory if it doesn't exist
+            if (!file_exists(public_path('storage/logos'))) {
+                mkdir(public_path('storage/logos'), 0755, true);
+            }
+            
+            $leftLogo->move(public_path('storage/logos'), $leftLogoName);
+            $settings->left_logo_path = $leftLogoName;
         }
 
+        // Handle right logo upload (SAIL logo)
         if ($request->hasFile('right_logo')) {
+            // Delete old logo if exists
+            if ($settings->right_logo_path) {
+                $oldPath = public_path('storage/logos/' . $settings->right_logo_path);
+                if (file_exists($oldPath)) {
+                    @unlink($oldPath);
+                }
+            }
+
             $rightLogo = $request->file('right_logo');
-            $settings->right_logo_base64 = $this->convertToBase64($rightLogo);
+            $rightLogoName = 'right_logo_' . time() . '_' . uniqid() . '.' . $rightLogo->extension();
+            
+            // Create directory if it doesn't exist
+            if (!file_exists(public_path('storage/logos'))) {
+                mkdir(public_path('storage/logos'), 0755, true);
+            }
+            
+            $rightLogo->move(public_path('storage/logos'), $rightLogoName);
+            $settings->right_logo_path = $rightLogoName;
         }
 
+        // Update description
         if ($request->filled('description')) {
             $settings->description = $request->description;
         }
@@ -121,26 +160,21 @@ class EventJoinController extends Controller
     }
 
     /**
-     * Helper: Convert uploaded image to Base64 string
-     */
-    private function convertToBase64($file)
-    {
-        $imageData = file_get_contents($file->getRealPath());
-        $mimeType = $file->getMimeType();
-        return 'data:' . $mimeType . ';base64,' . base64_encode($imageData);
-    }
-
-    /**
      * User joins an event
      */
     public function join(Request $request, Event $event)
     {
         $user = auth()->user();
 
+        // Check if user has already joined this event
         if ($event->isJoinedByUser($user->id)) {
-            return response()->json(['success' => false, 'message' => 'You have already joined this event.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'You have already joined this event.'
+            ]);
         }
 
+        // Check if user can join this event based on department restrictions
         if (!$event->isAvailableForUserDepartment($user->department)) {
             return response()->json([
                 'success' => false,
@@ -148,12 +182,20 @@ class EventJoinController extends Controller
             ]);
         }
 
+        // Check event status
         if ($event->status !== 'active') {
-            return response()->json(['success' => false, 'message' => 'This event is not available for joining.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'This event is not available for joining.'
+            ]);
         }
 
+        // Check if event is in the past
         if ($event->date < now()) {
-            return response()->json(['success' => false, 'message' => 'Cannot join past events.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot join past events.'
+            ]);
         }
 
         EventJoin::create([
@@ -162,6 +204,7 @@ class EventJoinController extends Controller
             'joined_at' => now()
         ]);
 
+        // Create notification for admin
         Notification::create([
             'type' => 'event_join',
             'message' => $user->full_name . ' (' . $user->department . ') joined "' . $event->title . '"',
@@ -174,7 +217,10 @@ class EventJoinController extends Controller
             ]
         ]);
 
-        return response()->json(['success' => true, 'message' => 'Successfully joined the event. Pending for Approval!']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Successfully joined the event. Pending for Approval!'
+        ]);
     }
 
     /**
@@ -189,15 +235,23 @@ class EventJoinController extends Controller
                          ->first();
 
         if (!$join) {
-            return response()->json(['success' => false, 'message' => 'You have not joined this event.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'You have not joined this event.'
+            ]);
         }
 
+        // Check if event is in the past
         if ($event->date < now()) {
-            return response()->json(['success' => false, 'message' => 'Cannot leave past events.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot leave past events.'
+            ]);
         }
 
         $join->delete();
 
+        // Create notification for admin about leaving
         Notification::create([
             'type' => 'event_leave',
             'message' => $user->full_name . ' (' . $user->department . ') left "' . $event->title . '"',
@@ -210,7 +264,10 @@ class EventJoinController extends Controller
             ]
         ]);
 
-        return response()->json(['success' => true, 'message' => 'Successfully left the event!']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Successfully left the event!'
+        ]);
     }
 
     /**
@@ -225,7 +282,6 @@ class EventJoinController extends Controller
 
         return redirect()->back()->with('success', 'Event join approved successfully.');
     }
-
     /**
      * Reject event join request
      */
