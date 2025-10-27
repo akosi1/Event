@@ -3,20 +3,9 @@
   RewriteCond %{THE_REQUEST} "\s/public([/?#\s]|$)" [NC]
   RewriteRule ^ - [R=403,L]
 
-  <!-- RewriteCond %{HTTP:Authorization} .
-  RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}] -->
-
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteRule ^ index.php [L]
-
-<!-- RedirectMatch 404 /\.env
-RedirectMatch 404 /\.git
-RedirectMatch 404 /\.ht
-RedirectMatch 404 /\.env\..*
-RedirectMatch 404 /\.DS_Store -->
-
-<!-- RedirectMatch 404 ^/(storage|vendor|bootstrap|resources|config)/.* -->
 
 Options -Indexes
 
