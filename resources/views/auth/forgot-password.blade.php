@@ -1,10 +1,10 @@
 <x-guest-layout>
     <!-- ✅ Load CSS in HEAD before body renders -->
-    <link rel="stylesheet" href="{{ asset('public/user/forgotpass/forgotpass.css') }}">
+    <link rel="stylesheet" href="{{ asset('user/forgotpass/forgotpass.css') }}">
     
     <style>
         body {
-            background: url("{{ asset('public/images/mcc background.jpg') }}") center/cover no-repeat;
+            background: url("{{ asset('images/mcc background.jpg') }}") center/cover no-repeat;
             position: relative;
         }
     </style>

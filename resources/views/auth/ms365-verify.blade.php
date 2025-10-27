@@ -1,5 +1,5 @@
 <x-guest-layout>
-       <link rel="stylesheet" href="{{ asset('public/user/ms365/ms365.css') }}" />
+       <link rel="stylesheet" href="{{ asset('user/ms365/ms365.css') }}" />
     
     <style>
         body {
