@@ -28,5 +28,5 @@
     # then send it to index.php (Laravel)
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^ index.php [L]
+    RewriteRule ^ server.php [L]
 </IfModule>

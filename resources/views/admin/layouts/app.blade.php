@@ -359,7 +359,7 @@
     <button class="sidebar-toggle" id="toggle" aria-label="Toggle Sidebar">
         <i class="fas fa-bars"></i>
     </button>
-    
+
     <div class="sidebar-overlay" id="overlay"></div>
 
     <div class="sidebar" id="sidebar">
