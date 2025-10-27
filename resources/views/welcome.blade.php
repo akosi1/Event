@@ -886,7 +886,7 @@
         <div class="hero-container">
             <!-- Logo -->
             <div class="logo-section">
-                <img src="images/logo.png" alt="MCC Logo">
+                <img src="public/images/logo.png" alt="MCC Logo">
             </div>
 
             <!-- Header -->
