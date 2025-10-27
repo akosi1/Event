@@ -9,7 +9,6 @@
         Auth\MS365OTPController
     };
     use App\Http\Controllers\Admin\EventController;
-
     /*
     |--------------------------------------------------------------------------
     | Web Routes

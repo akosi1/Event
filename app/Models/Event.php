@@ -56,27 +56,50 @@ class Event extends Model
         return $this->hasMany(Certificate::class);
     }
 
-
+    /**
+     * Check if event has an image (supports both base64 and file path)
+     */
     public function hasImage(): bool
     {
-        return !empty($this->image) && file_exists(public_path('storage/' . $this->image));
+        if (empty($this->image)) {
+            return false;
+        }
+
+        // Check if it's a base64 image
+        if (preg_match('/^data:image\/(jpeg|png|jpg|gif|webp);base64,/', $this->image)) {
+            return true;
+        }
+
+        // Check if it's a file path and file exists
+        return file_exists(public_path('storage/' . $this->image));
     }
 
+    /**
+     * Get the image URL (supports both base64 and file path)
+     */
     public function getImageUrlAttribute(): string
     {
         if (!$this->image) {
             return asset('images/default-event.jpg');
         }
 
+        // Check if image is base64 - return it directly
+        if (preg_match('/^data:image\/(jpeg|png|jpg|gif|webp);base64,/', $this->image)) {
+            return $this->image;
+        }
+
+        // Check if it's a full URL
         if (filter_var($this->image, FILTER_VALIDATE_URL)) {
             return $this->image;
         }
 
+        // Validate file extension for file paths
         $extension = strtolower(pathinfo($this->image, PATHINFO_EXTENSION));
-        if (!in_array($extension, ['jpg', 'jpeg', 'png'])) {
+        if (!in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
             return asset('images/default-event.jpg');
         }
 
+        // Check if file exists in storage
         if (file_exists(public_path('storage/' . $this->image))) {
             return asset('storage/' . $this->image);
         }
@@ -84,17 +107,55 @@ class Event extends Model
         return asset('images/default-event.jpg');
     }
 
+    /**
+     * Get the certificate template image URL (supports both base64 and file path)
+     */
+    public function getCertificateTemplateImageUrlAttribute(): ?string
+    {
+        if (!$this->certificate_template_image) {
+            return null;
+        }
+
+        // Check if image is base64 - return it directly
+        if (preg_match('/^data:image\/(jpeg|png|jpg|gif|webp);base64,/', $this->certificate_template_image)) {
+            return $this->certificate_template_image;
+        }
+
+        // Check if it's a full URL
+        if (filter_var($this->certificate_template_image, FILTER_VALIDATE_URL)) {
+            return $this->certificate_template_image;
+        }
+
+        // Check if file exists in storage
+        if (file_exists(public_path('storage/' . $this->certificate_template_image))) {
+            return asset('storage/' . $this->certificate_template_image);
+        }
+
+        return null;
+    }
+
+    /**
+     * Get the image path (for file-based images only)
+     */
     public function getImagePath(): string
     {
-        if ($this->hasImage()) {
+        if ($this->hasImage() && !preg_match('/^data:image/', $this->image)) {
             return asset('storage/' . $this->image);
         }
 
         return asset('images/default-event.jpg');
     }
 
+    /**
+     * Delete the image file (only for file-based images, not base64)
+     */
     public function deleteImage(): bool
     {
+        // Don't try to delete base64 images
+        if ($this->image && preg_match('/^data:image/', $this->image)) {
+            return true;
+        }
+
         $path = public_path('storage/' . $this->image);
         if ($this->image && file_exists($path)) {
             try {
@@ -106,6 +167,23 @@ class Event extends Model
             }
         }
         return true;
+    }
+
+    /**
+     * Check if image is base64 encoded
+     */
+    public function isBase64Image(): bool
+    {
+        return !empty($this->image) && preg_match('/^data:image\/(jpeg|png|jpg|gif|webp);base64,/', $this->image);
+    }
+
+    /**
+     * Check if certificate template is base64 encoded
+     */
+    public function isBase64CertificateTemplate(): bool
+    {
+        return !empty($this->certificate_template_image) && 
+               preg_match('/^data:image\/(jpeg|png|jpg|gif|webp);base64,/', $this->certificate_template_image);
     }
 
     public function joins(): HasMany
@@ -168,7 +246,6 @@ class Event extends Model
         });
     }
     
-
     public function isAvailableForUserDepartment($userDepartment): bool
     {
         if (!$this->is_exclusive) {
