@@ -40,12 +40,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('event-joins/update-print-settings', [EventJoinController::class, 'updatePrintSettings'])
         ->name('event-joins.update-print-settings');
-        
+
          Route::get('/events/print', [EventController::class, 'print'])->name('events.print');
          Route::post('/events/update-print-settings', [EventController::class, 'updatePrintSettings'])
         ->name('events.update-print-settings');
-
-
 });
 
     // Users resource routes
