@@ -90,7 +90,6 @@ class AdminController extends Controller
             ->orderByDesc('count')
             ->limit(10)
             ->get();
-
         // Event Joins Status Data (NEW)
         $eventJoinsStatusData = [
             'pending' => EventJoin::where('approved', false)->count(),

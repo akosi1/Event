@@ -507,7 +507,6 @@ class EventController extends Controller
             $validated['department'] = null;
             $validated['allowed_departments'] = null;
         }
-
         return $validated;
     }
 }

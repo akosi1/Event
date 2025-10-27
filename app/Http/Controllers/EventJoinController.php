@@ -282,7 +282,6 @@ class EventJoinController extends Controller
 
         return redirect()->back()->with('success', 'Event join approved successfully.');
     }
-
     /**
      * Reject event join request
      */
