@@ -129,10 +129,12 @@
                             <i class="fas fa-check"></i> Verify & Sign In
                         </button>
                         <div class="form-footer">
-                            <p class="text-center" style="margin-top: 15px;">
-                                Didn’t receive the code? 
-                                <a href="{{ route('login') }}" style="color:#6b2c91;">Go back to resend</a>
-                            </p>
+                        <p class="text-center" style="margin-top: 15px; color: #ffffff;">
+                            Didn’t receive the code? 
+                            <a href="{{ route('login') }}" style="color: #ffffff; font-weight: bold; text-shadow: 0 0 3px rgba(0,0,0,0.6);">
+                                Go back to resend
+                            </a>
+                        </p>
                             <div class="back-link">
                                 <a href="{{ url('/') }}" class="btn-secondary">Back to main page</a>
                             </div>
