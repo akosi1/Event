@@ -142,6 +142,7 @@
                     </form>
                 </div>
             @else
+            
                 <!-- ORIGINAL LOGIN FORM WITH 3-ATTEMPT LOCKOUT -->
                 <div class="auth-header">
                     <h1>Welcome Back</h1>
