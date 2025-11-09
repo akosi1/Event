@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verification Code</title>
+    <title>Login Verification Code</title>
 </head>
 <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0a0a0a;">
     @php
@@ -45,7 +45,7 @@
                                                 <td style="padding: 50px 40px 40px; text-align: center;">
                                                     <!-- Logo -->
                                                     @if($logoBase64)
-                                                    <img src="{{ $logoBase64 }}" alt="MCC Logo" width="130" style="display: block; margin: 0 auto 30px; width: 130px; height: auto;">
+                                                    <img src="{{ $logoBase64 }}" alt="MCC Logo" width="130" height="auto" style="display: block; margin: 0 auto 30px; width: 130px; max-width: 130px; height: auto;">
                                                     @endif
                                                     
                                                     <!-- Titles -->

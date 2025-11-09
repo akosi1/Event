@@ -103,8 +103,7 @@
                                 required 
                                 autocomplete="username"
                                 readonly
-                                class="form-control"
-                                style="background-color: rgba(245, 245, 245, 0.95); cursor: not-allowed;"
+                                class="form-control readonly-field"
                             >
                             <label class="input-label">McLawis College Email</label>
                             <i class="fas fa-envelope input-icon"></i>
@@ -112,36 +111,67 @@
                         <x-input-error :messages="$errors->get('email')" class="error-msg" />
                     </div>
 
-                    <div class="form-group">
-                        <div class="dropdown-wrapper">
-                            <div class="dropdown-btn" id="deptBtn">
-                                <div class="dropdown-content">
-                                    <i class="fas fa-graduation-cap input-icon" id="deptIcon"></i>
-                                    <label class="select-label" id="deptLabel">Select Department</label>
-                                    <span id="deptText"></span>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <div class="dropdown-wrapper">
+                                <div class="dropdown-btn" id="deptBtn">
+                                    <div class="dropdown-content">
+                                        <i class="fas fa-graduation-cap input-icon" id="deptIcon"></i>
+                                        <label class="select-label" id="deptLabel">Select Department</label>
+                                        <span id="deptText"></span>
+                                    </div>
+                                    <i class="fas fa-chevron-down arrow" id="deptArrow"></i>
                                 </div>
-                                <i class="fas fa-chevron-down arrow" id="deptArrow"></i>
+                                <div class="menu" id="deptMenu">
+                                    <div class="item" data-val="BSIT" data-full="Bachelor of Science in Information Technology" data-icon="fa-laptop-code">
+                                        <i class="fas fa-laptop-code"></i><span>BSIT</span>
+                                    </div>
+                                    <div class="item" data-val="BSBA" data-full="Bachelor of Science in Business Administration" data-icon="fa-briefcase">
+                                        <i class="fas fa-briefcase"></i><span>BSBA</span>
+                                    </div>
+                                    <div class="item" data-val="BSED" data-full="Bachelor of Science in Education" data-icon="fa-chalkboard-teacher">
+                                        <i class="fas fa-chalkboard-teacher"></i><span>BSEd</span>
+                                    </div>
+                                    <div class="item" data-val="BEED" data-full="Bachelor of Elementary Education" data-icon="fa-school">
+                                        <i class="fas fa-school"></i><span>BEEd</span>
+                                    </div>
+                                    <div class="item" data-val="BSHM" data-full="Bachelor of Science in Hospitality Management" data-icon="fa-hotel">
+                                        <i class="fas fa-hotel"></i><span>BSHM</span>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="department" id="department" value="{{ old('department') }}" required>
                             </div>
-                            <div class="menu" id="deptMenu">
-                                <div class="item" data-val="BSIT" data-full="Bachelor of Science in Information Technology" data-icon="fa-laptop-code">
-                                    <i class="fas fa-laptop-code"></i><span>BSIT</span>
-                                </div>
-                                <div class="item" data-val="BSBA" data-full="Bachelor of Science in Business Administration" data-icon="fa-briefcase">
-                                    <i class="fas fa-briefcase"></i><span>BSBA</span>
-                                </div>
-                                <div class="item" data-val="BSED" data-full="Bachelor of Science in Education" data-icon="fa-chalkboard-teacher">
-                                    <i class="fas fa-chalkboard-teacher"></i><span>BSEd</span>
-                                </div>
-                                <div class="item" data-val="BEED" data-full="Bachelor of Elementary Education" data-icon="fa-school">
-                                    <i class="fas fa-school"></i><span>BEEd</span>
-                                </div>
-                                <div class="item" data-val="BSHM" data-full="Bachelor of Science in Hospitality Management" data-icon="fa-hotel">
-                                    <i class="fas fa-hotel"></i><span>BSHM</span>
-                                </div>
-                            </div>
-                            <input type="hidden" name="department" id="department" value="{{ old('department') }}" required>
+                            <x-input-error :messages="$errors->get('department')" class="error-msg" />
                         </div>
-                        <x-input-error :messages="$errors->get('department')" class="error-msg" />
+
+                        <div class="form-group">
+                            <div class="dropdown-wrapper">
+                                <div class="dropdown-btn" id="yearBtn">
+                                    <div class="dropdown-content">
+                                        <i class="fas fa-calendar-alt input-icon" id="yearIcon"></i>
+                                        <label class="select-label" id="yearLabel">Select Year Level</label>
+                                        <span id="yearText"></span>
+                                    </div>
+                                    <i class="fas fa-chevron-down arrow" id="yearArrow"></i>
+                                </div>
+                                <div class="menu" id="yearMenu">
+                                    <div class="item" data-val="1" data-full="1st Year" data-icon="fa-calendar-alt">
+                                        <i class="fas fa-calendar-alt"></i><span>1st Year</span>
+                                    </div>
+                                    <div class="item" data-val="2" data-full="2nd Year" data-icon="fa-calendar-alt">
+                                        <i class="fas fa-calendar-alt"></i><span>2nd Year</span>
+                                    </div>
+                                    <div class="item" data-val="3" data-full="3rd Year" data-icon="fa-calendar-alt">
+                                        <i class="fas fa-calendar-alt"></i><span>3rd Year</span>
+                                    </div>
+                                    <div class="item" data-val="4" data-full="4th Year" data-icon="fa-calendar-alt">
+                                        <i class="fas fa-calendar-alt"></i><span>4th Year</span>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="year_level" id="year_level" value="{{ old('year_level') }}" required>
+                            </div>
+                            <x-input-error :messages="$errors->get('year_level')" class="error-msg" />
+                        </div>
                     </div>
 
                     <div class="form-row">
@@ -194,7 +224,6 @@
                         Password must be at least 12 characters with uppercase, lowercase, number, and symbol.
                     </div>
 
-                    {{-- Terms and Conditions Checkbox --}}
                     <div class="form-group">
                         <div class="terms-checkbox-wrapper">
                             <input 
@@ -240,8 +269,9 @@
         </div>
     </div>
 
-    {{-- Include Terms and Conditions Modal --}}
     @include('layouts.term_condition')
+
+    <link rel="stylesheet" href="{{ asset('user/register/register.css') }}">
 
     <script>
         function togglePasswordVisibility(fieldId) {
@@ -257,14 +287,15 @@
             const deptMenu = document.getElementById('deptMenu');
             const deptText = document.getElementById('deptText');
             const deptInput = document.getElementById('department');
-            const deptArrow = document.getElementById('deptArrow');
             const deptIcon = document.getElementById('deptIcon');
-            const items = document.querySelectorAll('.item');
+            const deptItems = deptMenu.querySelectorAll('.item');
+            const yearBtn = document.getElementById('yearBtn');
+            const yearMenu = document.getElementById('yearMenu');
 
-            const oldValue = deptInput.value;
-            if (oldValue) {
-                items.forEach(item => {
-                    if (item.dataset.val === oldValue || item.dataset.full === oldValue) {
+            const oldDeptValue = deptInput.value;
+            if (oldDeptValue) {
+                deptItems.forEach(item => {
+                    if (item.dataset.val === oldDeptValue || item.dataset.full === oldDeptValue) {
                         deptText.textContent = item.dataset.val;
                         deptInput.value = item.dataset.val;
                         deptIcon.className = 'fas ' + item.dataset.icon + ' input-icon';
@@ -277,9 +308,11 @@
                 e.stopPropagation();
                 deptMenu.classList.toggle('show');
                 deptBtn.classList.toggle('active');
+                yearMenu.classList.remove('show');
+                yearBtn.classList.remove('active');
             });
 
-            items.forEach(item => {
+            deptItems.forEach(item => {
                 item.addEventListener('click', function() {
                     const val = this.dataset.val;
                     const icon = this.dataset.icon;
@@ -292,12 +325,67 @@
                 });
             });
 
+            const yearText = document.getElementById('yearText');
+            const yearInput = document.getElementById('year_level');
+            const yearIcon = document.getElementById('yearIcon');
+            const yearItems = yearMenu.querySelectorAll('.item');
+
+            const oldYearValue = yearInput.value;
+            if (oldYearValue) {
+                yearItems.forEach(item => {
+                    if (item.dataset.val === oldYearValue) {
+                        yearText.textContent = item.dataset.full;
+                        yearInput.value = item.dataset.val;
+                        yearBtn.classList.add('has-value');
+                    }
+                });
+            }
+
+            yearBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                yearMenu.classList.toggle('show');
+                yearBtn.classList.toggle('active');
+                deptMenu.classList.remove('show');
+                deptBtn.classList.remove('active');
+            });
+
+            yearItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const val = this.dataset.val;
+                    const full = this.dataset.full;
+                    yearText.textContent = full;
+                    yearInput.value = val;
+                    yearBtn.classList.add('has-value');
+                    yearMenu.classList.remove('show');
+                    yearBtn.classList.remove('active');
+                });
+            });
+
             document.addEventListener('click', function(e) {
                 if (!deptBtn.contains(e.target)) {
                     deptMenu.classList.remove('show');
                     deptBtn.classList.remove('active');
                 }
+                if (!yearBtn.contains(e.target)) {
+                    yearMenu.classList.remove('show');
+                    yearBtn.classList.remove('active');
+                }
             });
+
+            const termsCheckbox = document.getElementById('terms_accepted');
+            const termsWrapper = termsCheckbox.closest('.terms-checkbox-wrapper');
+            
+            termsCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    termsWrapper.classList.add('accepted');
+                } else {
+                    termsWrapper.classList.remove('accepted');
+                }
+            });
+
+            if (termsCheckbox.checked) {
+                termsWrapper.classList.add('accepted');
+            }
 
             document.getElementById('registrationForm').addEventListener('submit', function(e) {
                 const textFields = ['id_number', 'first_name', 'last_name', 'middle_name', 'password', 'password_confirmation'];
@@ -311,7 +399,6 @@
                     }
                 }
 
-                // Check if name fields contain numbers
                 const nameFields = ['first_name', 'last_name', 'middle_name'];
                 for (const fieldId of nameFields) {
                     const field = document.getElementById(fieldId);
@@ -323,7 +410,6 @@
                     }
                 }
 
-                // Check terms and conditions
                 const termsCheckbox = document.getElementById('terms_accepted');
                 if (!termsCheckbox.checked) {
                     e.preventDefault();
@@ -334,102 +420,4 @@
             });
         });
     </script>
-
-    <link rel="stylesheet" href="{{ asset('user/register/register.css') }}">
-    <style>
-        body {
-            background: url("{{ asset('images/mcc background.jpg') }}") center/cover no-repeat;
-            position: relative;
-        }
-        .password-toggle {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: #aaa;
-            cursor: pointer;
-            font-size: 14px;
-            z-index: 10;
-        }
-        .password-toggle:hover {
-            color: #666;
-        }
-        .password-policy {
-            font-size: 0.75rem;
-            color: #ccc;
-            margin: 8px 0 16px;
-            text-align: center;
-        }
-
-        /* Terms and Conditions Checkbox Styling */
-        .terms-checkbox-wrapper {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            padding: 16px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-        }
-
-        .terms-checkbox-wrapper:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .terms-checkbox-wrapper.accepted {
-            background: rgba(107, 44, 145, 0.1);
-            border-color: #6b2c91;
-        }
-
-        .terms-checkbox {
-            width: 20px;
-            height: 20px;
-            min-width: 20px;
-            cursor: pointer;
-            accent-color: #6b2c91;
-            margin-top: 2px;
-        }
-
-        .terms-label {
-            color: #fff;
-            font-size: 14px;
-            line-height: 1.6;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .terms-link {
-            color: #a78bfa;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            border-bottom: 1px solid transparent;
-        }
-
-        .terms-link:hover {
-            color: #c4b5fd;
-            border-bottom-color: #c4b5fd;
-        }
-
-        @media (max-width: 768px) {
-            .terms-checkbox-wrapper {
-                padding: 12px;
-            }
-
-            .terms-label {
-                font-size: 13px;
-            }
-
-            .terms-checkbox {
-                width: 18px;
-                height: 18px;
-                min-width: 18px;
-            }
-        }
-    </style>
 </x-guest-layout>

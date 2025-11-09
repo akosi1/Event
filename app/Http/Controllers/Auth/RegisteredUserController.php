@@ -93,6 +93,7 @@ class RegisteredUserController extends Controller
             'last_name',
             'email',
             'department',
+            'year_level',
             'password',
             'password_confirmation'
         ]);
@@ -139,10 +140,19 @@ class RegisteredUserController extends Controller
                 ->withErrors(['department' => 'Invalid department selected.']);
         }
 
+        // ✅ Year level validation
+        $allowedYears = ['1', '2', '3', '4'];
+        if (!in_array($inputs['year_level'], $allowedYears)) {
+            return back()
+                ->withInput($request->except('password', 'password_confirmation'))
+                ->withErrors(['year_level' => 'Invalid year level selected.']);
+        }
+
         // ✅ Final validation
         $request->merge(array_merge($sanitized, [
             'email' => $verifiedEmail,
             'department' => $inputs['department'],
+            'year_level' => $inputs['year_level'],
             'password' => $password,
             'password_confirmation' => $passwordConfirmation,
         ]));
@@ -154,6 +164,7 @@ class RegisteredUserController extends Controller
             'last_name' => ['required', 'string', 'max:255', 'regex:/^\S*$/'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:' . User::class],
             'department' => ['required', 'string', 'in:' . implode(',', $allowedDepts)],
+            'year_level' => ['required', 'string', 'in:' . implode(',', $allowedYears)],
             'password' => [
                 'required',
                 'confirmed',
@@ -182,6 +193,7 @@ class RegisteredUserController extends Controller
                 'last_name' => $validated['last_name'],
                 'email' => $verifiedEmail,
                 'department' => $validated['department'],
+                'year_level' => $validated['year_level'],
                 // 👇 Argon2id Hashing
                 'password' => Hash::make($validated['password'], $argonOptions),
                 'role' => 'user',

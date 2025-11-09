@@ -23,7 +23,19 @@ Route::middleware('guest')->group(function () {
 
     Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
     Route::post('register', [RegisteredUserController::class, 'store'])->middleware('throttle:5,1')->name('register.store');
-
+Route::get('/test-logo', function() {
+    $logoPath = public_path('images/logo.png');
+    
+    return response()->json([
+        'path' => $logoPath,
+        'exists' => file_exists($logoPath),
+        'readable' => is_readable($logoPath),
+        'filesize' => file_exists($logoPath) ? filesize($logoPath) : 0,
+        'base64_preview' => file_exists($logoPath) 
+            ? substr(base64_encode(file_get_contents($logoPath)), 0, 100) 
+            : 'File not found'
+    ]);
+});
     // 🔁 LOGIN WITH VERIFICATION
     Route::get('login', [LoginWithVerificationController::class, 'showLoginForm'])->name('login');
     Route::post('login', [LoginWithVerificationController::class, 'attemptLogin'])->middleware('throttle:5,1')->name('login.store');

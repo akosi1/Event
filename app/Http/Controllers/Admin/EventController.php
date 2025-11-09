@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\PrintSummary;
 use App\Services\EventRecurrenceService;
+use App\Services\EventNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -18,10 +19,14 @@ use Illuminate\Support\Facades\Auth;
 class EventController extends Controller
 {
     protected $eventRecurrenceService;
+    protected $eventNotificationService;
 
-    public function __construct(EventRecurrenceService $eventRecurrenceService)
-    {
+    public function __construct(
+        EventRecurrenceService $eventRecurrenceService,
+        EventNotificationService $eventNotificationService
+    ) {
         $this->eventRecurrenceService = $eventRecurrenceService;
+        $this->eventNotificationService = $eventNotificationService;
     }
 
     // Define departments array to ensure consistency
@@ -36,7 +41,7 @@ class EventController extends Controller
     public function index(Request $request)
     {
         $query = Event::with(['parentEvent', 'childEvents'])
-                      ->whereNull('parent_event_id'); // Only show parent events
+                      ->whereNull('parent_event_id');
 
         // Search filter
         if ($request->filled('search')) {
@@ -81,24 +86,18 @@ class EventController extends Controller
         $perPage = $request->get('per_page', 10);
         $events = $query->orderBy('date', 'desc')->paginate($perPage);
 
-        // Append query parameters to pagination links
         $events->appends($request->query());
 
-        // Get print settings for the modal
         $printSettings = PrintSummary::first();
 
         return view('admin.events.index', compact('events', 'printSettings'));
     }
 
-    /**
-     * Generate and display print summary for events
-     */
     public function print(Request $request)
     {
         $query = Event::with(['parentEvent', 'childEvents', 'joinedUsers'])
-                      ->whereNull('parent_event_id'); // Only show parent events
+                      ->whereNull('parent_event_id');
 
-        // Apply same filters as index page
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
                 $q->where('title', 'like', '%' . $request->search . '%')
@@ -134,32 +133,23 @@ class EventController extends Controller
             }
         }
 
-        // Get all records for printing (no pagination)
         $events = $query->orderBy('date', 'desc')->get();
-        
-        // Generate summary data with statistics
         $summaryData = PrintSummary::generateEventsSummary($events);
 
         return view('admin.events.print', compact('summaryData'));
     }
 
-    /**
-     * Update print settings for events (logos and description)
-     */
     public function updatePrintSettings(Request $request)
     {
         $request->validate([
-            'events_left_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'events_right_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'events_left_logo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'events_right_logo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'events_description' => 'nullable|string|max:500',
         ]);
 
-        // Get or create print settings
         $settings = PrintSummary::firstOrCreate([]);
 
-        // Handle left logo upload
         if ($request->hasFile('events_left_logo')) {
-            // Delete old logo if exists
             if ($settings->events_left_logo_path) {
                 $oldPath = public_path('storage/logos/' . $settings->events_left_logo_path);
                 if (file_exists($oldPath)) {
@@ -170,7 +160,6 @@ class EventController extends Controller
             $leftLogo = $request->file('events_left_logo');
             $leftLogoName = 'events_left_logo_' . time() . '_' . uniqid() . '.' . $leftLogo->extension();
             
-            // Create directory if it doesn't exist
             if (!file_exists(public_path('storage/logos'))) {
                 mkdir(public_path('storage/logos'), 0755, true);
             }
@@ -179,9 +168,7 @@ class EventController extends Controller
             $settings->events_left_logo_path = $leftLogoName;
         }
 
-        // Handle right logo upload
         if ($request->hasFile('events_right_logo')) {
-            // Delete old logo if exists
             if ($settings->events_right_logo_path) {
                 $oldPath = public_path('storage/logos/' . $settings->events_right_logo_path);
                 if (file_exists($oldPath)) {
@@ -192,7 +179,6 @@ class EventController extends Controller
             $rightLogo = $request->file('events_right_logo');
             $rightLogoName = 'events_right_logo_' . time() . '_' . uniqid() . '.' . $rightLogo->extension();
             
-            // Create directory if it doesn't exist
             if (!file_exists(public_path('storage/logos'))) {
                 mkdir(public_path('storage/logos'), 0755, true);
             }
@@ -201,7 +187,6 @@ class EventController extends Controller
             $settings->events_right_logo_path = $rightLogoName;
         }
 
-        // Update description
         if ($request->filled('events_description')) {
             $settings->events_description = $request->events_description;
         }
@@ -226,8 +211,7 @@ class EventController extends Controller
             if ($request->filled($field)) {
                 $base64String = $request->input($field);
 
-                // Validate it's a proper base64 image
-                if (!preg_match('/^data:image\/(jpeg|png|jpg|gif|webp);base64,/', $base64String)) {
+                if (!preg_match('/^data:image\/(jpeg|png|jpg);base64,/', $base64String)) {
                     return back()->withErrors([$field => 'Invalid base64 image format.'])->withInput();
                 }
 
@@ -235,7 +219,6 @@ class EventController extends Controller
             }
         }
 
-        // Process department exclusivity
         $validated = $this->processDepartmentExclusivity($validated, $request);
 
         // Create the main event
@@ -246,14 +229,24 @@ class EventController extends Controller
             $this->eventRecurrenceService->createRecurringEvents($event, $validated);
         }
 
+        // Send notification to all users
+        $notificationMessage = '';
+        try {
+            $sentCount = $this->eventNotificationService->notifyNewEvent($event);
+            $notificationMessage = " Email notifications sent to {$sentCount} user(s).";
+        } catch (\Exception $e) {
+            \Log::error('Failed to send event notifications: ' . $e->getMessage());
+            $notificationMessage = ' (Note: Some email notifications failed to send)';
+        }
+
         return redirect()->route('admin.events.index')
-                        ->with('success', 'Event created successfully!' .
-                               ($event->is_recurring ? ' Recurring instances have been generated.' : ''));
+                        ->with('success', 'Event "' . $event->title . '" created successfully!' .
+                               ($event->is_recurring ? ' Recurring instances have been generated.' : '') .
+                               $notificationMessage);
     }
 
     public function show(Event $event)
     {
-        // Load child events and joined users with their departments
         $event->load([
             'childEvents' => function ($query) {
                 $query->orderBy('date', 'asc');
@@ -265,7 +258,6 @@ class EventController extends Controller
             }
         ]);
 
-        // Get department statistics for joined users
         $departmentStats = $event->joinedUsers->groupBy('department')->map(function ($users) {
             return [
                 'count' => $users->count(),
@@ -285,7 +277,6 @@ class EventController extends Controller
     {
         $validated = $this->validateEventData($request, $event);
 
-        // Handle image removal
         if ($request->filled('remove_image') && $request->remove_image == '1') {
             if ($event->image && Storage::disk('public')->exists($event->image)) {
                 try {
@@ -300,17 +291,14 @@ class EventController extends Controller
         $fileFields = ['image', 'certificate_template_image'];
 
         foreach($fileFields as $field){
-            // Handle new image upload
             if ($request->hasFile($field)) {
                 try {
                     $image = $request->file($field);
 
-                    // Validate the file is actually an image
                     if (!$image->isValid()) {
                         return back()->withErrors([$field => 'Invalid image file.'])->withInput();
                     }
 
-                    // Delete old image if exists
                     if ($event->image && Storage::disk('public')->exists($event->image)) {
                         try {
                             Storage::disk('public')->delete($event->image);
@@ -319,14 +307,11 @@ class EventController extends Controller
                         }
                     }
 
-                    // Create a unique filename with timestamp
                     $imageName = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
 
                     $folder = $field === 'certificate_template_image' ? 'certificates' : 'events';
-                    // Store the image
                     $imagePath = $image->storeAs($folder, $imageName, 'public');
 
-                    // Verify the file was actually stored
                     if (!Storage::disk('public')->exists($imagePath)) {
                         return back()->withErrors(['image' => 'Failed to store image.'])->withInput();
                     }
@@ -339,20 +324,41 @@ class EventController extends Controller
             }
         }
 
-        // Process department exclusivity
         $validated = $this->processDepartmentExclusivity($validated, $request);
 
-        // Remove the remove_image flag from validated data before updating
         unset($validated['remove_image']);
+
+        $oldStatus = $event->status;
 
         $event->update($validated);
 
         // Handle recurring event updates
         if ($request->boolean('update_series') && $event->isRecurring()) {
             $this->eventRecurrenceService->updateRecurringSeries($event, $validated);
-            $message = 'Event series updated successfully!';
+            $message = 'Event series "' . $event->title . '" updated successfully!';
         } else {
-            $message = 'Event updated successfully!';
+            $message = 'Event "' . $event->title . '" updated successfully!';
+        }
+
+        // Send notifications
+        if ($event->status === 'active' && $oldStatus === 'active') {
+            try {
+                $sentCount = $this->eventNotificationService->notifyEventUpdate($event);
+                if ($sentCount > 0) {
+                    $message .= " Update notifications sent to {$sentCount} joined user(s).";
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to send update notifications: ' . $e->getMessage());
+            }
+        } elseif (in_array($event->status, ['cancelled', 'postponed']) && $oldStatus === 'active') {
+            try {
+                $sentCount = $this->eventNotificationService->notifyEventCancellation($event);
+                if ($sentCount > 0) {
+                    $message .= " Cancellation notifications sent to {$sentCount} joined user(s).";
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to send cancellation notifications: ' . $e->getMessage());
+            }
         }
 
         return redirect()->route('admin.events.index')
@@ -361,12 +367,10 @@ class EventController extends Controller
 
     public function destroy(Event $event)
     {
-        // Handle recurring event deletion
         if ($event->isRecurring() && request()->boolean('delete_series')) {
             $this->eventRecurrenceService->deleteRecurringSeries($event);
-            $message = 'Event series deleted successfully!';
+            $message = 'Event series "' . $event->title . '" deleted successfully!';
         } else {
-            // Delete associated image
             if ($event->image && Storage::disk('public')->exists($event->image)) {
                 try {
                     Storage::disk('public')->delete($event->image);
@@ -375,24 +379,18 @@ class EventController extends Controller
                 }
             }
             $event->delete();
-            $message = 'Event deleted successfully!';
+            $message = 'Event "' . $event->title . '" deleted successfully!';
         }
 
         return redirect()->route('admin.events.index')
                         ->with('success', $message);
     }
 
-    /**
-     * Get available departments
-     */
     public static function getDepartments()
     {
         return self::DEPARTMENTS;
     }
 
-    /**
-     * Validate event data
-     */
     private function validateEventData(Request $request, Event $event = null)
     {
         $rules = [
@@ -405,34 +403,25 @@ class EventController extends Controller
             'department' => 'nullable|string|in:' . implode(',', array_keys(self::DEPARTMENTS)),
             'status' => 'required|in:active,postponed,cancelled',
             'cancel_reason' => 'required_if:status,postponed,cancelled|nullable|string',
-            'image' => ['nullable', 'string', 'regex:/^data:image\/(jpeg|png|jpg|gif|webp);base64,/'],
+            'image' => ['nullable', 'string', 'regex:/^data:image\/(jpeg|png|jpg);base64,/'],
             'remove_image' => 'nullable|boolean',
-
-            // Exclusivity fields
             'is_exclusive' => 'boolean',
             'allowed_departments' => 'nullable|array',
             'allowed_departments.*' => 'string|in:' . implode(',', array_keys(self::DEPARTMENTS)),
-
-            // Recurrence fields
             'is_recurring' => 'boolean',
             'recurrence_pattern' => 'nullable|string|in:daily,weekly,monthly,yearly,weekdays,custom',
             'recurrence_interval' => 'nullable|integer|min:1|max:365',
             'recurrence_end_date' => 'nullable|date|after:date',
             'recurrence_count' => 'nullable|integer|min:1|max:365',
-
-            // Update options
             'update_series' => 'boolean',
         ];
 
-        // For new events, date should be in the future
         if (!$event) {
             $rules['date'] = 'required|date|after:now';
         }
 
-        // Custom validation for exclusive events
         $validated = $request->validate($rules);
 
-        // Additional validation for exclusive events
         if ($request->boolean('is_exclusive')) {
             if (empty($validated['department']) && empty($validated['allowed_departments'])) {
                 throw \Illuminate\Validation\ValidationException::withMessages([
@@ -444,9 +433,6 @@ class EventController extends Controller
         return $validated;
     }
 
-    /**
-     * Store feedback for an event
-     */
     public function storeFeedback(Request $request, Event $event)
     {
         $request->validate([
@@ -490,17 +476,13 @@ class EventController extends Controller
         ]);
     }
 
-    /**
-     * Process department exclusivity settings
-     */
     private function processDepartmentExclusivity(array $validated, Request $request): array
     {
         if ($request->boolean('is_exclusive')) {
             $validated['is_exclusive'] = true;
 
-            // Ensure at least one department is specified for exclusive events
             if (empty($validated['department']) && empty($validated['allowed_departments'])) {
-                $validated['department'] = array_keys(self::DEPARTMENTS)[0]; // Default to first department
+                $validated['department'] = array_keys(self::DEPARTMENTS)[0];
             }
         } else {
             $validated['is_exclusive'] = false;

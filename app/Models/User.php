@@ -22,6 +22,7 @@ class User extends Authenticatable
         'role',
         'status',
         'department',
+        'year_level',
     ];
 
     protected $hidden = ['password', 'remember_token'];
@@ -65,6 +66,18 @@ class User extends Authenticatable
         ];
 
         return $departments[$this->department] ?? $this->department;
+    }
+
+    public function getYearLevelNameAttribute(): string
+    {
+        $years = [
+            '1' => '1st Year',
+            '2' => '2nd Year',
+            '3' => '3rd Year',
+            '4' => '4th Year',
+        ];
+
+        return $years[$this->year_level] ?? $this->year_level;
     }
 
     public function isAdmin(): bool

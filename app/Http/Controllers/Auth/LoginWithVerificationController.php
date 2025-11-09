@@ -82,9 +82,10 @@ class LoginWithVerificationController extends Controller
             'expires_at' => now()->addMinutes(10),
         ]);
 
-        Mail::raw("Your verification code is: {$code}\n\nThis code expires in 10 minutes.", function ($message) use ($user) {
+        // Send email using the Blade template
+        Mail::send('emails.email-verify', ['otp' => $code], function ($message) use ($user) {
             $message->to($user->email)
-                    ->subject('Login Verification Code')
+                    ->subject('Login Verification Code - MCC Event & Portfolio Organizer')
                     ->from(config('mail.from.address'), config('mail.from.name'));
         });
 
