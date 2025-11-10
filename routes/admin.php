@@ -45,7 +45,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
          Route::post('/events/update-print-settings', [EventController::class, 'updatePrintSettings'])
         ->name('events.update-print-settings');
 });
-
+Route::get('admin/events/{event}/edit', [EventController::class, 'edit'])->name('admin.events.edit');
     // Users resource routes
     Route::resource('/users', UserController::class)->names('admin.users');
 
