@@ -56,45 +56,117 @@ class Event extends Model
         return $this->hasMany(Certificate::class);
     }
 
-
+    /**
+     * Check if event has a valid image
+     */
     public function hasImage(): bool
     {
-        return !empty($this->image) && file_exists(public_path('storage/' . $this->image));
+        if (empty($this->image)) {
+            return false;
+        }
+
+        // Check if it's a base64 string
+        if (preg_match('/^data:image\/(jpeg|jpg|png);base64,/', $this->image)) {
+            return true;
+        }
+
+        // Check if it's a file path
+        return file_exists(public_path('storage/' . $this->image));
     }
 
+    /**
+     * Get the base64 encoded image data
+     */
+    public function getImageBase64Attribute(): ?string
+    {
+        if (!$this->image) {
+            return null;
+        }
+
+        // If already base64, return as is
+        if (preg_match('/^data:image\/(jpeg|jpg|png);base64,/', $this->image)) {
+            return $this->image;
+        }
+
+        // If it's a file path, convert to base64
+        $filePath = public_path('storage/' . $this->image);
+        if (file_exists($filePath)) {
+            try {
+                $imageData = file_get_contents($filePath);
+                $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+                
+                // Normalize extension
+                $mimeType = match($extension) {
+                    'jpg', 'jpeg' => 'jpeg',
+                    'png' => 'png',
+                    default => 'jpeg'
+                };
+                
+                return 'data:image/' . $mimeType . ';base64,' . base64_encode($imageData);
+            } catch (\Exception $e) {
+                \Log::error('Failed to convert image to base64: ' . $e->getMessage());
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Get image URL for display
+     */
     public function getImageUrlAttribute(): string
     {
         if (!$this->image) {
             return asset('images/default-event.jpg');
         }
 
+        // If it's base64, return the base64 string
+        if (preg_match('/^data:image\/(jpeg|jpg|png);base64,/', $this->image)) {
+            return $this->image;
+        }
+
+        // If it's a URL, return as is
         if (filter_var($this->image, FILTER_VALIDATE_URL)) {
             return $this->image;
         }
 
+        // Check file extension
         $extension = strtolower(pathinfo($this->image, PATHINFO_EXTENSION));
         if (!in_array($extension, ['jpg', 'jpeg', 'png'])) {
             return asset('images/default-event.jpg');
         }
 
+        // Check if file exists and convert to base64
         if (file_exists(public_path('storage/' . $this->image))) {
-            return asset('storage/' . $this->image);
+            return $this->image_base64 ?? asset('storage/' . $this->image);
         }
 
         return asset('images/default-event.jpg');
     }
 
+    /**
+     * Get image path for file operations
+     */
     public function getImagePath(): string
     {
-        if ($this->hasImage()) {
+        if ($this->hasImage() && !preg_match('/^data:image\/(jpeg|jpg|png);base64,/', $this->image)) {
             return asset('storage/' . $this->image);
         }
 
         return asset('images/default-event.jpg');
     }
 
+    /**
+     * Delete the image file if it exists
+     */
     public function deleteImage(): bool
     {
+        // Don't try to delete base64 images
+        if (preg_match('/^data:image\/(jpeg|jpg|png);base64,/', $this->image)) {
+            return true;
+        }
+
         $path = public_path('storage/' . $this->image);
         if ($this->image && file_exists($path)) {
             try {
@@ -168,7 +240,6 @@ class Event extends Model
         });
     }
     
-
     public function isAvailableForUserDepartment($userDepartment): bool
     {
         if (!$this->is_exclusive) {
