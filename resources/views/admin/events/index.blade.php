@@ -214,7 +214,7 @@
                                             title="View" onclick="viewEvent({{ $event->id }})">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    <a href="{{ route('admin.events.edit', $event) }}" 
+                                    <a href="{{ route('admin.events.edit', ['event' => $event->id]) }}" 
                                        class="btn btn-sm btn-outline-warning" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
