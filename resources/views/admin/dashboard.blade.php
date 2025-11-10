@@ -88,17 +88,64 @@
     </div>
 </div>
 
-<!-- Charts Row 3: Top Event Names -->
+<!-- Charts Row 3: Top Event Names - Line Chart -->
 <div class="row mt-4">
-    <div class="col-md-8 offset-md-2">
+    <div class="col-md-12">
         <div class="card shadow-sm">
             <div class="card-header bg-gradient-success">
                 <h5 class="card-title text-dark mb-0 d-flex align-items-center">
-                    <i class="fas fa-chart-line me-2"></i>Top Event Names
+                    <i class="fas fa-chart-line me-2"></i>Top Event Names Frequency
                 </h5>
             </div>
-            <div class="card-body" style="height: 500px;">
+            <div class="card-body" style="height: 400px;">
                 <canvas id="eventNamesChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Event Names List Section -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="card-title text-dark mb-0 d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-list me-2"></i>Event Names List</span>
+                    <div class="d-flex align-items-center">
+                        <label for="event_names_per_page" class="form-label me-2 mb-0 text-dark">Show:</label>
+                        <select class="form-select form-select-sm" id="event_names_per_page" style="width: 80px;">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="15">15</option>
+                            <option value="20">20</option>
+                        </select>
+                    </div>
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th class="text-dark">#</th>
+                                <th class="text-dark">Event Name</th>
+                                <th class="text-dark">Frequency</th>
+                                <th class="text-dark">Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody id="eventNamesTableBody">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <small class="text-muted" id="eventNamesInfo"></small>
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0" id="eventNamesPagination">
+                            <!-- Populated by JavaScript -->
+                        </ul>
+                    </nav>
+                </div>
             </div>
         </div>
     </div>
@@ -153,9 +200,14 @@
                                 <tr class="event-row" data-search="{{ strtolower($event->title . ' ' . $event->location . ' ' . $event->description) }}">
                                     <td>
                                         @if($event->hasImage())
-                                            <img src="{{ $event->image_url }}" alt="{{ $event->title }}" class="img-thumbnail" 
+                                            @php
+                                                $imageSource = $event->image_base64 ?? $event->image_url;
+                                            @endphp
+                                            <img src="{{ $imageSource }}" 
+                                                 alt="{{ $event->title }}" 
+                                                 class="img-thumbnail" 
                                                  style="width: 50px; height: 50px; object-fit: cover; cursor: pointer;"
-                                                 onclick="showImage('{{ $event->image_url }}', '{{ $event->title }}')">
+                                                 onclick="showImage('{{ addslashes($imageSource) }}', '{{ addslashes($event->title) }}')">
                                         @else
                                             <div class="bg-light d-flex align-items-center justify-content-center rounded" style="width: 50px; height: 50px;">
                                                 <i class="fas fa-image text-muted"></i>
@@ -186,9 +238,14 @@
                         <div class="col-lg-4 col-md-6 mb-4 event-card" data-search="{{ strtolower($event->title . ' ' . $event->location . ' ' . $event->description) }}">
                             <div class="card h-100 shadow-sm">
                                 @if($event->hasImage())
-                                    <img src="{{ $event->image_url }}" class="card-img-top" alt="{{ $event->title }}" 
+                                    @php
+                                        $imageSource = $event->image_base64 ?? $event->image_url;
+                                    @endphp
+                                    <img src="{{ $imageSource }}" 
+                                         class="card-img-top" 
+                                         alt="{{ $event->title }}" 
                                          style="height: 200px; object-fit: cover; cursor: pointer;"
-                                         onclick="showImage('{{ $event->image_url }}', '{{ $event->title }}')">
+                                         onclick="showImage('{{ addslashes($imageSource) }}', '{{ addslashes($event->title) }}')">
                                 @else
                                     <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
                                         <i class="fas fa-image fa-3x text-muted"></i>
@@ -269,8 +326,28 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+let eventNamesPaginationState = {
+    currentPage: 1,
+    perPage: 10,
+    data: []
+};
+
+// Store events data with base64 images
+const eventsData = @json($allEvents->items());
+
 document.addEventListener('DOMContentLoaded', function() {
     initCharts();
+    
+    // Initialize event names pagination
+    eventNamesPaginationState.data = @json($eventNamesData);
+    renderEventNamesTable();
+    
+    // Event names per page change
+    document.getElementById('event_names_per_page').addEventListener('change', function() {
+        eventNamesPaginationState.perPage = parseInt(this.value);
+        eventNamesPaginationState.currentPage = 1;
+        renderEventNamesTable();
+    });
     
     document.getElementById('searchEvents').addEventListener('input', function() {
         const term = this.value.toLowerCase();
@@ -283,6 +360,112 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+function renderEventNamesTable() {
+    const { currentPage, perPage, data } = eventNamesPaginationState;
+    const totalItems = data.length;
+    const totalPages = Math.ceil(totalItems / perPage);
+    const startIndex = (currentPage - 1) * perPage;
+    const endIndex = Math.min(startIndex + perPage, totalItems);
+    const pageData = data.slice(startIndex, endIndex);
+    
+    // Calculate total for percentages
+    const total = data.reduce((sum, item) => sum + item.count, 0);
+    
+    // Render table body
+    const tbody = document.getElementById('eventNamesTableBody');
+    tbody.innerHTML = pageData.map((item, index) => {
+        const percentage = ((item.count / total) * 100).toFixed(1);
+        return `
+            <tr>
+                <td class="text-dark">${startIndex + index + 1}</td>
+                <td class="text-dark"><strong>${escapeHtml(item.title)}</strong></td>
+                <td class="text-dark">${item.count}</td>
+                <td class="text-dark">
+                    <div class="d-flex align-items-center">
+                        <div class="progress flex-grow-1 me-2" style="height: 20px;">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 style="width: ${percentage}%" 
+                                 aria-valuenow="${percentage}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                                ${percentage}%
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+    
+    // Render info
+    document.getElementById('eventNamesInfo').textContent = 
+        `Showing ${startIndex + 1} to ${endIndex} of ${totalItems} event names`;
+    
+    // Render pagination
+    renderEventNamesPagination(totalPages);
+}
+
+function renderEventNamesPagination(totalPages) {
+    const { currentPage } = eventNamesPaginationState;
+    const pagination = document.getElementById('eventNamesPagination');
+    
+    let html = '';
+    
+    // Previous button
+    html += `
+        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="changeEventNamesPage(${currentPage - 1}); return false;">
+                Previous
+            </a>
+        </li>
+    `;
+    
+    // Page numbers
+    for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+            html += `
+                <li class="page-item ${i === currentPage ? 'active' : ''}">
+                    <a class="page-link" href="#" onclick="changeEventNamesPage(${i}); return false;">
+                        ${i}
+                    </a>
+                </li>
+            `;
+        } else if (i === currentPage - 2 || i === currentPage + 2) {
+            html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+        }
+    }
+    
+    // Next button
+    html += `
+        <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="changeEventNamesPage(${currentPage + 1}); return false;">
+                Next
+            </a>
+        </li>
+    `;
+    
+    pagination.innerHTML = html;
+}
+
+function changeEventNamesPage(page) {
+    const totalPages = Math.ceil(eventNamesPaginationState.data.length / eventNamesPaginationState.perPage);
+    if (page >= 1 && page <= totalPages) {
+        eventNamesPaginationState.currentPage = page;
+        renderEventNamesTable();
+    }
+}
+
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+}
 
 function initCharts() {
     // Chart 1: Event Joins Status - Bar Chart
@@ -508,75 +691,52 @@ function initCharts() {
         }
     });
 
-    // Chart 5: Event Names - Pie Chart
+    // Chart 5: Event Names - Line Chart
     const eventNamesCtx = document.getElementById('eventNamesChart').getContext('2d');
     const eventNamesData = @json($eventNamesData);
     
-    const eventColors = [
-        'rgba(255, 99, 132, 0.8)',
-        'rgba(54, 162, 235, 0.8)',
-        'rgba(255, 206, 86, 0.8)',
-        'rgba(75, 192, 192, 0.8)',
-        'rgba(153, 102, 255, 0.8)',
-        'rgba(255, 159, 64, 0.8)',
-        'rgba(199, 199, 199, 0.8)',
-        'rgba(83, 102, 255, 0.8)',
-        'rgba(255, 99, 255, 0.8)',
-        'rgba(99, 255, 132, 0.8)'
-    ];
-    
-    const eventBorderColors = [
-        'rgba(255, 99, 132, 1)',
-        'rgba(54, 162, 235, 1)',
-        'rgba(255, 206, 86, 1)',
-        'rgba(75, 192, 192, 1)',
-        'rgba(153, 102, 255, 1)',
-        'rgba(255, 159, 64, 1)',
-        'rgba(199, 199, 199, 1)',
-        'rgba(83, 102, 255, 1)',
-        'rgba(255, 99, 255, 1)',
-        'rgba(99, 255, 132, 1)'
-    ];
-    
     new Chart(eventNamesCtx, {
-        type: 'pie',
+        type: 'line',
         data: {
-            labels: eventNamesData.map(item => item.title.length > 20 ? item.title.substring(0, 20) + '...' : item.title),
+            labels: eventNamesData.map((item, index) => item.title.length > 20 ? item.title.substring(0, 20) + '...' : item.title),
             datasets: [{
                 label: 'Event Frequency',
                 data: eventNamesData.map(item => item.count),
-                backgroundColor: eventColors,
-                borderColor: eventBorderColors,
-                borderWidth: 2
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: 'rgba(75, 192, 192, 1)',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            scales: {
+                y: { 
+                    beginAtZero: true,
+                    ticks: { 
+                        stepSize: 1,
+                        font: { size: 12 }
+                    }
+                },
+                x: {
+                    ticks: { 
+                        font: { size: 11 },
+                        maxRotation: 45,
+                        minRotation: 45
+                    }
+                }
+            },
             plugins: {
                 legend: { 
-                    position: 'right',
-                    labels: {
-                        padding: 15,
-                        font: { size: 11 },
-                        generateLabels: function(chart) {
-                            const data = chart.data;
-                            if (data.labels.length && data.datasets.length) {
-                                const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
-                                return data.labels.map((label, i) => {
-                                    const value = data.datasets[0].data[i];
-                                    const percentage = ((value / total) * 100).toFixed(1);
-                                    return {
-                                        text: `${label} (${value}) - ${percentage}%`,
-                                        fillStyle: data.datasets[0].backgroundColor[i],
-                                        hidden: false,
-                                        index: i
-                                    };
-                                });
-                            }
-                            return [];
-                        }
-                    }
+                    position: 'top',
+                    labels: { font: { size: 12 } }
                 },
                 tooltip: {
                     backgroundColor: 'rgba(0, 0, 0, 0.8)',
@@ -585,11 +745,7 @@ function initCharts() {
                     bodyFont: { size: 12 },
                     callbacks: {
                         label: function(context) {
-                            const label = context.label || '';
-                            const value = context.parsed || 0;
-                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = ((value / total) * 100).toFixed(1);
-                            return `${label}: ${value} (${percentage}%)`;
+                            return 'Frequency: ' + context.parsed.y;
                         }
                     }
                 }
@@ -615,37 +771,47 @@ function toggleView() {
 }
 
 function viewDetails(eventId) {
-    const eventData = @json($allEvents->items());
-    const event = eventData.find(e => e.id === eventId);
+    const event = eventsData.find(e => e.id === eventId);
     
     if (event) {
         const modal = new bootstrap.Modal(document.getElementById('eventModal'));
         const content = document.getElementById('eventContent');
         
+        // Get the image URL - prefer base64
+        let imageUrl = null;
+        if (event.image_base64) {
+            imageUrl = event.image_base64;
+        } else if (event.image_url) {
+            imageUrl = event.image_url;
+        } else if (event.image && event.image.startsWith('data:image/')) {
+            imageUrl = event.image;
+        }
+        
         let imageHtml = '';
-        if (event.image_url) {
+        if (imageUrl) {
             imageHtml = `
                 <div class="text-center mb-3">
-                    <img src="${event.image_url}" alt="${event.title}" class="img-fluid rounded" 
-                         style="max-height: 300px; cursor: pointer;" onclick="showImage('${event.image_url}', '${event.title}')">
+                    <img src="${imageUrl}" alt="${escapeHtml(event.title)}" class="img-fluid rounded" 
+                         style="max-height: 300px; cursor: pointer;" 
+                         onclick="showImage('${imageUrl}', '${escapeHtml(event.title)}')">
                 </div>
             `;
         }
         
         content.innerHTML = `
             ${imageHtml}
-            <h4 class="text-dark">${event.title}</h4>
+            <h4 class="text-dark">${escapeHtml(event.title)}</h4>
             <div class="row">
                 <div class="col-md-6">
                     <p><strong class="text-dark">Date:</strong> <span class="text-dark">${new Date(event.date).toLocaleDateString()}</span></p>
                 </div>
                 <div class="col-md-6">
-                    <p><strong class="text-dark">Location:</strong> <span class="text-dark">${event.location}</span></p>
+                    <p><strong class="text-dark">Location:</strong> <span class="text-dark">${escapeHtml(event.location)}</span></p>
                 </div>
             </div>
             <div class="mt-3">
                 <p><strong class="text-dark">Description:</strong></p>
-                <p class="text-dark">${event.description}</p>
+                <p class="text-dark">${escapeHtml(event.description)}</p>
             </div>
         `;
         
