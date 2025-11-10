@@ -54,6 +54,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     ->name('admin.certificates.download');
 
 
+    Route::get('/events/token/{token}', [EventController::class, 'showByToken']);
+   Route::post('/admin/events/{event}/regenerate-token', [EventController::class, 'regenerateToken']);
+   
     // Notification routes
     Route::get('/notifications', [NotificationController::class, 'index'])->name('admin.notifications.index');
     Route::get('/notifications/count', [NotificationController::class, 'getUnreadCount'])->name('admin.notifications.count');

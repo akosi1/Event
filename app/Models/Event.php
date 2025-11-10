@@ -10,13 +10,14 @@ use Illuminate\Database\Eloquent\{
     Relations\BelongsTo
 };
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class Event extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'title', 'description', 'date', 'start_time', 'end_time', 'location', 'status',
+        'token', 'title', 'description', 'date', 'start_time', 'end_time', 'location', 'status',
         'department', 'is_exclusive', 'allowed_departments', 'is_recurring',
         'recurrence_pattern', 'recurrence_interval', 'recurrence_end_date',
         'recurrence_count', 'repeat_type', 'repeat_interval', 'repeat_until',
@@ -50,6 +51,34 @@ class Event extends Model
         'weekdays' => 'Weekdays Only',
         'custom' => 'Custom'
     ];
+
+    /**
+     * Generate a unique token for the event
+     */
+    public static function generateUniqueToken(): string
+    {
+        do {
+            $token = bin2hex(random_bytes(32));
+        } while (self::where('token', $token)->exists());
+
+        return $token;
+    }
+
+    /**
+     * Find event by token
+     */
+    public static function findByToken(string $token): ?self
+    {
+        return self::where('token', $token)->first();
+    }
+
+    /**
+     * Get the route key name for Laravel route model binding
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'token';
+    }
 
     public function certificates(): HasMany
     {
@@ -364,6 +393,13 @@ class Event extends Model
     protected static function boot()
     {
         parent::boot();
+
+        // Generate token when creating new event
+        static::creating(function ($event) {
+            if (empty($event->token)) {
+                $event->token = self::generateUniqueToken();
+            }
+        });
 
         static::deleting(function ($event) {
             $event->deleteImage();

@@ -3,13 +3,23 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\{Model, Relations\BelongsTo};
+use Illuminate\Support\Str;
 
 class EventJoin extends Model
 {
-    protected $fillable = ['user_id', 'event_id', 'joined_at', 'approved', 'approved_by', 'approved_at'];
+    protected $fillable = [
+        'user_id', 
+        'event_id', 
+        'token',
+        'joined_at', 
+        'approved', 
+        'approved_by', 
+        'approved_at'
+    ];
 
     protected $casts = [
-        'joined_at' => 'datetime'
+        'joined_at' => 'datetime',
+        'approved_at' => 'datetime'
     ];
 
     /**
@@ -63,7 +73,22 @@ class EventJoin extends Model
     }
 
     /**
-     * Boot the model to set joined_at automatically
+     * Generate a unique token for this event join
+     */
+    public function generateToken(): string
+    {
+        do {
+            $token = Str::random(32);
+        } while (static::where('token', $token)->exists());
+
+        $this->token = $token;
+        $this->save();
+
+        return $token;
+    }
+
+    /**
+     * Boot the model to set joined_at and token automatically
      */
     protected static function boot()
     {
@@ -72,6 +97,14 @@ class EventJoin extends Model
         static::creating(function ($eventJoin) {
             if (is_null($eventJoin->joined_at)) {
                 $eventJoin->joined_at = now();
+            }
+            
+            if (is_null($eventJoin->token)) {
+                do {
+                    $token = Str::random(32);
+                } while (static::where('token', $token)->exists());
+                
+                $eventJoin->token = $token;
             }
         });
     }
