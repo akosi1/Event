@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{Event, EventJoin, Notification, PrintSummary};
+use App\Models\{Event, EventJoin, Notification};
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class EventJoinController extends Controller
 {
@@ -43,11 +42,8 @@ class EventJoinController extends Controller
 
         $eventJoins = $query->orderBy('joined_at', 'desc')->paginate(15);
         $events = Event::orderBy('date', 'asc')->get();
-        
-        // Get print settings for the modal
-        $printSettings = PrintSummary::first();
 
-        return view('admin.event-joins.index', compact('eventJoins', 'events', 'printSettings'));
+        return view('admin.event-joins.index', compact('eventJoins', 'events'));
     }
 
     /**
@@ -85,78 +81,17 @@ class EventJoinController extends Controller
         // Get all records for printing (no pagination)
         $eventJoins = $query->orderBy('joined_at', 'desc')->get();
         
-        // Generate summary data with statistics
-        $summaryData = PrintSummary::generateEventJoinsSummary($eventJoins);
+        // Generate summary data
+        $summaryData = [
+            'event_joins' => $eventJoins,
+            'total_records' => $eventJoins->count(),
+            'approved_count' => $eventJoins->where('approved', true)->count(),
+            'pending_count' => $eventJoins->where('approved', false)->count(),
+            'generated_at' => now()->format('F d, Y h:i A'),
+            'logo_path' => asset('images/logo.png')
+        ];
 
         return view('admin.event-joins.print', compact('summaryData'));
-    }
-
-    /**
-     * Update print settings (logos and description)
-     */
-    public function updatePrintSettings(Request $request)
-    {
-        $request->validate([
-            'left_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'right_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'description' => 'nullable|string|max:500',
-        ]);
-
-        // Get or create print settings
-        $settings = PrintSummary::firstOrCreate([]);
-
-        // Handle left logo upload
-        if ($request->hasFile('left_logo')) {
-            // Delete old logo if exists
-            if ($settings->left_logo_path) {
-                $oldPath = public_path('storage/logos/' . $settings->left_logo_path);
-                if (file_exists($oldPath)) {
-                    @unlink($oldPath);
-                }
-            }
-
-            $leftLogo = $request->file('left_logo');
-            $leftLogoName = 'left_logo_' . time() . '_' . uniqid() . '.' . $leftLogo->extension();
-            
-            // Create directory if it doesn't exist
-            if (!file_exists(public_path('storage/logos'))) {
-                mkdir(public_path('storage/logos'), 0755, true);
-            }
-            
-            $leftLogo->move(public_path('storage/logos'), $leftLogoName);
-            $settings->left_logo_path = $leftLogoName;
-        }
-
-        // Handle right logo upload (SAIL logo)
-        if ($request->hasFile('right_logo')) {
-            // Delete old logo if exists
-            if ($settings->right_logo_path) {
-                $oldPath = public_path('storage/logos/' . $settings->right_logo_path);
-                if (file_exists($oldPath)) {
-                    @unlink($oldPath);
-                }
-            }
-
-            $rightLogo = $request->file('right_logo');
-            $rightLogoName = 'right_logo_' . time() . '_' . uniqid() . '.' . $rightLogo->extension();
-            
-            // Create directory if it doesn't exist
-            if (!file_exists(public_path('storage/logos'))) {
-                mkdir(public_path('storage/logos'), 0755, true);
-            }
-            
-            $rightLogo->move(public_path('storage/logos'), $rightLogoName);
-            $settings->right_logo_path = $rightLogoName;
-        }
-
-        // Update description
-        if ($request->filled('description')) {
-            $settings->description = $request->description;
-        }
-
-        $settings->save();
-
-        return redirect()->back()->with('success', 'Print settings updated successfully!');
     }
 
     /**
@@ -231,7 +166,7 @@ class EventJoinController extends Controller
         $user = auth()->user();
 
         $join = EventJoin::where('user_id', $user->id)
-                         ->where('event_id', $event->id)
+                         ->where('event_id', $request->event_id)
                          ->first();
 
         if (!$join) {
@@ -282,6 +217,7 @@ class EventJoinController extends Controller
 
         return redirect()->back()->with('success', 'Event join approved successfully.');
     }
+
     /**
      * Reject event join request
      */

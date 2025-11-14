@@ -23,15 +23,36 @@ class UserController extends Controller
                   ->orWhere('last_name', 'LIKE', "%{$search}%")
                   ->orWhere('email', 'LIKE', "%{$search}%")
                   ->orWhere('role', 'LIKE', "%{$search}%")
-                  ->orWhere('status', 'LIKE', "%{$search}%");
+                  ->orWhere('status', 'LIKE', "%{$search}%")
+                  ->orWhere('department', 'LIKE', "%{$search}%");
             });
+        }
+
+        // Handle AJAX autocomplete request
+        if ($request->ajax() || $request->get('autocomplete')) {
+            $users = $query->limit(10)->get()->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'full_name' => $user->full_name,
+                    'email' => $user->email,
+                    'id_number' => $user->id_number,
+                    'department' => $user->department,
+                    'year_level' => $user->year_level_name,
+                    'role' => $user->role,
+                    'status' => $user->status,
+                    'profile_picture' => $user->profile_picture_url,
+                    'initials' => $user->initials,
+                ];
+            });
+
+            return response()->json(['users' => $users]);
         }
 
         // Sorting
         $sortBy = $request->get('sort_by', 'created_at');
         $sortOrder = $request->get('sort_order', 'desc');
         
-        $allowedSorts = ['first_name', 'last_name', 'email', 'role', 'status', 'created_at'];
+        $allowedSorts = ['first_name', 'last_name', 'email', 'role', 'status', 'department', 'year_level', 'created_at'];
         if (in_array($sortBy, $allowedSorts)) {
             $query->orderBy($sortBy, $sortOrder);
         }
@@ -51,16 +72,34 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'id_number' => 'required|string|max:50|unique:users',
             'first_name' => 'required|string|max:50|regex:/^[a-zA-Z\s]+$/',
             'middle_name' => 'nullable|string|max:50|regex:/^[a-zA-Z\s]+$/',
             'last_name' => 'required|string|max:50|regex:/^[a-zA-Z\s]+$/',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
+            'department' => 'required|in:BSIT,BSBA,BSED,BEED,BSHM',
+            'year_level' => 'required|in:1,2,3,4',
             'role' => 'required|in:admin,user',
             'status' => 'required|in:active,inactive',
+            'profile_picture' => 'nullable|string', // Changed to accept base64 string
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
+
+        // Handle base64 profile picture
+        if ($request->filled('profile_picture')) {
+            $base64Image = $request->input('profile_picture');
+            
+            // Validate and process base64 image
+            if ($this->isValidBase64Image($base64Image)) {
+                $validated['profile_picture'] = $base64Image;
+            } else {
+                return back()->withErrors(['profile_picture' => 'Invalid image format. Only PNG, JPEG, and JPG are allowed.'])->withInput();
+            }
+        } else {
+            unset($validated['profile_picture']);
+        }
 
         User::create($validated);
 
@@ -81,13 +120,17 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $validated = $request->validate([
+            'id_number' => ['required', 'string', 'max:50', Rule::unique('users')->ignore($user->id)],
             'first_name' => 'required|string|max:50|regex:/^[a-zA-Z\s]+$/',
             'middle_name' => 'nullable|string|max:50|regex:/^[a-zA-Z\s]+$/',
             'last_name' => 'required|string|max:50|regex:/^[a-zA-Z\s]+$/',
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password' => 'nullable|string|min:8|confirmed',
+            'department' => 'required|in:BSIT,BSBA,BSED,BEED,BSHM',
+            'year_level' => 'required|in:1,2,3,4',
             'role' => 'required|in:admin,user',
             'status' => 'required|in:active,inactive',
+            'profile_picture' => 'nullable|string', // Changed to accept base64 string
         ]);
 
         // Handle password update
@@ -95,6 +138,18 @@ class UserController extends Controller
             $validated['password'] = Hash::make($validated['password']);
         } else {
             unset($validated['password']);
+        }
+
+        // Handle base64 profile picture
+        if ($request->filled('profile_picture')) {
+            $base64Image = $request->input('profile_picture');
+            
+            // Validate and process base64 image
+            if ($this->isValidBase64Image($base64Image)) {
+                $validated['profile_picture'] = $base64Image;
+            } else {
+                return back()->withErrors(['profile_picture' => 'Invalid image format. Only PNG, JPEG, and JPG are allowed.'])->withInput();
+            }
         }
 
         $user->update($validated);
@@ -109,5 +164,34 @@ class UserController extends Controller
 
         return redirect()->route('admin.users.index')
             ->with('success', 'User deleted successfully.');
+    }
+
+    /**
+     * Validate if the base64 string is a valid image (PNG, JPEG, JPG)
+     */
+    private function isValidBase64Image($base64String)
+    {
+        // Check if it's a valid base64 data URI
+        if (!preg_match('/^data:image\/(png|jpeg|jpg);base64,/', $base64String)) {
+            return false;
+        }
+
+        // Extract the base64 data
+        $imageData = preg_replace('/^data:image\/(png|jpeg|jpg);base64,/', '', $base64String);
+        
+        // Validate base64 encoding
+        if (!base64_decode($imageData, true)) {
+            return false;
+        }
+
+        // Check file size (max 2MB in base64)
+        $sizeInBytes = (strlen($imageData) * 3) / 4;
+        $maxSize = 2 * 1024 * 1024; // 2MB
+        
+        if ($sizeInBytes > $maxSize) {
+            return false;
+        }
+
+        return true;
     }
 }

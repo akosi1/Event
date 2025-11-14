@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Event;
-use App\Models\PrintSummary;
 use App\Services\EventRecurrenceService;
 use App\Services\EventNotificationService;
 use Illuminate\Http\Request;
@@ -83,9 +82,7 @@ class EventController extends Controller
 
         $events->appends($request->query());
 
-        $printSettings = PrintSummary::first();
-
-        return view('admin.events.index', compact('events', 'printSettings'));
+        return view('admin.events.index', compact('events'));
     }
 
     public function print(Request $request)
@@ -129,67 +126,20 @@ class EventController extends Controller
             }
         }
 
-        $events = $query->orderBy('date', 'desc')->get();
-        $summaryData = PrintSummary::generateEventsSummary($events);
+        // Get all events for printing (no pagination)
+        $events = $query->orderBy('date', 'asc')->get();
+        
+        // Generate summary data
+        $summaryData = [
+            'events' => $events,
+            'total_events' => $events->count(),
+            'active_count' => $events->where('status', 'active')->count(),
+            'postponed_count' => $events->where('status', 'postponed')->count(),
+            'cancelled_count' => $events->where('status', 'cancelled')->count(),
+            'generated_at' => now()->format('F d, Y h:i A')
+        ];
 
         return view('admin.events.print', compact('summaryData'));
-    }
-
-    public function updatePrintSettings(Request $request)
-    {
-        $request->validate([
-            'events_left_logo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'events_right_logo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'events_description' => 'nullable|string|max:500',
-        ]);
-
-        $settings = PrintSummary::firstOrCreate([]);
-
-        if ($request->hasFile('events_left_logo')) {
-            if ($settings->events_left_logo_path) {
-                $oldPath = public_path('storage/logos/' . $settings->events_left_logo_path);
-                if (file_exists($oldPath)) {
-                    @unlink($oldPath);
-                }
-            }
-
-            $leftLogo = $request->file('events_left_logo');
-            $leftLogoName = 'events_left_logo_' . time() . '_' . uniqid() . '.' . $leftLogo->extension();
-            
-            if (!file_exists(public_path('storage/logos'))) {
-                mkdir(public_path('storage/logos'), 0755, true);
-            }
-            
-            $leftLogo->move(public_path('storage/logos'), $leftLogoName);
-            $settings->events_left_logo_path = $leftLogoName;
-        }
-
-        if ($request->hasFile('events_right_logo')) {
-            if ($settings->events_right_logo_path) {
-                $oldPath = public_path('storage/logos/' . $settings->events_right_logo_path);
-                if (file_exists($oldPath)) {
-                    @unlink($oldPath);
-                }
-            }
-
-            $rightLogo = $request->file('events_right_logo');
-            $rightLogoName = 'events_right_logo_' . time() . '_' . uniqid() . '.' . $rightLogo->extension();
-            
-            if (!file_exists(public_path('storage/logos'))) {
-                mkdir(public_path('storage/logos'), 0755, true);
-            }
-            
-            $rightLogo->move(public_path('storage/logos'), $rightLogoName);
-            $settings->events_right_logo_path = $rightLogoName;
-        }
-
-        if ($request->filled('events_description')) {
-            $settings->events_description = $request->events_description;
-        }
-
-        $settings->save();
-
-        return redirect()->back()->with('success', 'Print settings updated successfully!');
     }
 
     public function create()

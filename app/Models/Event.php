@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\{
     Model,
     Relations\HasMany,
     Relations\BelongsToMany,
-    Relations\BelongsTo
+    Relations\BelongsTo,
+    ModelNotFoundException
 };
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -73,11 +74,67 @@ class Event extends Model
     }
 
     /**
+     * Find event by token or fail
+     */
+    public static function findByTokenOrFail(string $token): self
+    {
+        $event = self::findByToken($token);
+        
+        if (!$event) {
+            throw new ModelNotFoundException("Event not found with token: {$token}");
+        }
+        
+        return $event;
+    }
+
+    /**
+     * Find event by ID or token (flexible finder)
+     */
+    public static function findByIdOrToken($identifier): ?self
+    {
+        // If it's numeric, try ID first, then token
+        if (is_numeric($identifier)) {
+            $event = self::find($identifier);
+            if ($event) {
+                return $event;
+            }
+        }
+        
+        // Try as token
+        return self::findByToken($identifier);
+    }
+
+    /**
      * Get the route key name for Laravel route model binding
      */
     public function getRouteKeyName(): string
     {
         return 'token';
+    }
+
+    /**
+     * Resolve route binding to support both ID and token
+     */
+    public function resolveRouteBinding($value, $field = null)
+    {
+        // If field is specified, use default behavior
+        if ($field) {
+            return $this->where($field, $value)->firstOrFail();
+        }
+
+        // Try to find by token (primary method)
+        $event = self::findByToken($value);
+        if ($event) {
+            return $event;
+        }
+
+        // Fallback: try by ID for backward compatibility
+        if (is_numeric($value)) {
+            return $this->findOrFail($value);
+        }
+
+        // Neither found - throw exception
+        throw new ModelNotFoundException("Event not found");
     }
 
     public function certificates(): HasMany
@@ -227,7 +284,7 @@ class Event extends Model
     {
         return $this->belongsToMany(User::class, 'event_joins')
                     ->withTimestamps()
-                    ->withPivot('joined_at');
+                    ->withPivot('joined_at', 'approved', 'approved_at');
     }
 
     public function parentEvent(): BelongsTo

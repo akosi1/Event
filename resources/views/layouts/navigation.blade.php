@@ -72,8 +72,16 @@
             
             <div class="dropdown" id="userDropdown">
                 <button class="dropdown-btn user-btn" type="button" aria-haspopup="true" aria-expanded="false">
-                    <i class="fas fa-user-circle"></i>
-                    {{ auth()->user()->first_name }}
+                    @if(auth()->user()->profile_picture)
+                        <img src="{{ auth()->user()->profile_picture }}" 
+                             alt="{{ auth()->user()->first_name }}" 
+                             class="user-profile-pic">
+                    @else
+                        <div class="user-profile-initials">
+                            {{ substr(auth()->user()->first_name, 0, 1) }}{{ substr(auth()->user()->last_name, 0, 1) }}
+                        </div>
+                    @endif
+                    <span class="user-name">{{ auth()->user()->first_name }}</span>
                     <i class="fas fa-chevron-down dropdown-arrow"></i>
                 </button>
                 <div class="dropdown-menu dropdown-menu-right" role="menu">
@@ -96,8 +104,9 @@
 </nav>
 
 <div class="mobile-overlay" id="mobileOverlay"></div>
+
 <style>
-    /* ========================================
+/* ========================================
    ROOT VARIABLES
    ======================================== */
 :root {
@@ -247,6 +256,47 @@
 
 .nav-btn:hover::after {
     width: 100%;
+}
+
+/* ========================================
+   USER PROFILE PICTURE & INITIALS
+   ======================================== */
+.user-profile-pic {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--accent-red);
+    transition: all 0.3s ease;
+}
+
+.user-profile-initials {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--accent-red);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    border: 2px solid var(--accent-red);
+    transition: all 0.3s ease;
+}
+
+.user-btn {
+    padding: 4px 0;
+}
+
+.user-btn:hover .user-profile-pic,
+.user-btn:hover .user-profile-initials {
+    transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(229, 62, 62, 0.5);
+}
+
+.user-name {
+    font-size: 14px;
 }
 
 /* ========================================
@@ -550,6 +600,13 @@
         border-bottom: none;
     }
 
+    .user-profile-pic,
+    .user-profile-initials {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+    }
+
     /* Mobile Scrollbar */
     .nav-content::-webkit-scrollbar {
         width: 4px;
@@ -599,6 +656,13 @@
         padding: 12px 16px;
         font-size: 13px;
     }
+
+    .user-profile-pic,
+    .user-profile-initials {
+        width: 24px;
+        height: 24px;
+        font-size: 11px;
+    }
 }
 
 /* Landscape orientation fix */
@@ -629,3 +693,73 @@
     }
 }
 </style>
+
+<script>
+// Navigation JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    const navbar = document.getElementById('navbar');
+    const mobileToggle = document.getElementById('mobileToggle');
+    const navContent = document.getElementById('navContent');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+    const dropdowns = document.querySelectorAll('.dropdown');
+
+    // Scroll effect
+    window.addEventListener('scroll', function() {
+        if (window.scrollY > 50) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+    });
+
+    // Mobile menu toggle
+    mobileToggle?.addEventListener('click', function() {
+        navContent.classList.toggle('active');
+        mobileOverlay.classList.toggle('active');
+    });
+
+    // Close mobile menu when clicking overlay
+    mobileOverlay?.addEventListener('click', function() {
+        navContent.classList.remove('active');
+        mobileOverlay.classList.remove('active');
+        dropdowns.forEach(dropdown => dropdown.classList.remove('active'));
+    });
+
+    // Dropdown functionality for mobile
+    dropdowns.forEach(dropdown => {
+        const btn = dropdown.querySelector('.dropdown-btn');
+        
+        btn?.addEventListener('click', function(e) {
+            if (window.innerWidth <= 768) {
+                e.preventDefault();
+                
+                // Close other dropdowns
+                dropdowns.forEach(d => {
+                    if (d !== dropdown) {
+                        d.classList.remove('active');
+                    }
+                });
+                
+                // Toggle current dropdown
+                dropdown.classList.toggle('active');
+            }
+        });
+    });
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.dropdown') && window.innerWidth <= 768) {
+            dropdowns.forEach(dropdown => dropdown.classList.remove('active'));
+        }
+    });
+
+    // Close mobile menu on window resize
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+            navContent.classList.remove('active');
+            mobileOverlay.classList.remove('active');
+            dropdowns.forEach(dropdown => dropdown.classList.remove('active'));
+        }
+    });
+});
+</script>

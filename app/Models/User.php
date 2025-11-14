@@ -24,6 +24,7 @@ class User extends Authenticatable
         'status',
         'department',
         'year_level',
+        'profile_picture',
     ];
 
     protected $hidden = ['password', 'remember_token'];
@@ -42,7 +43,17 @@ class User extends Authenticatable
     // Decrypt id_number when retrieving
     public function getIdNumberAttribute($value)
     {
-        return $value ? decrypt($value) : null;
+        if (!$value) {
+            return null;
+        }
+
+        try {
+            return decrypt($value);
+        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+            // If decryption fails, the value is likely not encrypted
+            // Return the plain value as-is
+            return $value;
+        }
     }
 
     public function getFullNameAttribute(): string
@@ -56,8 +67,12 @@ class User extends Authenticatable
         return trim($this->first_name . $middleInitial . ' ' . $this->last_name);
     }
 
-    public function getDepartmentNameAttribute(): string
+    public function getDepartmentNameAttribute(): ?string
     {
+        if (!$this->department) {
+            return null;
+        }
+
         $departments = [
             'BSIT' => 'Bachelor of Science in Information Technology',
             'BSBA' => 'Bachelor of Science in Business Administration',
@@ -69,8 +84,12 @@ class User extends Authenticatable
         return $departments[$this->department] ?? $this->department;
     }
 
-    public function getYearLevelNameAttribute(): string
+    public function getYearLevelNameAttribute(): ?string
     {
+        if (!$this->year_level) {
+            return null;
+        }
+
         $years = [
             '1' => '1st Year',
             '2' => '2nd Year',
@@ -79,6 +98,16 @@ class User extends Authenticatable
         ];
 
         return $years[$this->year_level] ?? $this->year_level;
+    }
+
+    public function getProfilePictureUrlAttribute(): ?string
+    {
+        return $this->profile_picture;
+    }
+
+    public function getInitialsAttribute(): string
+    {
+        return substr($this->first_name, 0, 1) . substr($this->last_name, 0, 1);
     }
 
     public function isAdmin(): bool

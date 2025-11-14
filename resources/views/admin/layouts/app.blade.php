@@ -64,29 +64,19 @@
             width: 3px; height: 20px; background: white; border-radius: 0 2px 2px 0;
         }
 
-        /* Footer */
-        .sidebar-footer {
-            padding: 1rem; border-top: 1px solid rgba(255,255,255,0.15);
-            background: rgba(0,0,0,0.1);
-        }
-        .logout-btn {
-            width: 100%; background: var(--danger); border: none; color: white;
-            padding: 0.75rem; border-radius: 8px; font-weight: 500; cursor: pointer;
-            transition: var(--transition); display: flex; align-items: center; justify-content: center;
-        }
-        .logout-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-        .logout-btn i { margin-right: 0.5rem; }
-
         /* Toggle Button */
         .sidebar-toggle {
             position: fixed; top: 1rem; left: 1rem; z-index: 1001; width: 45px; height: 45px;
-            background: var(--primary); border: none; color: white; border-radius: 8px;
+            background: var(--primary); border: none; color: white; border-radius: 10px;
             box-shadow: var(--shadow-md); cursor: pointer; opacity: 0; transform: translateX(-60px);
             pointer-events: none; display: flex; align-items: center; justify-content: center;
-            transition: var(--transition);
+            transition: var(--transition); font-size: 1.2rem;
         }
-        .sidebar-toggle:hover { transform: translateX(-60px) translateY(-3px); box-shadow: var(--shadow-lg); }
+        .sidebar-toggle:hover { transform: translateX(-60px) scale(1.05); box-shadow: var(--shadow-lg); }
         .sidebar-toggle.show { opacity: 1; transform: translateX(0); pointer-events: all; }
+        
+        .sidebar-toggle i.fa-bars { display: inline; }
+        .sidebar-toggle i.fa-ellipsis-v { display: none; }
 
         /* Main Content */
         .main-content {
@@ -100,6 +90,161 @@
             position: sticky; top: 0; z-index: 999; padding: 1rem 1.5rem;
         }
         .main-content.expanded .navbar { border-radius: 0; }
+
+        /* Navbar Title Center */
+        .navbar-title {
+            flex: 1;
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin: 0;
+        }
+
+        /* Profile Section */
+        .profile-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 10px;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .profile-section:hover {
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .profile-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #667eea;
+        }
+
+        .profile-initials {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: 2px solid #667eea;
+        }
+
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .profile-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #2d3748;
+            line-height: 1.2;
+        }
+
+        .profile-role {
+            font-size: 0.75rem;
+            color: #718096;
+        }
+
+        .profile-dropdown-icon {
+            color: #718096;
+            transition: var(--transition);
+            margin-left: 0.25rem;
+        }
+
+        .profile-section:hover .profile-dropdown-icon {
+            color: #667eea;
+        }
+
+        /* Profile Dropdown */
+        .profile-dropdown {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            right: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            min-width: 220px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px) scale(0.95);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .profile-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
+        }
+
+        .profile-dropdown-header {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        }
+
+        .profile-dropdown-name {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .profile-dropdown-email {
+            font-size: 0.8rem;
+            color: #718096;
+        }
+
+        .profile-dropdown-menu {
+            padding: 0.5rem;
+        }
+
+        .profile-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: #4a5568;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .profile-dropdown-item:hover {
+            background: rgba(102, 126, 234, 0.05);
+            color: #667eea;
+        }
+
+        .profile-dropdown-item.logout-item:hover {
+            background: rgba(239, 68, 68, 0.05);
+            color: #ef4444;
+        }
+
+        .profile-dropdown-item i {
+            width: 18px;
+            text-align: center;
+        }
+
+        .profile-dropdown-divider {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 0.5rem 0;
+        }
 
         /* Notification Styles */
         .notification-container {
@@ -329,18 +474,42 @@
             .sidebar { transform: translateX(-100%); }
             .sidebar.show { transform: translateX(0); }
             .main-content { margin-left: 0; border-radius: 0; }
-            .navbar { border-radius: 0; }
+            .navbar { border-radius: 0; padding: 1rem; }
             .sidebar-toggle { opacity: 1; transform: translateX(0); pointer-events: all; }
+
+            .navbar-title {
+                font-size: 1.1rem;
+            }
+
+            .profile-info {
+                display: none;
+            }
+
+            .profile-section {
+                padding: 0.25rem;
+            }
 
             .notification-dropdown {
                 min-width: 300px;
                 max-width: calc(100vw - 2rem);
             }
+
+            .profile-dropdown {
+                right: -1rem;
+            }
+            
+            /* Change bars icon to 3 dots vertically on mobile */
+            .sidebar-toggle i.fa-bars { display: none; }
+            .sidebar-toggle i.fa-ellipsis-v { display: inline; }
         }
 
         @media (max-width: 576px) {
             :root { --sidebar-width: 100vw; }
-            .sidebar-toggle { top: 0.75rem; left: 0.75rem; }
+            .sidebar-toggle { top: 0.75rem; left: 0.75rem; width: 40px; height: 40px; }
+            
+            .navbar-title {
+                font-size: 1rem;
+            }
         }
 
         /* Components */
@@ -358,6 +527,7 @@
 <body>
     <button class="sidebar-toggle" id="toggle" aria-label="Toggle Sidebar">
         <i class="fas fa-bars"></i>
+        <i class="fas fa-ellipsis-v"></i>
     </button>
 
     <div class="sidebar-overlay" id="overlay"></div>
@@ -365,7 +535,6 @@
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <img src="{{ asset('images/logo.png') }}" alt="EventAP Logo">
-              {{-- <img src="public/images/logo.png" alt="EventAP Logo"> --}}
             <h4>Event & Portfolio Organizer</h4>
             <small>Admin Panel</small>
             <button class="sidebar-close" id="close" aria-label="Close Sidebar">
@@ -395,22 +564,15 @@
                 <i class="fas fa-users-cog"></i> Participants
             </a>
         </nav>
-
-        <div class="sidebar-footer">
-            <form method="POST" action="{{ route('admin.logout') }}">
-                @csrf
-                <button type="submit" class="logout-btn">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
-            </form>
-        </div>
+        
     </div>
+    
 
     <div class="main-content" id="content">
         <nav class="navbar navbar-expand-lg navbar-light">
-            <div class="container-fluid">
-                <h5 class="mb-0 fw-semibold">@yield('page-title', 'Dashboard')</h5>
-                <div class="navbar-nav ms-auto d-flex flex-row align-items-center">
+            <div class="container-fluid d-flex align-items-center">
+                <h5 class="navbar-title mb-0">@yield('page-title', 'Dashboard')</h5>
+                <div class="navbar-nav d-flex flex-row align-items-center">
                     <!-- Notification Container -->
                     <div class="notification-container">
                         <div class="notification-icon" id="notificationBell">
@@ -432,10 +594,36 @@
                         </div>
                     </div>
 
-                    <span class="navbar-text">
-                        <i class="fas fa-clock me-1"></i>
-                        <span id="time"></span>
-                    </span>
+                    <!-- Profile Section -->
+                    <div class="profile-section" id="profileSection">
+                        @if(Auth::user()->profile_picture)
+                            <img src="{{ Auth::user()->profile_picture_url }}" alt="{{ Auth::user()->full_name }}" class="profile-avatar">
+                        @else
+                            <div class="profile-initials">{{ Auth::user()->initials }}</div>
+                        @endif
+                        <div class="profile-info">
+                            <div class="profile-name">{{ Auth::user()->full_name }}</div>
+                            <div class="profile-role">{{ ucfirst(Auth::user()->role) }}</div>
+                        </div>
+                        <i class="fas fa-chevron-down profile-dropdown-icon"></i>
+
+                        <!-- Profile Dropdown -->
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <div class="profile-dropdown-header">
+                                <div class="profile-dropdown-name">{{ Auth::user()->full_name }}</div>
+                                <div class="profile-dropdown-email">{{ Auth::user()->email }}</div>
+                            </div>
+                            <div class="profile-dropdown-menu">
+                                <form method="POST" action="{{ route('admin.logout') }}" class="d-block">
+                                    @csrf
+                                    <button type="submit" class="profile-dropdown-item logout-item w-100 border-0 bg-transparent text-start">
+                                        <i class="fas fa-sign-out-alt"></i>
+                                        <span>Logout</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -472,7 +660,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
     <script>
         class Sidebar {
             constructor() {
@@ -489,8 +676,6 @@
             init() {
                 this.updateLayout();
                 this.bindEvents();
-                this.updateTime();
-                setInterval(() => this.updateTime(), 1000);
                 window.addEventListener('resize', () => this.updateLayout());
             }
 
@@ -574,10 +759,57 @@
                     toggle.classList.remove('show');
                 }
             }
+        }
 
-            updateTime() {
-                const timeEl = document.getElementById('time');
-                if (timeEl) timeEl.textContent = new Date().toLocaleTimeString();
+        class ProfileDropdown {
+            constructor() {
+                this.profileSection = document.getElementById('profileSection');
+                this.dropdown = document.getElementById('profileDropdown');
+                this.isOpen = false;
+
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+            }
+
+            bindEvents() {
+                // Toggle dropdown when clicking profile section
+                this.profileSection.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.toggle();
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.profile-section')) {
+                        this.close();
+                    }
+                });
+
+                // Prevent dropdown from closing when clicking inside
+                this.dropdown.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            }
+
+            toggle() {
+                if (this.isOpen) {
+                    this.close();
+                } else {
+                    this.open();
+                }
+            }
+
+            open() {
+                this.dropdown.classList.add('show');
+                this.isOpen = true;
+            }
+
+            close() {
+                this.dropdown.classList.remove('show');
+                this.isOpen = false;
             }
         }
 
@@ -875,10 +1107,11 @@
         // Initialize systems when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
             new Sidebar();
+            new ProfileDropdown();
             window.notificationSystem = new NotificationSystem();
         });
     </script>
 
     @stack('scripts')
 </body>
-</html>
+</html>`

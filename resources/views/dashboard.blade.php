@@ -9,7 +9,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="{{ asset('user/dashboard/dashboard.css') }}" rel="stylesheet">
     <link href="{{ asset('user/nav/css/navbar.css') }}" rel="stylesheet">
-   <link href="{{ asset('user/footer/footer.css') }}" rel="stylesheet">
+    <link href="{{ asset('user/footer/footer.css') }}" rel="stylesheet">
     <!-- SweetAlert2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.min.css" rel="stylesheet">
     <style>
@@ -62,274 +62,6 @@
 
         .swal2-cancel:hover {
             background-color: #dc2626 !important;
-        }
-
-        /* styles for flex button (leave and generate cert) */
-        .flex-container {
-            width: 100%;
-            display: flex;
-            gap: 1rem;
-            align-items: center
-        }
-
-
-        .custom-btn {
-            flex: 1;
-            color: #1e293b;
-            border: none;
-            padding: 0.75rem 1.25rem;
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.4rem;
-            transition: all 0.3s ease;
-            font-size: 0.85rem;
-            text-transform: capitalize;
-            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .leave-btn {
-            background: rgba(239, 68, 68, 0.95);
-            color: white;
-            box-shadow: 0 3px 12px rgba(239, 68, 68, 0.4);
-        }
-
-        .leave-btn::hover {
-            background: rgba(220, 38, 38, 0.95);
-            box-shadow: 0 5px 18px rgba(239, 68, 68, 0.5);
-        }
-
-        .generate-btn {
-            background: rgba(34, 197, 94, 0.95);
-            ;
-        }
-
-        .generate-btn:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* certificate modal styles */
-        .certificates-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .certificate-card {
-            background: #fff;
-            border-radius: 1rem;
-            overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .certificate-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
-        }
-
-        .certificate-image-container {
-            position: relative;
-            width: 100%;
-            height: 220px;
-            overflow: hidden;
-            background: #f9fafb;
-        }
-
-        .certificate-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .certificate-content {
-            padding: 1rem 1.2rem;
-            text-align: center;
-        }
-
-        .certificate-event-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 0.4rem;
-        }
-
-        .certificate-date {
-            font-size: 0.9rem;
-            color: #6b7280;
-            margin-bottom: 0.8rem;
-        }
-
-        .download-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            background: #10b981;
-            color: white;
-            border-radius: 8px;
-            padding: 0.5rem 1rem;
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: background 0.2s;
-        }
-
-        .download-btn:hover {
-            background: #059669;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 3rem 1rem;
-            color: #6b7280;
-        }
-
-        .empty-state i {
-            font-size: 3rem;
-            color: #d1d5db;
-            margin-bottom: 0.5rem;
-        }
-
-        .pending {
-            background: rgba(251, 191, 36, 0.95);
-            /* yellow */
-            color: #1e293b;
-            cursor: not-allowed;
-        }
-
-        .time-left-badge {
-            background: #9333ea;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 10px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            position: absolute;
-            top: 10px;
-            right: 10px;
-        }
-
-        .blinking {
-            border: 1.5px solid red !important;
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-            50% {
-                opacity: 0.4;
-
-            }
-        }
-
-        /* opacity: 0.4; */
-        /* ===========================
-       FEEDBACK FEATURE STYLES
-       =========================== */
-
-        /* Feedback button under each event */
-        .feedback-btn {
-            background-color: #2e2f54ff;
-            color: #fff;
-            transition: background-color 0.2s ease, transform 0.1s ease;
-        }
-
-        .feedback-btn:hover {
-            background-color: #2563eb;
-            transform: translateY(-2px);
-        }
-
-        /* Feedback modal overlay */
-        #feedbackModal.modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000 !important;
-        }
-
-        /* Modal box */
-        #feedbackModal .modal-content {
-            background: rgba(37, 3, 92, 1);
-            border-radius: 12px;
-            max-width: 500px;
-            width: 90%;
-            padding: 1.5rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            animation: fadeInScale 0.2s ease-in-out;
-        }
-
-        /* Header */
-        #feedbackModal .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        #feedbackModal .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.2rem;
-            cursor: pointer;
-            color: #555;
-        }
-
-        #feedbackModal .modal-close:hover {
-            color: #2e084dff;
-        }
-
-        /* Stars */
-        #feedbackModal .stars {
-            display: flex;
-            gap: 5px;
-            margin-top: 0.5rem;
-        }
-
-        #feedbackModal .stars .fa-star {
-            font-size: 1.5rem;
-            color: #ccc;
-            cursor: pointer;
-            transition: color 0.2s ease;
-        }
-
-        #feedbackModal .stars .fa-star.selected {
-            color: #fbbf24;
-        }
-
-        /* Textarea */
-        #feedbackModal textarea {
-            width: 100%;
-            border-radius: 6px;
-            padding: 0.5rem;
-            margin-top: 0.5rem;
-            border: 1px solid rgba(114, 22, 22, 1);
-            resize: vertical;
-            font-family: inherit;
-            font-size: 0.95rem;
-        }
-
-        /* Feedback modal animation */
-        @keyframes fadeInScale {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
         }
     </style>
 </head>
@@ -395,8 +127,9 @@
                                 </div>
 
                                 <!-- Info Button -->
-                                <button class="info-btn" onclick="showEventInfo({{ $event->id }})"
-                                    title="Event Details" data-event-title="{{ e($event->title) }}"
+                                <button class="info-btn" onclick="showEventInfo(this)"
+                                    title="Event Details" 
+                                    data-event-title="{{ e($event->title) }}"
                                     data-event-location="{{ e($event->location) }}"
                                     data-event-date="{{ $event->date->format('F d, Y') }}"
                                     data-event-time="{{ e($event->start_time ? $event->start_time->format('g:i A') : 'TBA') }}"
@@ -432,7 +165,6 @@
                                     <h3 class="event-title">{{ e($event->title) }}</h3>
 
                                     <!-- Button -->
-
                                     @if ($event->join_status === 'joined')
                                         <div class="flex-container">
                                             <button class="custom-btn leave-btn joined"
@@ -443,7 +175,7 @@
                                             </button>
 
                                             <!-- Feedback Button -->
-                                            <button class=" custom-btn feedback-btn"
+                                            <button class="custom-btn feedback-btn"
                                                 onclick="openFeedbackModal({{ $event->id }}, '{{ e($event->title) }}')">
                                                 <i class="fas fa-comment-dots"></i> Feedback
                                             </button>
@@ -455,19 +187,16 @@
                                             <button class="custom-btn generate-btn"
                                                 @if ($certificate)
                                                     data-certificate-path="{{ asset('storage/' . $certificate->certificate_path) }}"
-                                                    data-event-title={{$certificate->event->title}}
-                                                    data-certificate-date={{$certificate->created_at}}
+                                                    data-event-title="{{ $certificate->event->title }}"
+                                                    data-certificate-date="{{ $certificate->created_at }}"
                                                     onclick="showCertificateInfo({{ $certificate->event_id }})"
                                                 @else
-                                                    data-event-id="{{$event->id}}"
+                                                    data-event-id="{{ $event->id }}"
                                                     onclick="toggleGenerateCertificate(this)"
                                                 @endif
-                                                title="{{ (!$event->hasEnded || !$event->certificate_template_image)
-                                                ? 'The Event is not yet end or no Certificate template'
-                                                : '' }}"
-                                                {{-- @disabled(!$event->hasEnded || !$event->certificate_template_image)> --}}
+                                                title="{{ (!$event->hasEnded || !$event->certificate_template_image) ? 'The Event is not yet end or no Certificate template' : '' }}">
                                                 <span class="btn-text">
-                                                    {{$certificate && $event->hasEnded ? 'View' : 'Certificate'}}
+                                                    {{ $certificate && $event->hasEnded ? 'View' : 'Certificate' }}
                                                 </span>
                                             </button>
                                         </div>
@@ -481,15 +210,12 @@
                                             <span class="btn-text">Join Now <span class="time-left-badge"></span></span>
                                         </button>
                                     @endif
-
-
-
                                 </div>
                             </div>
                         @endforeach
                     </div>
 
-                    <!-- Pagination (unchanged) -->
+                    <!-- Pagination -->
                     @if ($events->hasPages())
                         <div class="pagination-container">
                             <div class="pagination-wrapper">
@@ -559,6 +285,69 @@
         </div>
     </div>
 
+    <!-- Event Info Modal - Profile Card Style -->
+    <div id="eventInfoModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-event-image-container" id="modalImageContainer">
+                    <img src="" alt="Event" class="modal-event-image" id="modalImage" style="display: none;">
+                    <div class="modal-event-image-placeholder" id="modalImagePlaceholder" style="display: none;">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                </div>
+                <button class="modal-close" onclick="closeEventInfo()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-profile-section">
+                <h2 class="modal-event-title" id="modalTitle">Event Title</h2>
+                <p class="modal-event-subtitle" id="modalSubtitle">Event Information</p>
+                <div class="modal-badges">
+                    <span class="modal-badge badge-featured">FEATURED</span>
+                    <span class="modal-badge" id="modalStatusBadge">ACTIVE</span>
+                </div>
+            </div>
+            <div class="modal-body" id="eventInfoContent">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-item-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="info-label">Location</div>
+                        <div class="info-text" id="modalLocation">Convention Center</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-item-icon">
+                            <i class="fas fa-calendar"></i>
+                        </div>
+                        <div class="info-label">Date & Time</div>
+                        <div class="info-text" id="modalDateTime">Nov 15, 2025</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-item-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <div class="info-label">Department</div>
+                        <div class="info-text" id="modalDepartment">All Departments</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-item-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="info-label">Time</div>
+                        <div class="info-text" id="modalTime">5:00 PM</div>
+                    </div>
+                </div>
+                <div class="description-box">
+                    <div class="info-label">Event Description</div>
+                    <div class="info-text" id="modalDescription">
+                        Join us for an exciting event featuring industry leaders and innovators.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Feedback Modal -->
     <div id="feedbackModal" class="modal-overlay">
         <div class="modal-content">
@@ -595,21 +384,8 @@
     <!-- Toast container -->
     <div id="toastContainer"></div>
 
-    <!-- Event Info Modal -->
-    <div id="eventInfoModal" class="modal-overlay" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalTitle">Event Title</h2>
-                <button class="modal-close" onclick="closeEventInfo()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body" id="eventInfoContent">
-                <!-- Dynamic content will be inserted here -->
-            </div>
-        </div>
-    </div>
-@include('layouts.footer')
+    @include('layouts.footer')
+    
     <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.all.min.js"></script>
 
@@ -617,6 +393,64 @@
     <script src="{{ asset('user/js/dashboard.js') }}"></script>
 
     <script>
+        // Show Event Info Modal with Profile Card Style
+        function showEventInfo(button) {
+            const modal = document.getElementById('eventInfoModal');
+            const eventTitle = button.getAttribute('data-event-title');
+            const eventLocation = button.getAttribute('data-event-location');
+            const eventDate = button.getAttribute('data-event-date');
+            const eventTime = button.getAttribute('data-event-time');
+            const eventDepartment = button.getAttribute('data-event-department');
+            const eventDescription = button.getAttribute('data-event-description');
+            const eventImage = button.getAttribute('data-event-image');
+            const eventStatus = button.getAttribute('data-event-status');
+
+            // Update modal content
+            document.getElementById('modalTitle').textContent = eventTitle;
+            document.getElementById('modalSubtitle').textContent = `${eventLocation} • ${eventDate}`;
+            document.getElementById('modalLocation').textContent = eventLocation;
+            document.getElementById('modalDateTime').textContent = eventDate;
+            document.getElementById('modalTime').textContent = eventTime;
+            document.getElementById('modalDepartment').textContent = eventDepartment;
+            document.getElementById('modalDescription').textContent = eventDescription;
+
+            // Update status badge
+            const statusBadge = document.getElementById('modalStatusBadge');
+            if (eventStatus === 'active') {
+                statusBadge.textContent = 'ACTIVE';
+                statusBadge.className = 'modal-badge badge-active';
+            } else {
+                statusBadge.textContent = 'INACTIVE';
+                statusBadge.className = 'modal-badge badge-inactive';
+            }
+
+            // Handle image display
+            const modalImage = document.getElementById('modalImage');
+            const modalPlaceholder = document.getElementById('modalImagePlaceholder');
+
+            if (eventImage) {
+                modalImage.src = eventImage;
+                modalImage.style.display = 'block';
+                modalPlaceholder.style.display = 'none';
+            } else {
+                modalImage.style.display = 'none';
+                modalPlaceholder.style.display = 'flex';
+            }
+
+            modal.classList.add('active');
+        }
+
+        function closeEventInfo() {
+            document.getElementById('eventInfoModal').classList.remove('active');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('eventInfoModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeEventInfo();
+            }
+        });
+
         function openFeedbackModal(eventId, eventTitle) {
             document.getElementById('feedbackModal').style.display = 'flex';
             document.getElementById('feedbackEventId').value = eventId;
@@ -670,6 +504,7 @@
                     Swal.fire('Error', 'Something went wrong. Please try again.', 'error');
                 });
         });
+
         // Enhanced toggle event join with SweetAlert confirmation
         function toggleEventJoin(button) {
             const eventId = button.getAttribute('data-event-id');
@@ -687,15 +522,9 @@
                 cancelButtonText: 'No',
                 confirmButtonColor: isJoined ? '#ef4444' : '#10b981',
                 cancelButtonColor: '#6b7280',
-                reverseButtons: true,
-                customClass: {
-                    popup: 'swal-popup-custom',
-                    confirmButton: 'swal-confirm-custom',
-                    cancelButton: 'swal-cancel-custom'
-                }
+                reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // User confirmed, proceed with the action
                     processEventAction(button, eventId, action, eventTitle);
                 }
             });
@@ -704,7 +533,6 @@
         function toggleGenerateCertificate(button) {
             const eventId = button.getAttribute('data-event-id');
 
-            // Show confirmation dialog
             Swal.fire({
                 title: 'Generate Certificate',
                 html: `Are you sure you want to generate Certificate?`,
@@ -713,34 +541,23 @@
                 confirmButtonText: 'Yes',
                 cancelButtonText: 'No',
                 confirmButtonColor: '#10b981',
-                // confirmButtonColor: isJoined ? '#ef4444' : '#10b981',
                 cancelButtonColor: '#6b7280',
-                reverseButtons: true,
-                customClass: {
-                    popup: 'swal-popup-custom',
-                    confirmButton: 'swal-confirm-custom',
-                    cancelButton: 'swal-cancel-custom'
-                }
+                reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
-                    processCertificateGeneration(button, eventId)
+                    processCertificateGeneration(button, eventId);
                 }
             });
         }
 
-        // Process certificate generation
         function processCertificateGeneration(button, eventId) {
             const url = `/events/${eventId}/generate-certificate`;
 
-            // Disable button during request
             button.disabled = true;
             button.style.opacity = '0.6';
 
-            // Use DELETE method for leave, POST for join
-            const method = 'POST';
-
             fetch(url, {
-                    method: method,
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -750,7 +567,6 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Show success message
                         Swal.fire({
                             title: 'Success!',
                             text: data.message,
@@ -763,7 +579,6 @@
                             location.reload();
                         });
                     } else {
-                        // Show error message
                         Swal.fire({
                             title: 'Error',
                             text: data.message,
@@ -784,21 +599,17 @@
                     });
                 })
                 .finally(() => {
-                    // Re-enable button
                     button.disabled = false;
                     button.style.opacity = '1';
                 });
         }
 
-        // Process the actual join/leave action
         function processEventAction(button, eventId, action, eventTitle) {
             const url = `/events/${eventId}/${action}`;
 
-            // Disable button during request
             button.disabled = true;
             button.style.opacity = '0.6';
 
-            // Use DELETE method for leave, POST for join
             const method = action === 'leave' ? 'DELETE' : 'POST';
 
             fetch(url, {
@@ -812,7 +623,6 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Update button state
                         const isNowJoined = action === 'join';
                         button.setAttribute('data-joined', isNowJoined);
                         button.querySelector('.btn-text').textContent = isNowJoined ? 'Pending Approval' : 'Join Now';
@@ -823,7 +633,6 @@
                             button.classList.remove('pending');
                         }
 
-                        // Show success message
                         Swal.fire({
                             title: 'Success!',
                             text: data.message,
@@ -834,7 +643,6 @@
                             position: 'top-end'
                         });
                     } else {
-                        // Show error message
                         Swal.fire({
                             title: 'Error',
                             text: data.message,
@@ -855,13 +663,12 @@
                     });
                 })
                 .finally(() => {
-                    // Re-enable button
                     button.disabled = false;
                     button.style.opacity = '1';
                 });
         }
 
-        // Enhanced image error handling
+        // Timer functionality
         document.addEventListener('DOMContentLoaded', function() {
             const images = document.querySelectorAll('.event-image');
             const eventCards = document.querySelectorAll('.event-card');
@@ -883,13 +690,11 @@
 
                 if (!endDate || !endTime || !timeLeftBadge) return;
 
-                const endDateTime = new Date(`${endDate.split(' ')[0]}T${endTime}`);
-                console.log(`end date time${endDateTime}`)
+                const endDateTime = new Date(`${endDate}T${endTime}`);
 
                 function updateTimer() {
                     const now = new Date();
                     const diff = endDateTime - now;
-                    console.log(diff)
 
                     if (diff <= 0) {
                         return;
@@ -901,8 +706,6 @@
                     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
-
-
                     if (days > 0) {
                         timeLeftBadge.textContent = `${days}d ${hours}h ${minutes}m left`;
                     } else if (hours > 0) {
@@ -912,12 +715,9 @@
                     }
                 }
 
-                // initial render
                 updateTimer();
                 setInterval(updateTimer, 60000);
             });
-
-
         });
     </script>
 </body>

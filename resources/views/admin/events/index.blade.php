@@ -13,11 +13,6 @@
             <p class="text-muted mb-0">{{ $events->total() }} total events</p>
         </div>
         <div class="d-flex gap-2">
-            <!-- Print Settings Button -->
-            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#printSettingsModal">
-                <i class="fas fa-cog me-2"></i>Print Settings
-            </button>
-            
             <!-- Print Summary Button -->
             <a href="{{ route('admin.events.print', request()->query()) }}" 
                target="_blank" 
@@ -332,74 +327,6 @@
     </div>
 </div>
 
-<!-- Print Settings Modal -->
-<div class="modal fade" id="printSettingsModal" tabindex="-1" aria-labelledby="printSettingsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="printSettingsModalLabel">
-                    <i class="fas fa-cog me-2"></i>Events Print Summary Settings
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form action="{{ route('admin.events.update-print-settings') }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                <div class="modal-body">
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        These settings are specific to the Events Summary report and won't affect other reports.
-                    </div>
-                    
-                    <div class="row g-4">
-                        <!-- Left Logo -->
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Left Logo</label>
-                            <div class="text-center mb-3 p-3 bg-light rounded">
-                                <img id="eventsLeftLogoPreview" 
-                                     src="{{ $printSettings?->events_left_logo_url ?? asset('images/default-left-logo.png') }}" 
-                                     alt="Left Logo" 
-                                     class="img-thumbnail"
-                                     style="max-height: 150px; max-width: 100%; object-fit: contain;">
-                            </div>
-                            <input type="file" name="events_left_logo" class="form-control" accept="image/*" id="eventsLeftLogoInput">
-                            <small class="text-muted d-block mt-1">Recommended: 200x200px, PNG or JPG</small>
-                        </div>
-
-                        <!-- Right Logo -->
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Right Logo</label>
-                            <div class="text-center mb-3 p-3 bg-light rounded">
-                                <img id="eventsRightLogoPreview" 
-                                     src="{{ $printSettings?->events_right_logo_url ?? asset('images/default-right-logo.png') }}" 
-                                     alt="Right Logo" 
-                                     class="img-thumbnail"
-                                     style="max-height: 150px; max-width: 100%; object-fit: contain;">
-                            </div>
-                            <input type="file" name="events_right_logo" class="form-control" accept="image/*" id="eventsRightLogoInput">
-                            <small class="text-muted d-block mt-1">Recommended: 200x200px, PNG or JPG</small>
-                        </div>
-
-                        <!-- Description -->
-                        <div class="col-12">
-                            <label class="form-label fw-bold">Header Description</label>
-                            <textarea name="events_description" class="form-control" rows="3" placeholder="Enter header description for events print summary...">{{ $printSettings?->events_description ?? '' }}</textarea>
-                            <small class="text-muted d-block mt-1">This will appear in the center of the print header below the title</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i>Cancel
-                    </button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-2"></i>Save Settings
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 <!-- Hidden form for delete -->
 <form id="deleteForm" method="POST" style="display: none;">
     @csrf
@@ -563,36 +490,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
-
-    // Image Preview for Events Left Logo
-    const eventsLeftLogoInput = document.getElementById('eventsLeftLogoInput');
-    if (eventsLeftLogoInput) {
-        eventsLeftLogoInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('eventsLeftLogoPreview').src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    }
-
-    // Image Preview for Events Right Logo
-    const eventsRightLogoInput = document.getElementById('eventsRightLogoInput');
-    if (eventsRightLogoInput) {
-        eventsRightLogoInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('eventsRightLogoPreview').src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    }
 });
 
 // View Event Function

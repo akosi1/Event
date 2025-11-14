@@ -54,6 +54,9 @@ Route::get('/public', function () {
             ->name('certificate.generate');
 
         // Profile management
+        Route::match(['put', 'patch'], '/profile', [ProfileController::class, 'update'])
+    ->name('profile.update');
+
         Route::prefix('profile')->name('profile.')->group(function () {
             Route::get('/', [ProfileController::class, 'edit'])->name('edit');
             Route::patch('/', [ProfileController::class, 'update'])->name('update');
