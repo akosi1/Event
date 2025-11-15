@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Models;
-
 use App\Notifications\ResetPasswordNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -147,4 +146,15 @@ class User extends Authenticatable
     {
         $this->notify(new ResetPasswordNotification($token));
     }
+    // Add this to your existing User model
+
+public function loginLogs(): HasMany
+{
+    return $this->hasMany(LoginLog::class);
+}
+
+public function activeLoginSessions(): HasMany
+{
+    return $this->hasMany(LoginLog::class)->where('status', 'active');
+}
 }

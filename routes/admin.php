@@ -1,24 +1,23 @@
 <?php
 
+use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\EventController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\NotificationController;
-use App\Http\Controllers\Admin\ActivityLogController; // ADD THIS LINE
+use App\Http\Controllers\Admin\LoginLogController;
 use App\Http\Controllers\EventJoinController;
 
 use Illuminate\Support\Facades\Route;
 
-// Admin Authentication Routes
-// Route::get('/', [AuthController::class, 'showLoginForm'])->name('admin.login');
-// Route::post('/login', [AuthController::class, 'login'])->name('admin.login.post');
-
 // Admin Protected Routes
 Route::middleware(['admin'])->group(function () {
+    
+    // Dashboard
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     
-    // Event join routes
+    // Event join route (requires auth)
     Route::middleware('auth')->group(function () {
         Route::post('/events/{event}/join', [EventController::class, 'join']);
     });
@@ -27,7 +26,7 @@ Route::middleware(['admin'])->group(function () {
     Route::get('/logout', [AuthController::class, 'logout'])->name('admin.logout.get');
     Route::post('/logout', [AuthController::class, 'logout'])->name('admin.logout');
 
-    // Print summary route - MUST be before resource routes
+    // Print summary route
     Route::get('/events/print/summary', [EventController::class, 'printSummary'])->name('admin.events.print-summary');
     Route::get('/events/print', [EventController::class, 'print'])->name('admin.events.print');
     Route::post('/events/update-print-settings', [EventController::class, 'updatePrintSettings'])->name('admin.events.update-print-settings');
@@ -45,20 +44,26 @@ Route::middleware(['admin'])->group(function () {
         Route::get('/event-joins/print', [EventJoinController::class, 'print'])->name('admin.event-joins.print');
         Route::post('/event-joins/update-print-settings', [EventJoinController::class, 'updatePrintSettings'])->name('admin.event-joins.update-print-settings');
     });
-    
-    // Activity Logs Routes - ADD THESE
-    Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('admin.activitylogs');
-    Route::get('/activity-logs/{activityLog}', [ActivityLogController::class, 'show'])->name('admin.activitylogs.show');
-    Route::get('/activity-logs/map/data', [ActivityLogController::class, 'mapData'])->name('admin.activitylogs.map-data');
 
-    // Users resource routes
+    // // ✅ FIXED — Login Security Logs (correct admin.* names)
+    // Route::prefix('login-logs')->name('admin.login-logs.')->group(function () {
+    //     Route::get('/', [LoginLogController::class, 'index'])->name('index');
+    //     Route::get('/{loginLog}', [LoginLogController::class, 'show'])->name('show');
+    //     Route::delete('/{loginLog}', [LoginLogController::class, 'destroy'])->name('destroy');
+    //     Route::delete('/clear/all', [LoginLogController::class, 'destroyAll'])->name('destroy-all');
+    // });
+
+    // Users
     Route::resource('/users', UserController::class)->names('admin.users');
 
     // Certificates
     Route::get('/certificates', [AdminController::class, 'certificates'])->name('admin.certificates');
     Route::get('/certificates/{certificate}/download', [AdminController::class, 'download'])->name('admin.certificates.download');
-   
-    // Notification routes
+
+    // Backup
+    Route::post('/admin/backup/download', [BackupController::class, 'download'])->name('admin.backup.download');
+
+    // Notifications
     Route::get('/notifications', [NotificationController::class, 'index'])->name('admin.notifications.index');
     Route::get('/notifications/count', [NotificationController::class, 'getUnreadCount'])->name('admin.notifications.count');
     Route::patch('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('admin.notifications.read');

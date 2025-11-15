@@ -230,6 +230,11 @@
             color: #667eea;
         }
 
+        .profile-dropdown-item.backup-item:hover {
+            background: rgba(16, 185, 129, 0.05);
+            color: #10b981;
+        }
+
         .profile-dropdown-item.logout-item:hover {
             background: rgba(239, 68, 68, 0.05);
             color: #ef4444;
@@ -238,6 +243,29 @@
         .profile-dropdown-item i {
             width: 18px;
             text-align: center;
+        }
+
+        .profile-dropdown-item.loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .profile-dropdown-item .spinner {
+            display: none;
+        }
+
+        .profile-dropdown-item.loading .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         .profile-dropdown-divider {
@@ -348,11 +376,6 @@
                href="{{ route('admin.event-joins.index') }}">
                 <i class="fas fa-users-cog"></i> Participants
             </a>
-            
-            <a class="nav-link {{ request()->routeIs('admin.activitylogs*') ? 'active' : '' }}"
-            href="{{ route('admin.activitylogs') }}">
-                <i class="fas fa-chart-line"></i> Activity Logs
-            </a>
         </nav>
         
     </div>
@@ -385,6 +408,15 @@
                                 <div class="profile-dropdown-email">{{ Auth::user()->email }}</div>
                             </div>
                             <div class="profile-dropdown-menu">
+                                <!-- Database Backup Button -->
+                                <button type="button" id="backupButton" class="profile-dropdown-item backup-item w-100 border-0 bg-transparent text-start">
+                                    <i class="fas fa-database"></i>
+                                    <span class="spinner"></span>
+                                    <span class="backup-text">Download DB Backup</span>
+                                </button>
+
+                                <div class="profile-dropdown-divider"></div>
+
                                 <form method="POST" action="{{ route('admin.logout') }}" class="d-block">
                                     @csrf
                                     <button type="submit" class="profile-dropdown-item logout-item w-100 border-0 bg-transparent text-start">
@@ -584,10 +616,97 @@
             }
         }
 
+        class DatabaseBackup {
+            constructor() {
+                this.backupButton = document.getElementById('backupButton');
+                this.init();
+            }
+
+            init() {
+                this.backupButton.addEventListener('click', () => this.downloadBackup());
+            }
+
+            async downloadBackup() {
+                const button = this.backupButton;
+                const icon = button.querySelector('.fas');
+                const text = button.querySelector('.backup-text');
+
+                // Disable button and show loading state
+                button.classList.add('loading');
+                button.disabled = true;
+                text.textContent = 'Downloading...';
+
+                try {
+                    const response = await fetch('{{ route("admin.backup.download") }}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Backup failed');
+                    }
+
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    
+                    // Get filename from response headers or create default
+                    const contentDisposition = response.headers.get('Content-Disposition');
+                    let filename = 'u802714156_events_backup.sql';
+                    
+                    if (contentDisposition) {
+                        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+                        if (filenameMatch) {
+                            filename = filenameMatch[1];
+                        }
+                    }
+                    
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+
+                    // Show success message
+                    this.showAlert('Database backup downloaded successfully!', 'success');
+                } catch (error) {
+                    console.error('Backup error:', error);
+                    this.showAlert('Failed to download database backup. Please try again.', 'error');
+                } finally {
+                    // Reset button state
+                    button.classList.remove('loading');
+                    button.disabled = false;
+                    text.textContent = 'Download DB Backup';
+                }
+            }
+
+            showAlert(message, type) {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+                alertDiv.innerHTML = `
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+
+                const container = document.querySelector('.p-4');
+                container.insertBefore(alertDiv, container.firstChild);
+
+                // Auto dismiss after 5 seconds
+                setTimeout(() => {
+                    alertDiv.remove();
+                }, 5000);
+            }
+        }
+
         // Initialize systems when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
             new Sidebar();
             new ProfileDropdown();
+            new DatabaseBackup();
             // NotificationSystem is initialized in notification.blade.php
         });
     </script>
