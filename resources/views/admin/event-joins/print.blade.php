@@ -27,7 +27,6 @@
             .records-table thead { display: table-header-group; }
             .records-table tr { page-break-inside: avoid; }
             
-            /* Remove browser print headers/footers */
             @page { 
                 margin-top: 0;
                 margin-bottom: 0;
@@ -38,7 +37,6 @@
             }
         }
         
-        /* Hide browser default headers and footers */
         body::before,
         body::after {
             display: none !important;
@@ -47,21 +45,22 @@
         /* Header */
         .official-header { 
             text-align: center; 
-            border-bottom: 2px solid #000; 
-            padding-bottom: 15px; 
-            margin-bottom: 20px; 
+            padding-bottom: 10px; 
+            margin-bottom: 15px; 
         }
         
         .header-logos { 
             display: flex; 
-            justify-content: space-between; 
-            align-items: flex-start; 
-            margin-bottom: 10px; 
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 5px; 
         }
         
         .logo-left, .logo-right { 
-            width: 80px; 
-            height: 80px; 
+            width: 60px; 
+            height: 60px;
+            flex-shrink: 0;
         }
         
         .logo-left img, .logo-right img { 
@@ -71,20 +70,19 @@
         }
         
         .header-text { 
-            flex: 1; 
-            padding: 0 20px; 
+            text-align: center;
         }
         
         .header-text p { 
             font-size: 11px; 
-            line-height: 1.3; 
-            margin: 2px 0; 
+            line-height: 1.2; 
+            margin: 1px 0; 
         }
         
         .header-text h1 { 
             font-size: 13px; 
             font-weight: bold; 
-            margin: 5px 0; 
+            margin: 3px 0; 
             text-transform: uppercase; 
         }
         
@@ -97,7 +95,7 @@
             text-align: center; 
             font-size: 12px; 
             font-weight: bold; 
-            margin: 15px 0 10px 0; 
+            margin: 10px 0; 
             text-transform: uppercase; 
             border-bottom: 1px solid #000;
             padding-bottom: 5px;
@@ -107,38 +105,8 @@
             text-align: center;
             font-size: 14px;
             font-weight: bold;
-            margin: 20px 0;
+            margin: 15px 0;
             text-transform: uppercase;
-        }
-
-        /* Summary Box */
-        .summary-box {
-            border: 2px solid #000;
-            padding: 15px;
-            margin: 20px 0;
-        }
-
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            text-align: center;
-        }
-
-        .summary-item {
-            border: 1px solid #000;
-            padding: 10px;
-        }
-
-        .summary-label {
-            font-size: 10px;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-        }
-
-        .summary-value {
-            font-size: 24px;
-            font-weight: bold;
         }
 
         /* Table */
@@ -152,7 +120,7 @@
         .records-table { 
             width: 100%; 
             border-collapse: collapse; 
-            margin-bottom: 20px;
+            margin-bottom: 0;
         }
         
         .records-table th, 
@@ -175,6 +143,16 @@
         
         .records-table tbody tr:nth-child(even) {
             background: #fafafa;
+        }
+
+        .records-table tfoot {
+            background: #f0f0f0;
+            font-weight: bold;
+        }
+
+        .records-table tfoot td {
+            font-size: 11px;
+            font-weight: bold;
         }
 
         .user-info, .event-info { 
@@ -256,53 +234,13 @@
         .print-btn:hover {
             background: #333;
         }
-        
-        /* Print Instructions */
-        .print-instructions {
-            position: fixed;
-            top: 70px;
-            right: 20px;
-            background: #fff3cd;
-            border: 2px solid #ffc107;
-            padding: 15px;
-            border-radius: 8px;
-            max-width: 300px;
-            font-size: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            z-index: 1000;
-        }
-        
-        .print-instructions h4 {
-            font-size: 14px;
-            margin-bottom: 10px;
-            color: #856404;
-        }
-        
-        .print-instructions ol {
-            margin: 0;
-            padding-left: 20px;
-        }
-        
-        .print-instructions li {
-            margin-bottom: 5px;
-        }
     </style>
 </head>
 <body>
     <button class="print-btn no-print" onclick="printDocument()">🖨️ Print Document</button>
     
-    <!-- <div class="print-instructions no-print">
-        <h4>📋 Before Printing:</h4>
-        <ol>
-            <li>Click "More settings"</li>
-            <li><strong>Uncheck</strong> "Headers and footers"</li>
-            <li>Click Print</li>
-        </ol>
-    </div> -->
-    
     <script>
         function printDocument() {
-            // Try to hide headers/footers programmatically
             const style = document.createElement('style');
             style.textContent = `
                 @page { 
@@ -314,12 +252,7 @@
                 }
             `;
             document.head.appendChild(style);
-            
-            // Trigger print
             window.print();
-            
-            // Note: Browser print headers/footers can only be disabled in print settings
-            // Users should uncheck "Headers and footers" in the print dialog
         }
     </script>
 
@@ -328,45 +261,24 @@
         <div class="official-header">
             <div class="header-logos">
                 <div class="logo-left">
-                    <img src="{{ $summaryData['logo_path'] }}" alt="Logo">
+                    <img src="{{ $summaryData['logo_left_path'] }}" alt="MCC Logo">
                 </div>
                 <div class="header-text">
                     <p>Republic of the Philippines</p>
                     <p>Region VII, Central Visayas</p>
-                    <p>Municipality of Madridejos</p>
+                    <p>Commission on Higher Education</p>
                     <h1>MADRIDEJOS COMMUNITY COLLEGE</h1>
                     <p class="address">Crossing Bunakan, Madridejos, Cebu</p>
                 </div>
                 <div class="logo-right">
-                    <img src="{{ $summaryData['logo_path'] }}" alt="Logo">
+                    <img src="{{ $summaryData['logo_right_path'] }}" alt="Madridejos Seal">
                 </div>
             </div>
         </div>
-
-        <div class="office-title">OFFICE OF THE COLLEGE PRESIDENT</div>
 
         <div class="document-title">Event Join Requests Summary</div>
 
-        <!-- Summary Box -->
-        <div class="summary-box">
-            <div class="summary-grid">
-                <div class="summary-item">
-                    <div class="summary-label">Total Requests</div>
-                    <div class="summary-value">{{ $summaryData['total_records'] }}</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-label">Approved</div>
-                    <div class="summary-value">{{ $summaryData['approved_count'] }}</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-label">Pending</div>
-                    <div class="summary-value">{{ $summaryData['pending_count'] }}</div>
-                </div>
-            </div>
-        </div>
-
         <!-- Records Table -->
-        <h2 class="table-title">Detailed Records List</h2>
         <table class="records-table">
             <thead>
                 <tr>
@@ -410,6 +322,20 @@
                 </tr>
                 @endforelse
             </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4" style="text-align: right; padding-right: 15px;">TOTAL REQUESTS:</td>
+                    <td style="text-align: center;">{{ $summaryData['total_records'] }}</td>
+                </tr>
+                <tr>
+                    <td colspan="4" style="text-align: right; padding-right: 15px;">APPROVED:</td>
+                    <td style="text-align: center;">{{ $summaryData['approved_count'] }}</td>
+                </tr>
+                <tr>
+                    <td colspan="4" style="text-align: right; padding-right: 15px;">PENDING:</td>
+                    <td style="text-align: center;">{{ $summaryData['pending_count'] }}</td>
+                </tr>
+            </tfoot>
         </table>
 
         <!-- Signature Section -->

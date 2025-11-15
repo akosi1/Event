@@ -88,7 +88,8 @@ class EventJoinController extends Controller
             'approved_count' => $eventJoins->where('approved', true)->count(),
             'pending_count' => $eventJoins->where('approved', false)->count(),
             'generated_at' => now()->format('F d, Y h:i A'),
-            'logo_path' => asset('images/logo.png')
+            'logo_left_path' => asset('images/logo.png'),
+            'logo_right_path' => asset('images/Official-Logo-Seal-madridejos.png')
         ];
 
         return view('admin.event-joins.print', compact('summaryData'));

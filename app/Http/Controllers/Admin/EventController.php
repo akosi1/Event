@@ -415,27 +415,65 @@ class EventController extends Controller
             'rating' => $request->rating,
         ]);
 
-        $mailer = new PHPMailerService();
+        $user = Auth::user();
 
+        // Create feedback preview (first 100 characters)
+        $feedbackPreview = strlen($request->feedback) > 100 
+            ? substr($request->feedback, 0, 100) . '...' 
+            : $request->feedback;
+
+        // Create notification message with feedback preview
+        $message = "{$user->first_name} {$user->last_name} shared their thoughts on \"{$event->title}\"";
+        
+        if ($request->rating) {
+            $message .= " (Rating: {$request->rating}/5)";
+        }
+        
+        $message .= ": \"{$feedbackPreview}\"";
+
+        // Create notification for admin
+        \App\Models\Notification::create([
+            'user_id' => null, // null for admin notifications
+            'type' => 'feedback',
+            'message' => $message,
+            'data' => json_encode([
+                'event_id' => $event->id,
+                'event_title' => $event->title,
+                'event_token' => $event->token,
+                'user_id' => $user->id,
+                'user_name' => "{$user->first_name} {$user->last_name}",
+                'user_email' => $user->email,
+                'feedback_id' => $feedback->id,
+                'rating' => $request->rating,
+                'feedback' => $request->feedback, // Full feedback stored in data
+                'feedback_preview' => $feedbackPreview
+            ]),
+            'is_read' => false,
+        ]);
+
+        // Send email to admin
+        $mailer = new PHPMailerService();
         $adminEmail = env('FEEDBACK_RECIPIENT', 'events.org.com');
-        $userEmail = Auth::user()->email;
+        $userEmail = $user->email;
 
         $subject = "New Feedback for: {$event->title}";
         $body = "
             <h3>New Feedback Received</h3>
             <p><strong>Event:</strong> {$event->title}</p>
             <p><strong>Event Token:</strong> {$event->token}</p>
-            <p><strong>User:</strong> {$userEmail}</p>
-            <p><strong>Rating:</strong> {$request->rating}</p>
-            <p><strong>Feedback:</strong><br>{$request->feedback}</p>
+            <p><strong>User:</strong> {$user->first_name} {$user->last_name} ({$userEmail})</p>
+            <p><strong>Rating:</strong> " . ($request->rating ? "{$request->rating}/5" : "No rating") . "</p>
+            <p><strong>Feedback:</strong><br>" . nl2br(htmlspecialchars($request->feedback)) . "</p>
         ";
 
         $mailer->sendEmail($adminEmail, $subject, $body);
 
+        // Send confirmation email to user
         $thankYouBody = "
             <h3>Thank You for Your Feedback!</h3>
             <p>We've received your feedback for <strong>{$event->title}</strong>.</p>
             <p>Your input helps us improve future events!</p>
+            <p><strong>Your feedback:</strong><br>" . nl2br(htmlspecialchars($request->feedback)) . "</p>
         ";
         $mailer->sendEmail($userEmail, "Feedback Confirmation", $thankYouBody);
 

@@ -30,7 +30,6 @@
     </div>
     @endif
 
-    {{-- Validation Errors --}}
     @if($errors->updatePassword->any())
     <div class="toast toast-error">
         <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
@@ -41,332 +40,180 @@
     </div>
     @endif
 
-    @if($errors->any() && !$errors->updatePassword->any())
-    <div class="toast toast-error">
-        <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-            <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/>
-        </svg>
-        <span>{{ $errors->first() }}</span>
-    </div>
-    @endif
-
     <div class="container">
-        {{-- Profile Header Section --}}
-        <div class="profile-header">
-            <div class="profile-header-content">
-                <div class="profile-avatar-large">
-                    <img id="header-avatar" src="{{ $user->profile_picture_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($user->full_name) . '&background=764ba2&color=fff&size=300' }}" alt="{{ $user->full_name }}">
-                    <div class="avatar-overlay">
-                        <label for="profile_picture_header" class="avatar-edit-btn">
-                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                                <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
-                                <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
-                            </svg>
-                        </label>
+        <form action="{{ route('profile.update') }}" method="POST" id="profile-form">
+            @csrf
+            @method('PUT')
+            
+            <input type="hidden" name="profile_picture_base64" id="profile_picture_base64">
+            <input type="file" id="profile_picture_header" name="profile_picture_file" accept="image/jpeg,image/png,image/gif" hidden onchange="previewImage(event)">
+
+            {{-- Profile Information Card --}}
+            <div class="profile-card">
+                {{-- Header with Title --}}
+                <div class="card-header">
+                    <h2 class="page-title">Personal Information</h2>
+                </div>
+
+                {{-- Profile Photo Section --}}
+                <div class="photo-section">
+                    <div class="photo-wrapper" onclick="togglePhotoOverlay()">
+                        <img id="header-avatar" src="{{ $user->profile_picture_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($user->full_name) . '&background=764ba2&color=fff&size=400' }}" alt="{{ $user->full_name }}">
+                        <div class="photo-overlay" id="photoOverlay">
+                            <button type="button" class="btn-change-photo" onclick="event.stopPropagation(); document.getElementById('profile_picture_header').click()">
+                                <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                                    <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
+                                </svg>
+                                Change Photo
+                            </button>
+                            <button type="button" class="btn-save-photo" id="savePhotoBtn" style="display: none;" onclick="event.stopPropagation(); savePhotoChange()">
+                                <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
+                                </svg>
+                                Save Photo
+                            </button>
+                        </div>
                     </div>
                 </div>
-                <div class="profile-info">
-                    <h1 class="profile-name">{{ $user->full_name }}</h1>
-                    <p class="profile-handle">{{ '@' . strtolower(str_replace(' ', '', $user->first_name . $user->last_name)) }}</p>
-                    <div class="profile-badges">
-                        <span class="badge badge-role">{{ ucfirst($user->role) }}</span>
-                        <span class="badge badge-status badge-{{ $user->status }}">{{ ucfirst($user->status) }}</span>
+
+                {{-- Editable Information Section --}}
+                <div class="info-section">
+                    <div class="info-row single-line">
+                        <label class="info-label">ID Number:</label>
+                        <span class="info-value">{{ $user->id_number }}</span>
                     </div>
+
+                    <div class="info-row single-line">
+                        <label class="info-label">Course:</label>
+                        <span class="info-value course-text">{{ strtoupper($user->department ?? 'BACHELOR OF SCIENCE IN INFORMATION TECHNOLOGY') }}</span>
+                    </div>
+
+                    <div class="info-row single-line">
+                        <label class="info-label" for="first_name">First Name:</label>
+                        <input type="text" id="first_name" name="first_name" class="info-input-inline editable @error('first_name') error @enderror" value="{{ old('first_name', $user->first_name) }}" required>
+                    </div>
+                    @error('first_name')
+                    <span class="error-message-inline">{{ $message }}</span>
+                    @enderror
+
+                    <div class="info-row single-line">
+                        <label class="info-label" for="middle_name">Middle Name:</label>
+                        <input type="text" id="middle_name" name="middle_name" class="info-input-inline editable @error('middle_name') error @enderror" value="{{ old('middle_name', $user->middle_name) }}" placeholder="Optional">
+                    </div>
+                    @error('middle_name')
+                    <span class="error-message-inline">{{ $message }}</span>
+                    @enderror
+
+                    <div class="info-row single-line">
+                        <label class="info-label" for="last_name">Last Name:</label>
+                        <input type="text" id="last_name" name="last_name" class="info-input-inline editable @error('last_name') error @enderror" value="{{ old('last_name', $user->last_name) }}" required>
+                    </div>
+                    @error('last_name')
+                    <span class="error-message-inline">{{ $message }}</span>
+                    @enderror
+
+                    <div class="info-row single-line">
+                        <label class="info-label">Year Level:</label>
+                        <span class="info-value">{{ $user->year_level_name ?? '1st Year' }}</span>
+                    </div>
+                </div>
+
+                {{-- Save Button --}}
+                <div class="form-actions">
+                    <button type="button" class="btn-save" onclick="showSaveModal()">
+                        <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3.5 3.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L7.5 9.293V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z"/>
+                        </svg>
+                        Save Changes
+                    </button>
                 </div>
             </div>
-            <div class="info-cards">
-                <div class="info-card">
-                    <div class="info-card-icon">
-                        <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3Zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
-                        </svg>
-                    </div>
-                    <div class="info-card-content">
-                        <span class="info-card-label">ID Number</span>
-                        <span class="info-card-value">{{ $user->id_number }}</span>
-                    </div>
-                </div>
+        </form>
 
-                <div class="info-card">
-                    <div class="info-card-icon icon-red">
-                        <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4Zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2Zm13 2.383-4.708 2.825L15 11.105V5.383Zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741ZM1 11.105l4.708-2.897L1 5.383v5.722Z"/>
-                        </svg>
-                    </div>
-                    <div class="info-card-content">
-                        <span class="info-card-label">Email</span>
-                        <span class="info-card-value">{{ $user->email }}</span>
-                    </div>
-                </div>
-
-                <div class="info-card">
-                    <div class="info-card-icon icon-red">
-                        <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M6.5 1A1.5 1.5 0 0 0 5 2.5V3H1.5A1.5 1.5 0 0 0 0 4.5v1.384l7.614 2.03a1.5 1.5 0 0 0 .772 0L16 5.884V4.5A1.5 1.5 0 0 0 14.5 3H11v-.5A1.5 1.5 0 0 0 9.5 1h-3zm0 1h3a.5.5 0 0 1 .5.5V3H6v-.5a.5.5 0 0 1 .5-.5z"/>
-                            <path d="M0 12.5A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5V6.85L8.129 8.947a.5.5 0 0 1-.258 0L0 6.85v5.65z"/>
-                        </svg>
-                    </div>
-                    <div class="info-card-content">
-                        <span class="info-card-label">Department</span>
-                        <span class="info-card-value">{{ $user->department }}</span>
-                    </div>
-                </div>
-
-                @if($user->year_level)
-                <div class="info-card">
-                    <div class="info-card-icon">
-                        <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M8.211 2.047a.5.5 0 0 0-.422 0l-7.5 3.5a.5.5 0 0 0 .025.917l7.5 3a.5.5 0 0 0 .372 0L14 7.14V13a1 1 0 0 0-1 1v2h3v-2a1 1 0 0 0-1-1V6.739l.686-.275a.5.5 0 0 0 .025-.917l-7.5-3.5Z"/>
-                            <path d="M4.176 9.032a.5.5 0 0 0-.656.327l-.5 1.7a.5.5 0 0 0 .294.605l4.5 1.8a.5.5 0 0 0 .372 0l4.5-1.8a.5.5 0 0 0 .294-.605l-.5-1.7a.5.5 0 0 0-.656-.327L8 10.466 4.176 9.032Z"/>
-                        </svg>
-                    </div>
-                    <div class="info-card-content">
-                        <span class="info-card-label">Year Level</span>
-                        <span class="info-card-value">{{ $user->year_level_name }}</span>
-                    </div>
-                </div>
-                @endif
+        {{-- Change Password Card --}}
+        <div class="profile-card password-card">
+            <div class="card-header">
+                <h2 class="page-title">Change Password</h2>
             </div>
-        </div>
 
-        {{-- Tabs Navigation --}}
-        <div class="tabs">
-            <button class="tab active" data-tab="profile">
-                <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3Zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
-                </svg>
-                Profile Information
-            </button>
-            <button class="tab" data-tab="password">
-                <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
-                </svg>
-                Security
-            </button>
-        </div>
-
-        {{-- Profile Information Tab --}}
-        <div class="tab-content active" id="profile-tab">
-            <form action="{{ route('profile.update') }}" method="POST" id="profile-form" class="modern-form">
+            <form action="{{ route('password.update') }}" method="POST" id="password-form">
                 @csrf
                 @method('PUT')
 
-                <input type="hidden" name="profile_picture_base64" id="profile_picture_base64">
-                <input type="hidden" name="remove_profile_picture" id="remove_profile_picture" value="0">
-                <input type="file" id="profile_picture_header" name="profile_picture_file" accept="image/jpeg,image/png,image/gif" hidden onchange="previewImage(event)">
-
-                <div class="form-section">
-                    <h2 class="section-title">Personal Information</h2>
-                    <p class="section-subtitle">Update your personal details and profile picture</p>
-
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="first_name" class="form-label">
-                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                    <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3Zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
+                <div class="password-section">
+                    <div class="form-group">
+                        <label class="form-label">Current Password</label>
+                        <div class="password-input">
+                            <input type="password" id="current_password" name="current_password" class="form-control @error('current_password', 'updatePassword') error @enderror" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword('current_password')">
+                                <svg class="eye-icon" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
+                                    <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
                                 </svg>
-                                First Name
-                            </label>
-                            <input type="text" id="first_name" name="first_name" class="form-control @error('first_name') error @enderror" value="{{ old('first_name', $user->first_name) }}" required>
-                            @error('first_name')
-                            <span class="error-message">{{ $message }}</span>
-                            @enderror
+                            </button>
                         </div>
-
-                        <div class="form-group">
-                            <label for="middle_name" class="form-label">
-                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                    <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3Zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
-                                </svg>
-                                Middle Name
-                                <span class="optional">Optional</span>
-                            </label>
-                            <input type="text" id="middle_name" name="middle_name" class="form-control @error('middle_name') error @enderror" value="{{ old('middle_name', $user->middle_name) }}">
-                            @error('middle_name')
-                            <span class="error-message">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        <div class="form-group">
-                            <label for="last_name" class="form-label">
-                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                    <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3Zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
-                                </svg>
-                                Last Name
-                            </label>
-                            <input type="text" id="last_name" name="last_name" class="form-control @error('last_name') error @enderror" value="{{ old('last_name', $user->last_name) }}" required>
-                            @error('last_name')
-                            <span class="error-message">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        <div class="form-group">
-                            <label for="email" class="form-label">
-                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                    <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4Zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2Zm13 2.383-4.708 2.825L15 11.105V5.383Zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741ZM1 11.105l4.708-2.897L1 5.383v5.722Z"/>
-                                </svg>
-                                Email Address
-                            </label>
-                            <input type="email" id="email" class="form-control" value="{{ $user->email }}" disabled>
-                            <p class="form-hint">Email cannot be changed</p>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="id_number" class="form-label">
-                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                    <path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5v-3zM2.5 2a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zm6.5.5A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5v-3zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zM1 10.5A1.5 1.5 0 0 1 2.5 9h3A1.5 1.5 0 0 1 7 10.5v3A1.5 1.5 0 0 1 5.5 15h-3A1.5 1.5 0 0 1 1 13.5v-3zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zm6.5.5A1.5 1.5 0 0 1 10.5 9h3a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 13.5v-3zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3z"/>
-                                </svg>
-                                ID Number
-                            </label>
-                            <input type="text" id="id_number" class="form-control" value="{{ $user->id_number }}" disabled>
-                            <p class="form-hint">ID Number is assigned by the system</p>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="department" class="form-label">
-                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                    <path d="M6.5 1A1.5 1.5 0 0 0 5 2.5V3H1.5A1.5 1.5 0 0 0 0 4.5v1.384l7.614 2.03a1.5 1.5 0 0 0 .772 0L16 5.884V4.5A1.5 1.5 0 0 0 14.5 3H11v-.5A1.5 1.5 0 0 0 9.5 1h-3zm0 1h3a.5.5 0 0 1 .5.5V3H6v-.5a.5.5 0 0 1 .5-.5z"/>
-                                    <path d="M0 12.5A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5V6.85L8.129 8.947a.5.5 0 0 1-.258 0L0 6.85v5.65z"/>
-                                </svg>
-                                Department
-                            </label>
-                            <input type="text" id="department" class="form-control" value="{{ $user->department_name }}" disabled>
-                        </div>
-
-                        @if($user->year_level)
-                        <div class="form-group">
-                            <label for="year_level" class="form-label">
-                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                    <path d="M8.211 2.047a.5.5 0 0 0-.422 0l-7.5 3.5a.5.5 0 0 0 .025.917l7.5 3a.5.5 0 0 0 .372 0L14 7.14V13a1 1 0 0 0-1 1v2h3v-2a1 1 0 0 0-1-1V6.739l.686-.275a.5.5 0 0 0 .025-.917l-7.5-3.5Z"/>
-                                    <path d="M4.176 9.032a.5.5 0 0 0-.656.327l-.5 1.7a.5.5 0 0 0 .294.605l4.5 1.8a.5.5 0 0 0 .372 0l4.5-1.8a.5.5 0 0 0 .294-.605l-.5-1.7a.5.5 0 0 0-.656-.327L8 10.466 4.176 9.032Z"/>
-                                </svg>
-                                Year Level
-                            </label>
-                            <input type="text" id="year_level" class="form-control" value="{{ $user->year_level_name }}" disabled>
-                        </div>
-                        @endif
+                        @error('current_password', 'updatePassword')
+                        <span class="error-message">{{ $message }}</span>
+                        @enderror
                     </div>
 
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" onclick="window.history.back()">
-                            Cancel
-                        </button>
-                        <button type="submit" class="btn btn-primary">
-                            <span class="btn-text">
-                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                    <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+                    <div class="form-group">
+                        <label class="form-label">New Password</label>
+                        <div class="password-input">
+                            <input type="password" id="password" name="password" class="form-control @error('password', 'updatePassword') error @enderror" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword('password')">
+                                <svg class="eye-icon" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
+                                    <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
                                 </svg>
-                                Save Changes
-                            </span>
-                            <span class="btn-loader" style="display: none;">
-                                <svg class="spinner" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                    <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0z" opacity=".3"/>
-                                    <path d="M8 0a8 8 0 0 0 0 16v-2a6 6 0 0 1 0-12V0z"/>
-                                </svg>
-                                Saving...
-                            </span>
-                        </button>
+                            </button>
+                        </div>
+                        @error('password', 'updatePassword')
+                        <span class="error-message">{{ $message }}</span>
+                        @enderror
                     </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Confirm New Password</label>
+                        <div class="password-input">
+                            <input type="password" id="password_confirmation" name="password_confirmation" class="form-control" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword('password_confirmation')">
+                                <svg class="eye-icon" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
+                                    <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-update-password">Update Password</button>
                 </div>
             </form>
         </div>
+    </div>
+</div>
 
-        {{-- Password Tab --}}
-        <div class="tab-content" id="password-tab">
-            <form action="{{ route('password.update') }}" method="POST" id="password-form" class="modern-form">
-                @csrf
-                @method('PUT')
-
-                <div class="form-section">
-                    <h2 class="section-title">Change Password</h2>
-                    <p class="section-subtitle">Ensure your account is using a long, random password to stay secure</p>
-
-                    <div class="form-grid">
-                        <div class="form-group full-width">
-                            <label for="current_password" class="form-label">
-                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                    <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
-                                </svg>
-                                Current Password
-                            </label>
-                            <div class="password-input">
-                                <input type="password" id="current_password" name="current_password" class="form-control @error('current_password', 'updatePassword') error @enderror" required>
-                                <button type="button" class="toggle-password" onclick="togglePassword('current_password')">
-                                    <svg class="eye-icon" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
-                                        <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
-                                        <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
-                                    </svg>
-                                </button>
-                            </div>
-                            @error('current_password', 'updatePassword')
-                            <span class="error-message">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        <div class="form-group">
-                            <label for="password" class="form-label">
-                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                    <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
-                                </svg>
-                                New Password
-                            </label>
-                            <div class="password-input">
-                                <input type="password" id="password" name="password" class="form-control @error('password', 'updatePassword') error @enderror" required>
-                                <button type="button" class="toggle-password" onclick="togglePassword('password')">
-                                    <svg class="eye-icon" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
-                                        <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
-                                        <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
-                                    </svg>
-                                </button>
-                            </div>
-                            @error('password', 'updatePassword')
-                            <span class="error-message">{{ $message }}</span>
-                            @enderror
-                            <p class="form-hint">Minimum 8 characters</p>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="password_confirmation" class="form-label">
-                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                    <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
-                                </svg>
-                                Confirm New Password
-                            </label>
-                            <div class="password-input">
-                                <input type="password" id="password_confirmation" name="password_confirmation" class="form-control" required>
-                                <button type="button" class="toggle-password" onclick="togglePassword('password_confirmation')">
-                                    <svg class="eye-icon" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
-                                        <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
-                                        <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('password-form').reset()">
-                            Reset
-                        </button>
-                        <button type="submit" class="btn btn-primary">
-                            <span class="btn-text">
-                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                    <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
-                                </svg>
-                                Update Password
-                            </span>
-                            <span class="btn-loader" style="display: none;">
-                                <svg class="spinner" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                    <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0z" opacity=".3"/>
-                                    <path d="M8 0a8 8 0 0 0 0 16v-2a6 6 0 0 1 0-12V0z"/>
-                                </svg>
-                                Updating...
-                            </span>
-                        </button>
-                    </div>
-                </div>
-            </form>
+{{-- Save Confirmation Modal --}}
+<div id="saveModal" class="modal">
+    <div class="modal-overlay" onclick="closeSaveModal()"></div>
+    <div class="modal-content">
+        <div class="modal-icon">
+            <svg width="48" height="48" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/>
+            </svg>
+        </div>
+        <h3 class="modal-title">Save Changes?</h3>
+        <p class="modal-message">Are you sure you want to save these changes to your profile?</p>
+        <div class="modal-actions">
+            <button type="button" class="btn-modal btn-cancel" onclick="closeSaveModal()">Cancel</button>
+            <button type="button" class="btn-modal btn-confirm" onclick="confirmSave()">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
+                </svg>
+                Yes, Save
+            </button>
         </div>
     </div>
 </div>
@@ -379,20 +226,19 @@
     }
 
     body {
-        background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%) !important;
-        margin: 0;
+        background: #f5f5f5 !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     }
 
     .profile-page {
         min-height: 100vh;
-        background: transparent !important;
-        padding: 6rem 1rem 2rem;
+        background: #f5f5f5 !important;
+        padding: 7rem 1rem 2rem;
     }
 
     .container {
-        max-width: 800px;
+        max-width: 1000px;
         margin: 0 auto;
-        zoom: 0.9;
     }
 
     /* Toast Notifications */
@@ -401,13 +247,13 @@
         top: 2rem;
         right: 2rem;
         padding: 1rem 1.5rem;
-        border-radius: 12px;
+        border-radius: 8px;
         display: flex;
         align-items: center;
         gap: 0.75rem;
         font-size: 0.875rem;
         font-weight: 500;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         animation: slideInRight 0.3s ease, fadeOut 0.3s ease 4.7s;
         z-index: 1000;
     }
@@ -440,358 +286,275 @@
         }
     }
 
-    /* Profile Header */
-    .profile-header {
-        background: rgba(255, 255, 255, 0.98);
-        border-radius: 20px;
-        padding: 2.5rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-        backdrop-filter: blur(10px);
-        position: relative;
+    /* Profile Card */
+    .profile-card {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 2.5rem 3rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
-    .profile-header-content {
+    /* Card Header */
+    .card-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .page-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #111827;
+        margin: 0;
+    }
+
+    /* Photo Section */
+    .photo-section {
         display: flex;
         flex-direction: column;
         align-items: center;
-        text-align: center;
-        gap: 1.5rem;
+        gap: 1rem;
         margin-bottom: 2rem;
         padding-bottom: 2rem;
-        border-bottom: 2px solid #f3f4f6;
+        border-bottom: 1px solid #e5e7eb;
     }
 
-    .profile-avatar-large {
+    .photo-wrapper {
+        width: 200px;
+        height: 200px;
+        border: 3px solid #d1d5db;
+        border-radius: 50%;
+        overflow: hidden;
+        background: #f9fafb;
         position: relative;
-        width: 140px;
-        height: 140px;
-        flex-shrink: 0;
+        cursor: pointer;
+        transition: all 0.3s;
     }
 
-    .profile-avatar-large img {
+    .photo-wrapper:hover {
+        border-color: #9ca3af;
+    }
+
+    .photo-wrapper:hover .photo-overlay {
+        opacity: 1;
+    }
+
+    .photo-overlay.show {
+        opacity: 1;
+    }
+
+    .photo-wrapper img {
         width: 100%;
         height: 100%;
-        border-radius: 50%;
         object-fit: cover;
-        border: 5px solid rgba(118, 75, 162, 0.2);
-        box-shadow: 0 8px 24px rgba(118, 75, 162, 0.3);
     }
 
-    .avatar-overlay {
+    .photo-overlay {
         position: absolute;
-        bottom: 0;
-        right: 0;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
         opacity: 0;
         transition: opacity 0.3s;
     }
 
-    .profile-avatar-large:hover .avatar-overlay {
-        opacity: 1;
-    }
-
-    .avatar-edit-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 44px;
-        height: 44px;
-        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-        border-radius: 50%;
-        cursor: pointer;
-        box-shadow: 0 4px 16px rgba(118, 75, 162, 0.5);
-        transition: all 0.3s;
-    }
-
-    .avatar-edit-btn:hover {
-        transform: scale(1.1);
-        box-shadow: 0 6px 20px rgba(118, 75, 162, 0.6);
-    }
-
-    .avatar-edit-btn svg {
-        color: white;
-    }
-
-    .profile-info {
-        flex: 1;
-    }
-
-    .profile-name {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #111827;
-        margin-bottom: 0.5rem;
-    }
-
-    .profile-handle {
-        font-size: 1.125rem;
-        color: #6b7280;
-        margin-bottom: 1rem;
-    }
-
-    .profile-badges {
-        display: flex;
-        gap: 0.75rem;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
-    .badge {
-        padding: 0.5rem 1rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .badge-role {
-        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-        color: white;
-        box-shadow: 0 2px 8px rgba(118, 75, 162, 0.3);
-    }
-
-    .badge-status {
-        border: 2px solid;
-    }
-
-    .badge-active {
-        background: #d1fae5;
-        color: #065f46;
-        border-color: #6ee7b7;
-    }
-
-    .badge-inactive {
-        background: #fee2e2;
-        color: #991b1b;
-        border-color: #fecaca;
-    }
-
-    /* Info Cards */
-    .info-cards {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-
-    .info-card {
-        background: transparent;
-        padding: 0;
-        border-radius: 0;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        transition: all 0.3s;
-        border: none;
-    }
-
-    .info-card:hover {
-        transform: translateY(-2px);
-    }
-
-    .info-card-icon {
-        width: 48px;
-        height: 48px;
-        background: #ef4444;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        flex-shrink: 0;
-        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-    }
-
-    .info-card-icon.icon-red {
-        background: #ef4444;
-        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-    }
-
-    .info-card-content {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .info-card-label {
-        display: block;
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: #6b7280;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 0.25rem;
-    }
-
-    .info-card-value {
-        display: block;
-        font-size: 0.9375rem;
-        font-weight: 600;
-        color: #111827;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    /* Tabs */
-    .tabs {
-        display: flex;
-        gap: 0.5rem;
-        margin-bottom: 2rem;
-        background: rgba(255, 255, 255, 0.98);
-        padding: 0.5rem;
-        border-radius: 12px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    }
-
-    .tab {
-        flex: 1;
-        padding: 1rem 1.5rem;
-        border: none;
-        background: transparent;
-        color: #6b7280;
-        font-size: 0.9375rem;
-        font-weight: 600;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.3s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-    }
-
-    .tab:hover {
-        background: #f9fafb;
+    .btn-change-photo,
+    .btn-save-photo {
+        background: white;
         color: #374151;
+        border: none;
+        padding: 0.5rem 1.25rem;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
 
-    .tab.active {
-        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    .btn-change-photo:hover {
+        background: #f3f4f6;
+        transform: translateY(-1px);
+    }
+
+    .btn-save-photo {
+        background: #10b981;
         color: white;
-        box-shadow: 0 4px 12px rgba(118, 75, 162, 0.4);
     }
 
-    .tab svg {
-        flex-shrink: 0;
+    .btn-save-photo:hover {
+        background: #059669;
+        transform: translateY(-1px);
     }
 
-    /* Tab Content */
-    .tab-content {
-        display: none;
+    .btn-capture {
+        background: #fbbf24;
+        color: #78350f;
+        border: none;
+        padding: 0.625rem 2rem;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
     }
 
-    .tab-content.active {
-        display: block;
+    .btn-capture:hover {
+        background: #f59e0b;
     }
 
-    /* Modern Form */
-    .modern-form {
-        background: rgba(255, 255, 255, 0.98);
-        border-radius: 20px;
-        padding: 2.5rem;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-        backdrop-filter: blur(10px);
+    /* Information Section */
+    .info-section {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
     }
 
-    .form-section {
-        margin-bottom: 2rem;
-    }
-
-    .form-section:last-child {
-        margin-bottom: 0;
-    }
-
-    .section-title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #111827;
-        margin-bottom: 0.5rem;
-    }
-
-    .section-subtitle {
-        font-size: 0.9375rem;
-        color: #6b7280;
-        margin-bottom: 2rem;
-    }
-
-    .form-grid {
+    .info-row {
         display: grid;
-        grid-template-columns: 1fr;
+        grid-template-columns: 160px 1fr;
+        gap: 1rem;
+        align-items: center;
+        font-size: 0.9375rem;
+    }
+
+    .info-row.single-line {
+        display: flex;
+        align-items: center;
         gap: 1.5rem;
-        margin-bottom: 2rem;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #374151;
+        flex-shrink: 0;
+        min-width: 130px;
+    }
+
+    .info-value {
+        color: #111827;
+        font-weight: 500;
+        font-size: 1rem;
+    }
+
+    .info-input-inline {
+        flex: 1;
+        padding: 0.625rem 0.875rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 1rem;
+        color: #111827;
+        font-family: inherit;
+        background: white;
+        transition: all 0.2s;
+    }
+
+    .info-input-inline.editable:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .info-input-inline.error {
+        border-color: #ef4444;
+    }
+
+    .course-text {
+        font-weight: 600;
+    }
+
+    .error-message-inline {
+        font-size: 0.8125rem;
+        color: #ef4444;
+        margin-left: 146px;
+        display: block;
+        margin-top: -0.75rem;
+    }
+
+    /* Form Actions */
+    .form-actions {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .btn-save {
+        background: #10b981;
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 6px;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-save:hover {
+        background: #059669;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    /* Password Card */
+    .password-card {
+        margin-top: 2rem;
+    }
+
+    .password-section {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
     }
 
     .form-group {
         display: flex;
         flex-direction: column;
-    }
-
-    .form-group.full-width {
-        grid-column: 1 / -1;
+        gap: 0.5rem;
     }
 
     .form-label {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
         font-size: 0.875rem;
         font-weight: 600;
         color: #374151;
-        margin-bottom: 0.5rem;
-    }
-
-    .form-label svg {
-        color: #764ba2;
-        flex-shrink: 0;
-    }
-
-    .optional {
-        font-weight: 400;
-        color: #9ca3af;
-        font-size: 0.8125rem;
     }
 
     .form-control {
         width: 100%;
-        padding: 0.875rem 1rem;
-        border: 2px solid #e5e7eb;
-        border-radius: 10px;
+        padding: 0.625rem 0.875rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
         font-size: 0.9375rem;
         color: #111827;
-        transition: all 0.3s;
+        transition: all 0.2s;
         font-family: inherit;
-        background: white;
     }
 
     .form-control:focus {
         outline: none;
-        border-color: #764ba2;
-        box-shadow: 0 0 0 4px rgba(118, 75, 162, 0.1);
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
 
     .form-control.error {
         border-color: #ef4444;
-    }
-
-    .form-control:disabled {
-        background: #f9fafb;
-        color: #9ca3af;
-        cursor: not-allowed;
-    }
-
-    .form-hint {
-        font-size: 0.8125rem;
-        color: #6b7280;
-        margin-top: 0.375rem;
-    }
-
-    .error-message {
-        font-size: 0.8125rem;
-        color: #ef4444;
-        margin-top: 0.375rem;
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
     }
 
     .password-input {
@@ -814,123 +577,256 @@
         padding: 0.5rem;
         display: flex;
         align-items: center;
-        transition: color 0.3s;
+        transition: color 0.2s;
     }
 
     .toggle-password:hover {
-        color: #764ba2;
+        color: #6b7280;
     }
 
-    /* Buttons */
-    .form-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 1rem;
-        padding-top: 2rem;
-        border-top: 2px solid #f3f4f6;
-    }
-
-    .btn {
-        padding: 0.875rem 2rem;
-        border-radius: 10px;
+    .btn-update-password {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
         font-size: 0.9375rem;
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.3s;
-        border: none;
-        display: inline-flex;
+        transition: background 0.2s;
+        margin-top: 0.5rem;
+    }
+
+    .btn-update-password:hover {
+        background: #2563eb;
+    }
+
+    /* Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
         align-items: center;
         justify-content: center;
-        gap: 0.5rem;
-        font-family: inherit;
     }
 
-    .btn-primary {
-        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-        color: white;
-        box-shadow: 0 4px 16px rgba(118, 75, 162, 0.4);
+    .modal.active {
+        display: flex;
     }
 
-    .btn-primary:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 24px rgba(118, 75, 162, 0.5);
+    .modal-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        animation: fadeIn 0.3s ease;
     }
 
-    .btn-primary:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-        transform: none;
-    }
-
-    .btn-secondary {
+    .modal-content {
+        position: relative;
         background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        max-width: 400px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: scaleIn 0.3s ease;
+        text-align: center;
+    }
+
+    .modal-icon {
+        width: 64px;
+        height: 64px;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        color: white;
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 0.5rem;
+    }
+
+    .modal-message {
+        font-size: 0.9375rem;
+        color: #6b7280;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    .btn-modal {
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-cancel {
+        background: #f3f4f6;
         color: #374151;
-        border: 2px solid #e5e7eb;
     }
 
-    .btn-secondary:hover {
-        background: #f9fafb;
-        border-color: #d1d5db;
+    .btn-cancel:hover {
+        background: #e5e7eb;
     }
 
-    .spinner {
-        animation: spin 0.8s linear infinite;
+    .btn-confirm {
+        background: #10b981;
+        color: white;
     }
 
-    @keyframes spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
+    .btn-confirm:hover {
+        background: #059669;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
 
-    /* Desktop - Larger screens */
-    @media (min-width: 769px) {
-        .info-cards {
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
         }
-        
-        .form-grid {
-            grid-template-columns: repeat(2, 1fr);
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes scaleIn {
+        from {
+            transform: scale(0.9);
+            opacity: 0;
+        }
+        to {
+            transform: scale(1);
+            opacity: 1;
         }
     }
 
     /* Responsive */
     @media (max-width: 768px) {
-        .container {
-            zoom: 1;
-        }
-
         .profile-page {
-            padding: 2rem 0.5rem;
+            padding: 2rem 1rem;
         }
 
-        .profile-header {
+        .profile-card {
             padding: 1.5rem;
         }
 
-        .profile-avatar-large {
-            width: 120px;
-            height: 120px;
+        .photo-section {
+            padding-bottom: 1.5rem;
+            margin-bottom: 1.5rem;
         }
 
-        .profile-name {
-            font-size: 1.5rem;
+        .photo-wrapper {
+            width: 150px;
+            height: 150px;
+            border-width: 2px;
         }
 
-        .tabs {
+        .photo-wrapper img {
+            object-fit: cover;
+            object-position: center;
+        }
+
+        .photo-overlay {
+            opacity: 0;
+            background: rgba(0, 0, 0, 0.6);
+            flex-direction: row;
+            padding: 0.5rem;
+        }
+
+        .photo-overlay.show {
+            opacity: 1;
+        }
+
+        .btn-change-photo,
+        .btn-save-photo {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.75rem;
+            gap: 0.25rem;
+            flex: 1;
+        }
+
+        .btn-change-photo svg,
+        .btn-save-photo svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .card-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+        }
+
+        .page-title {
+            font-size: 1rem;
+        }
+
+        .info-section {
+            gap: 1rem;
+        }
+
+        .info-row.single-line {
             flex-direction: column;
+            align-items: flex-start;
+            gap: 0.375rem;
         }
 
-        .modern-form {
-            padding: 1.5rem;
+        .info-label {
+            font-size: 0.8125rem;
+            color: #6b7280;
+            min-width: auto;
+            font-weight: 600;
+        }
+
+        .info-value {
+            font-size: 0.9375rem;
+            padding-left: 0;
+        }
+
+        .info-input-inline {
+            width: 100%;
+            font-size: 0.9375rem;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .error-message-inline {
+            margin-left: 0;
+            margin-top: -0.25rem;
         }
 
         .form-actions {
-            flex-direction: column-reverse;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
         }
 
-        .btn {
+        .btn-save {
             width: 100%;
+            justify-content: center;
         }
 
         .toast {
@@ -938,56 +834,53 @@
             left: 1rem;
         }
 
-        .info-cards {
-            gap: 1rem;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .section-title {
-            font-size: 1.25rem;
+        .modal-content {
+            padding: 1.5rem;
         }
 
-        .profile-name {
-            font-size: 1.25rem;
+        .modal-actions {
+            flex-direction: column;
+        }
+
+        .btn-modal {
+            width: 100%;
+        }
+
+        .password-card {
+            padding: 1.5rem;
+        }
+
+        .password-section {
+            gap: 1.25rem;
+        }
+
+        .btn-update-password {
+            width: 100%;
         }
     }
 </style>
 
 <script>
-    // Tab switching
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', function() {
-            const tabName = this.getAttribute('data-tab');
-            
-            // Remove active class from all tabs and contents
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            
-            // Add active class to clicked tab and corresponding content
-            this.classList.add('active');
-            document.getElementById(tabName + '-tab').classList.add('active');
-        });
-    });
+    // Toggle photo overlay on tap/click
+    function togglePhotoOverlay() {
+        const overlay = document.getElementById('photoOverlay');
+        overlay.classList.toggle('show');
+    }
 
-    // Auto-switch to password tab if there are password errors
-    @if($errors->updatePassword->any())
-    document.addEventListener('DOMContentLoaded', function() {
-        // Remove active from profile tab
-        document.querySelector('.tab[data-tab="profile"]').classList.remove('active');
-        document.getElementById('profile-tab').classList.remove('active');
+    // Close overlay when clicking outside
+    document.addEventListener('click', function(e) {
+        const photoWrapper = document.querySelector('.photo-wrapper');
+        const overlay = document.getElementById('photoOverlay');
         
-        // Add active to password tab
-        document.querySelector('.tab[data-tab="password"]').classList.add('active');
-        document.getElementById('password-tab').classList.add('active');
+        if (!photoWrapper.contains(e.target)) {
+            overlay.classList.remove('show');
+        }
     });
-    @endif
 
     // Image preview
     function previewImage(event) {
         const file = event.target.files[0];
         if (file) {
-            // Check file size (2MB limit)
             if (file.size > 2 * 1024 * 1024) {
                 alert('Image size must be less than 2MB');
                 event.target.value = '';
@@ -999,11 +892,105 @@
                 const base64Data = e.target.result;
                 document.getElementById('header-avatar').src = base64Data;
                 document.getElementById('profile_picture_base64').value = base64Data;
-                document.getElementById('remove_profile_picture').value = '0';
+                
+                // Show save photo button
+                document.getElementById('savePhotoBtn').style.display = 'flex';
+                document.getElementById('photoOverlay').classList.add('show');
             }
             reader.readAsDataURL(file);
         }
     }
+
+    // Save photo change
+    function savePhotoChange() {
+        const base64Data = document.getElementById('profile_picture_base64').value;
+        
+        if (!base64Data) {
+            alert('Please select a photo first');
+            return;
+        }
+
+        // Create a form and submit only the photo
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{{ route("profile.update") }}';
+        
+        const csrfToken = document.querySelector('input[name="_token"]').value;
+        const methodField = document.createElement('input');
+        methodField.type = 'hidden';
+        methodField.name = '_method';
+        methodField.value = 'PUT';
+        
+        const csrfField = document.createElement('input');
+        csrfField.type = 'hidden';
+        csrfField.name = '_token';
+        csrfField.value = csrfToken;
+        
+        const photoField = document.createElement('input');
+        photoField.type = 'hidden';
+        photoField.name = 'profile_picture_base64';
+        photoField.value = base64Data;
+        
+        // Add current name fields to prevent validation errors
+        const firstNameField = document.createElement('input');
+        firstNameField.type = 'hidden';
+        firstNameField.name = 'first_name';
+        firstNameField.value = document.getElementById('first_name').value;
+        
+        const middleNameField = document.createElement('input');
+        middleNameField.type = 'hidden';
+        middleNameField.name = 'middle_name';
+        middleNameField.value = document.getElementById('middle_name').value;
+        
+        const lastNameField = document.createElement('input');
+        lastNameField.type = 'hidden';
+        lastNameField.name = 'last_name';
+        lastNameField.value = document.getElementById('last_name').value;
+        
+        form.appendChild(csrfField);
+        form.appendChild(methodField);
+        form.appendChild(photoField);
+        form.appendChild(firstNameField);
+        form.appendChild(middleNameField);
+        form.appendChild(lastNameField);
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    // Show save modal
+    function showSaveModal() {
+        // Validate required fields
+        const firstName = document.getElementById('first_name').value.trim();
+        const lastName = document.getElementById('last_name').value.trim();
+
+        if (!firstName || !lastName) {
+            alert('Please fill in all required fields (First Name and Last Name)');
+            return;
+        }
+
+        document.getElementById('saveModal').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    // Close save modal
+    function closeSaveModal() {
+        document.getElementById('saveModal').classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
+
+    // Confirm save and submit form
+    function confirmSave() {
+        closeSaveModal();
+        document.getElementById('profile-form').submit();
+    }
+
+    // Close modal with ESC key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeSaveModal();
+        }
+    });
 
     // Toggle password visibility
     function togglePassword(fieldId) {
@@ -1029,21 +1016,6 @@
         }
     }
 
-    // Form submission with loading state
-    document.getElementById('profile-form').addEventListener('submit', function(e) {
-        const btn = this.querySelector('.btn-primary');
-        btn.disabled = true;
-        btn.querySelector('.btn-text').style.display = 'none';
-        btn.querySelector('.btn-loader').style.display = 'inline-flex';
-    });
-
-    document.getElementById('password-form').addEventListener('submit', function(e) {
-        const btn = this.querySelector('.btn-primary');
-        btn.disabled = true;
-        btn.querySelector('.btn-text').style.display = 'none';
-        btn.querySelector('.btn-loader').style.display = 'inline-flex';
-    });
-
     // Auto-hide toast messages
     setTimeout(() => {
         const toasts = document.querySelectorAll('.toast');
@@ -1052,5 +1024,22 @@
             setTimeout(() => toast.remove(), 300);
         });
     }, 5000);
+
+    // Auto-scroll to password section if there are password errors
+    @if($errors->updatePassword->any())
+    document.addEventListener('DOMContentLoaded', function() {
+        const passwordCard = document.querySelector('.password-card');
+        if (passwordCard) {
+            passwordCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Add highlight effect
+            passwordCard.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.3)';
+            setTimeout(() => {
+                passwordCard.style.transition = 'box-shadow 0.5s ease';
+                passwordCard.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
+            }, 2000);
+        }
+    });
+    @endif
 </script>
 </x-app-layout>

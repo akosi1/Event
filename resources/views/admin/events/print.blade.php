@@ -27,7 +27,6 @@
             .events-table thead { display: table-header-group; }
             .events-table tr { page-break-inside: avoid; }
             
-            /* Remove browser print headers/footers */
             @page { 
                 margin-top: 0;
                 margin-bottom: 0;
@@ -38,7 +37,6 @@
             }
         }
         
-        /* Hide browser default headers and footers */
         body::before,
         body::after {
             display: none !important;
@@ -47,21 +45,22 @@
         /* Header */
         .official-header { 
             text-align: center; 
-            border-bottom: 2px solid #000; 
-            padding-bottom: 15px; 
-            margin-bottom: 20px; 
+            padding-bottom: 10px; 
+            margin-bottom: 15px; 
         }
         
         .header-logos { 
             display: flex; 
-            justify-content: space-between; 
-            align-items: flex-start; 
-            margin-bottom: 10px; 
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 5px; 
         }
         
         .logo-left, .logo-right { 
-            width: 80px; 
-            height: 80px; 
+            width: 60px; 
+            height: 60px;
+            flex-shrink: 0;
         }
         
         .logo-left img, .logo-right img { 
@@ -71,20 +70,19 @@
         }
         
         .header-text { 
-            flex: 1; 
-            padding: 0 20px; 
+            text-align: center;
         }
         
         .header-text p { 
             font-size: 11px; 
-            line-height: 1.3; 
-            margin: 2px 0; 
+            line-height: 1.2; 
+            margin: 1px 0; 
         }
         
         .header-text h1 { 
             font-size: 13px; 
             font-weight: bold; 
-            margin: 5px 0; 
+            margin: 3px 0; 
             text-transform: uppercase; 
         }
         
@@ -97,7 +95,7 @@
             text-align: center; 
             font-size: 12px; 
             font-weight: bold; 
-            margin: 15px 0 10px 0; 
+            margin: 10px 0; 
             text-transform: uppercase; 
             border-bottom: 1px solid #000;
             padding-bottom: 5px;
@@ -107,52 +105,15 @@
             text-align: center;
             font-size: 14px;
             font-weight: bold;
-            margin: 20px 0;
+            margin: 15px 0;
             text-transform: uppercase;
-        }
-
-        /* Summary Box */
-        .summary-box {
-            border: 2px solid #000;
-            padding: 15px;
-            margin: 20px 0;
-        }
-
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            text-align: center;
-        }
-
-        .summary-item {
-            border: 1px solid #000;
-            padding: 10px;
-        }
-
-        .summary-label {
-            font-size: 10px;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-        }
-
-        .summary-value {
-            font-size: 24px;
-            font-weight: bold;
         }
 
         /* Table */
-        .table-title { 
-            font-size: 13px; 
-            font-weight: bold; 
-            margin: 20px 0 10px 0; 
-            text-transform: uppercase;
-        }
-        
         .events-table { 
             width: 100%; 
             border-collapse: collapse; 
-            margin-bottom: 20px;
+            margin-bottom: 0;
         }
         
         .events-table th, 
@@ -175,6 +136,16 @@
         
         .events-table tbody tr:nth-child(even) {
             background: #fafafa;
+        }
+
+        .events-table tfoot {
+            background: #f0f0f0;
+            font-weight: bold;
+        }
+
+        .events-table tfoot td {
+            font-size: 11px;
+            font-weight: bold;
         }
 
         .event-title { 
@@ -262,36 +233,6 @@
         .print-btn:hover {
             background: #333;
         }
-        
-        /* Print Instructions */
-        .print-instructions {
-            position: fixed;
-            top: 70px;
-            right: 20px;
-            background: #fff3cd;
-            border: 2px solid #ffc107;
-            padding: 15px;
-            border-radius: 8px;
-            max-width: 300px;
-            font-size: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            z-index: 1000;
-        }
-        
-        .print-instructions h4 {
-            font-size: 14px;
-            margin-bottom: 10px;
-            color: #856404;
-        }
-        
-        .print-instructions ol {
-            margin: 0;
-            padding-left: 20px;
-        }
-        
-        .print-instructions li {
-            margin-bottom: 5px;
-        }
 
         .empty-state {
             text-align: center;
@@ -303,18 +244,8 @@
 <body>
     <button class="print-btn no-print" onclick="printDocument()">🖨️ Print Document</button>
     
-    <!-- <div class="print-instructions no-print">
-        <h4>📋 Before Printing:</h4>
-        <ol>
-            <li>Click "More settings"</li>
-            <li><strong>Uncheck</strong> "Headers and footers"</li>
-            <li>Click Print</li>
-        </ol>
-    </div> -->
-    
     <script>
         function printDocument() {
-            // Try to hide headers/footers programmatically
             const style = document.createElement('style');
             style.textContent = `
                 @page { 
@@ -326,8 +257,6 @@
                 }
             `;
             document.head.appendChild(style);
-            
-            // Trigger print
             window.print();
         }
     </script>
@@ -337,49 +266,24 @@
         <div class="official-header">
             <div class="header-logos">
                 <div class="logo-left">
-                    <img src="{{ asset('images/logo.png') }}" alt="Logo">
+                    <img src="{{ asset('images/logo.png') }}" alt="MCC Logo">
                 </div>
                 <div class="header-text">
                     <p>Republic of the Philippines</p>
                     <p>Region VII, Central Visayas</p>
-                    <p>Municipality of Madridejos</p>
+                    <p>Commission on Higher Education</p>
                     <h1>MADRIDEJOS COMMUNITY COLLEGE</h1>
                     <p class="address">Crossing Bunakan, Madridejos, Cebu</p>
                 </div>
                 <div class="logo-right">
-                    <img src="{{ asset('images/logo.png') }}" alt="Logo">
+                    <img src="{{ asset('images/Official-Logo-Seal-madridejos.png') }}" alt="Madridejos Seal">
                 </div>
             </div>
         </div>
-
-        <div class="office-title">OFFICE OF THE COLLEGE PRESIDENT</div>
 
         <div class="document-title">Events Summary Report</div>
 
-        <!-- Summary Box -->
-        <div class="summary-box">
-            <div class="summary-grid">
-                <div class="summary-item">
-                    <div class="summary-label">Total Events</div>
-                    <div class="summary-value">{{ $summaryData['total_events'] }}</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-label">Active</div>
-                    <div class="summary-value">{{ $summaryData['active_count'] }}</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-label">Postponed</div>
-                    <div class="summary-value">{{ $summaryData['postponed_count'] }}</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-label">Cancelled</div>
-                    <div class="summary-value">{{ $summaryData['cancelled_count'] }}</div>
-                </div>
-            </div>
-        </div>
-
         <!-- Events Table -->
-        <h2 class="table-title">Detailed Events List</h2>
         <table class="events-table">
             <thead>
                 <tr>
@@ -393,7 +297,14 @@
                 </tr>
             </thead>
             <tbody>
+                @php
+                    $totalParticipants = 0;
+                @endphp
                 @forelse($summaryData['events'] as $index => $event)
+                @php
+                    $participantCount = $event->joinedUsers->count();
+                    $totalParticipants += $participantCount;
+                @endphp
                 <tr>
                     <td>{{ $index + 1 }}</td>
                     <td>
@@ -428,7 +339,7 @@
                         </span>
                     </td>
                     <td style="text-align: center;">
-                        <strong>{{ $event->joinedUsers->count() }}</strong>
+                        <strong>{{ $participantCount }}</strong>
                     </td>
                 </tr>
                 @empty
@@ -439,6 +350,28 @@
                 </tr>
                 @endforelse
             </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="5" style="text-align: right; padding-right: 15px;">TOTAL EVENTS:</td>
+                    <td style="text-align: center;">{{ $summaryData['total_events'] }}</td>
+                    <td style="text-align: center;">{{ $totalParticipants }}</td>
+                </tr>
+                <tr>
+                    <td colspan="5" style="text-align: right; padding-right: 15px;">ACTIVE:</td>
+                    <td style="text-align: center;">{{ $summaryData['active_count'] }}</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td colspan="5" style="text-align: right; padding-right: 15px;">POSTPONED:</td>
+                    <td style="text-align: center;">{{ $summaryData['postponed_count'] }}</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td colspan="5" style="text-align: right; padding-right: 15px;">CANCELLED:</td>
+                    <td style="text-align: center;">{{ $summaryData['cancelled_count'] }}</td>
+                    <td></td>
+                </tr>
+            </tfoot>
         </table>
 
         <!-- Signature Section -->
