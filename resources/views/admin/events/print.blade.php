@@ -58,8 +58,8 @@
         }
         
         .logo-left, .logo-right { 
-            width: 60px; 
-            height: 60px;
+            width: 80px; 
+            height: 80px;
             flex-shrink: 0;
         }
         
@@ -74,20 +74,20 @@
         }
         
         .header-text p { 
-            font-size: 11px; 
-            line-height: 1.2; 
-            margin: 1px 0; 
+            font-size: 12px; 
+            line-height: 1.3; 
+            margin: 2px 0; 
         }
         
         .header-text h1 { 
-            font-size: 13px; 
+            font-size: 15px; 
             font-weight: bold; 
-            margin: 3px 0; 
+            margin: 5px 0; 
             text-transform: uppercase; 
         }
         
         .header-text .address { 
-            font-size: 10px; 
+            font-size: 11px; 
             font-style: italic; 
         }
         

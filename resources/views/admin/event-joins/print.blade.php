@@ -58,8 +58,8 @@
         }
         
         .logo-left, .logo-right { 
-            width: 60px; 
-            height: 60px;
+            width: 80px; 
+            height: 80px;
             flex-shrink: 0;
         }
         
@@ -356,4 +356,4 @@
         </div>
     </div>
 </body>
-</html>
+</html> 
