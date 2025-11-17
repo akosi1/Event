@@ -695,71 +695,178 @@
 </style>
 
 <script>
-// Navigation JavaScript
-document.addEventListener('DOMContentLoaded', function() {
-    const navbar = document.getElementById('navbar');
-    const mobileToggle = document.getElementById('mobileToggle');
-    const navContent = document.getElementById('navContent');
-    const mobileOverlay = document.getElementById('mobileOverlay');
-    const dropdowns = document.querySelectorAll('.dropdown');
-
-    // Scroll effect
-    window.addEventListener('scroll', function() {
-        if (window.scrollY > 50) {
-            navbar.classList.add('scrolled');
-        } else {
-            navbar.classList.remove('scrolled');
-        }
-    });
-
-    // Mobile menu toggle
-    mobileToggle?.addEventListener('click', function() {
-        navContent.classList.toggle('active');
-        mobileOverlay.classList.toggle('active');
-    });
-
-    // Close mobile menu when clicking overlay
-    mobileOverlay?.addEventListener('click', function() {
-        navContent.classList.remove('active');
-        mobileOverlay.classList.remove('active');
-        dropdowns.forEach(dropdown => dropdown.classList.remove('active'));
-    });
-
-    // Dropdown functionality for mobile
-    dropdowns.forEach(dropdown => {
-        const btn = dropdown.querySelector('.dropdown-btn');
+// Navigation JavaScript - Fixed for page refresh glitches
+(function() {
+    'use strict';
+    
+    // Initialize on DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', initNavigation);
+    
+    function initNavigation() {
+        const navbar = document.getElementById('navbar');
+        const mobileToggle = document.getElementById('mobileToggle');
+        const navContent = document.getElementById('navContent');
+        const mobileOverlay = document.getElementById('mobileOverlay');
+        const dropdowns = document.querySelectorAll('.dropdown');
         
-        btn?.addEventListener('click', function(e) {
-            if (window.innerWidth <= 768) {
+        // Check if elements exist
+        if (!navbar || !navContent) {
+            console.warn('Navigation elements not found');
+            return;
+        }
+        
+        // Initialize scroll state on page load
+        checkScrollPosition();
+        
+        // Reset mobile menu state on page load
+        resetMobileMenu();
+        
+        // Scroll effect with debouncing
+        let scrollTimeout;
+        window.addEventListener('scroll', function() {
+            if (scrollTimeout) {
+                window.cancelAnimationFrame(scrollTimeout);
+            }
+            scrollTimeout = window.requestAnimationFrame(checkScrollPosition);
+        }, { passive: true });
+        
+        function checkScrollPosition() {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        }
+        
+        // Mobile menu toggle
+        if (mobileToggle) {
+            mobileToggle.addEventListener('click', function(e) {
                 e.preventDefault();
-                
-                // Close other dropdowns
-                dropdowns.forEach(d => {
-                    if (d !== dropdown) {
-                        d.classList.remove('active');
+                e.stopPropagation();
+                toggleMobileMenu();
+            });
+        }
+        
+        function toggleMobileMenu() {
+            const isActive = navContent.classList.contains('active');
+            
+            if (isActive) {
+                closeMobileMenu();
+            } else {
+                openMobileMenu();
+            }
+        }
+        
+        function openMobileMenu() {
+            navContent.classList.add('active');
+            if (mobileOverlay) {
+                mobileOverlay.classList.add('active');
+            }
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeMobileMenu() {
+            navContent.classList.remove('active');
+            if (mobileOverlay) {
+                mobileOverlay.classList.remove('active');
+            }
+            document.body.style.overflow = '';
+            
+            // Close all dropdowns when closing mobile menu
+            dropdowns.forEach(dropdown => dropdown.classList.remove('active'));
+        }
+        
+        function resetMobileMenu() {
+            navContent.classList.remove('active');
+            if (mobileOverlay) {
+                mobileOverlay.classList.remove('active');
+            }
+            document.body.style.overflow = '';
+            dropdowns.forEach(dropdown => dropdown.classList.remove('active'));
+        }
+        
+        // Close mobile menu when clicking overlay
+        if (mobileOverlay) {
+            mobileOverlay.addEventListener('click', closeMobileMenu);
+        }
+        
+        // Dropdown functionality
+        dropdowns.forEach(dropdown => {
+            const btn = dropdown.querySelector('.dropdown-btn');
+            
+            if (btn) {
+                btn.addEventListener('click', function(e) {
+                    if (window.innerWidth <= 768) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        // Close other dropdowns
+                        dropdowns.forEach(d => {
+                            if (d !== dropdown) {
+                                d.classList.remove('active');
+                            }
+                        });
+                        
+                        // Toggle current dropdown
+                        dropdown.classList.toggle('active');
                     }
                 });
-                
-                // Toggle current dropdown
-                dropdown.classList.toggle('active');
             }
         });
-    });
-
-    // Close dropdowns when clicking outside
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.dropdown') && window.innerWidth <= 768) {
-            dropdowns.forEach(dropdown => dropdown.classList.remove('active'));
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.dropdown') && window.innerWidth <= 768) {
+                dropdowns.forEach(dropdown => dropdown.classList.remove('active'));
+            }
+        });
+        
+        // Handle window resize
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(handleResize, 150);
+        });
+        
+        function handleResize() {
+            if (window.innerWidth > 768) {
+                resetMobileMenu();
+            }
         }
-    });
-
-    // Close mobile menu on window resize
-    window.addEventListener('resize', function() {
-        if (window.innerWidth > 768) {
-            navContent.classList.remove('active');
-            mobileOverlay.classList.remove('active');
-            dropdowns.forEach(dropdown => dropdown.classList.remove('active'));
-        }
-    });
-});
+        
+        // Prevent transitions on page load
+        window.addEventListener('load', function() {
+            document.body.classList.add('loaded');
+        });
+        
+        // Handle page visibility change (fixes issues when switching tabs)
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                // Page is hidden, store state if needed
+            } else {
+                // Page is visible again, reset if needed
+                if (window.innerWidth > 768) {
+                    resetMobileMenu();
+                }
+            }
+        });
+        
+        // Handle back/forward navigation
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                // Page was loaded from cache
+                resetMobileMenu();
+                checkScrollPosition();
+            }
+        });
+    }
+    
+    // Fallback if DOMContentLoaded already fired
+    if (document.readyState === 'loading') {
+        // Still loading, wait for DOMContentLoaded
+    } else {
+        // DOM already loaded
+        initNavigation();
+    }
+})();
 </script>
