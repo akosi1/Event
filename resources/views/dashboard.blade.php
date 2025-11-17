@@ -326,7 +326,7 @@
         </div>
     </div>
 
-    <script src="{{ asset('user/nav/js/navbar.js') }}"></script>
+    <!-- <script src="{{ asset('user/nav/js/navbar.js') }}"></script> -->
     <div id="toastContainer"></div>
     @include('layouts.footer')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.all.min.js"></script>
