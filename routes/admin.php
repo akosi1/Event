@@ -6,7 +6,7 @@ use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\EventController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\NotificationController;
-use App\Http\Controllers\Admin\LoginLogController;
+use App\Http\Controllers\Admin\LoginLogsController;
 use App\Http\Controllers\EventJoinController;
 
 use Illuminate\Support\Facades\Route;
@@ -45,14 +45,14 @@ Route::middleware(['admin'])->group(function () {
         Route::post('/event-joins/update-print-settings', [EventJoinController::class, 'updatePrintSettings'])->name('admin.event-joins.update-print-settings');
     });
 
-    // // ✅ FIXED — Login Security Logs (correct admin.* names)
-    // Route::prefix('login-logs')->name('admin.login-logs.')->group(function () {
-    //     Route::get('/', [LoginLogController::class, 'index'])->name('index');
-    //     Route::get('/{loginLog}', [LoginLogController::class, 'show'])->name('show');
-    //     Route::delete('/{loginLog}', [LoginLogController::class, 'destroy'])->name('destroy');
-    //     Route::delete('/clear/all', [LoginLogController::class, 'destroyAll'])->name('destroy-all');
-    // });
-
+    // Login Logs Management (FIXED)
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('/login-logs', [LoginLogsController::class, 'index'])->name('login-logs.index');
+        Route::get('/login-logs/data', [LoginLogsController::class, 'getData'])->name('login-logs.data');
+        Route::get('/login-logs/{loginLog}', [LoginLogsController::class, 'show'])->name('login-logs.show');
+        Route::post('/login-logs/cleanup', [LoginLogsController::class, 'cleanup'])->name('login-logs.cleanup');
+    });
+   
     // Users
     Route::resource('/users', UserController::class)->names('admin.users');
 

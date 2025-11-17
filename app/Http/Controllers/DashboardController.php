@@ -13,11 +13,27 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
-        // ✅ Use 'joins' instead of 'registrations'
+        // Query active events
         $query = Event::with('joins.user')
             ->where('status', 'active')
             ->whereNull('parent_event_id');
 
+        // ✅ FILTER OUT PAST EVENTS - Only show upcoming and ongoing events
+        $query->where(function ($q) {
+            $now = Carbon::now('Asia/Manila');
+            
+            $q->where('date', '>', $now->toDateString())
+              ->orWhere(function ($subQ) use ($now) {
+                  // Include events happening today that haven't ended yet
+                  $subQ->whereDate('date', '=', $now->toDateString())
+                       ->where(function ($timeQ) use ($now) {
+                           $timeQ->whereNull('end_time')
+                                 ->orWhereTime('end_time', '>=', $now->toTimeString());
+                       });
+              });
+        });
+
+        // Filter by department
         if ($request->filled('department')) {
             $query->forDepartment($request->department);
         } else {
@@ -26,6 +42,7 @@ class DashboardController extends Controller
             }
         }
 
+        // Search functionality
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -50,7 +67,6 @@ class DashboardController extends Controller
                 $event->hasEnded = true;
             }
 
-            // ✅ These methods already use 'joins', so they work
             $event->is_joined = $event->isJoinedByUser($user->id);
             $event->join_status = $event->joinStatus($user->id);
 

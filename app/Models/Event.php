@@ -19,7 +19,7 @@ class Event extends Model
 
     protected $fillable = [
         'token', 'title', 'description', 'date', 'start_time', 'end_time', 'location', 'status',
-        'department', 'is_exclusive', 'allowed_departments', 'is_recurring',
+        'department', 'is_exclusive', 'allowed_departments', 'allowed_year_levels', 'is_recurring',
         'recurrence_pattern', 'recurrence_interval', 'recurrence_end_date',
         'recurrence_count', 'repeat_type', 'repeat_interval', 'repeat_until',
         'parent_event_id', 'cancel_reason', 'image', 'certificate_template_image'
@@ -34,6 +34,7 @@ class Event extends Model
         'is_exclusive' => 'boolean',
         'is_recurring' => 'boolean',
         'allowed_departments' => 'array',
+        'allowed_year_levels' => 'array',
     ];
 
     const DEPARTMENTS = [
@@ -42,6 +43,13 @@ class Event extends Model
         'BSED' => 'Bachelor of Science in Education',
         'BEED' => 'Bachelor of Elementary Education',
         'BSHM' => 'Bachelor of Science in Hospitality Management'
+    ];
+
+    const YEAR_LEVELS = [
+        '1' => '1st Year',
+        '2' => '2nd Year',
+        '3' => '3rd Year',
+        '4' => '4th Year'
     ];
 
     const RECURRENCE_PATTERNS = [
@@ -92,7 +100,6 @@ class Event extends Model
      */
     public static function findByIdOrToken($identifier): ?self
     {
-        // If it's numeric, try ID first, then token
         if (is_numeric($identifier)) {
             $event = self::find($identifier);
             if ($event) {
@@ -100,7 +107,6 @@ class Event extends Model
             }
         }
         
-        // Try as token
         return self::findByToken($identifier);
     }
 
@@ -117,23 +123,19 @@ class Event extends Model
      */
     public function resolveRouteBinding($value, $field = null)
     {
-        // If field is specified, use default behavior
         if ($field) {
             return $this->where($field, $value)->firstOrFail();
         }
 
-        // Try to find by token (primary method)
         $event = self::findByToken($value);
         if ($event) {
             return $event;
         }
 
-        // Fallback: try by ID for backward compatibility
         if (is_numeric($value)) {
             return $this->findOrFail($value);
         }
 
-        // Neither found - throw exception
         throw new ModelNotFoundException("Event not found");
     }
 
@@ -151,12 +153,10 @@ class Event extends Model
             return false;
         }
 
-        // Check if it's a base64 string
         if (preg_match('/^data:image\/(jpeg|jpg|png);base64,/', $this->image)) {
             return true;
         }
 
-        // Check if it's a file path
         return file_exists(public_path('storage/' . $this->image));
     }
 
@@ -169,19 +169,16 @@ class Event extends Model
             return null;
         }
 
-        // If already base64, return as is
         if (preg_match('/^data:image\/(jpeg|jpg|png);base64,/', $this->image)) {
             return $this->image;
         }
 
-        // If it's a file path, convert to base64
         $filePath = public_path('storage/' . $this->image);
         if (file_exists($filePath)) {
             try {
                 $imageData = file_get_contents($filePath);
                 $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
                 
-                // Normalize extension
                 $mimeType = match($extension) {
                     'jpg', 'jpeg' => 'jpeg',
                     'png' => 'png',
@@ -207,23 +204,19 @@ class Event extends Model
             return asset('images/default-event.jpg');
         }
 
-        // If it's base64, return the base64 string
         if (preg_match('/^data:image\/(jpeg|jpg|png);base64,/', $this->image)) {
             return $this->image;
         }
 
-        // If it's a URL, return as is
         if (filter_var($this->image, FILTER_VALIDATE_URL)) {
             return $this->image;
         }
 
-        // Check file extension
         $extension = strtolower(pathinfo($this->image, PATHINFO_EXTENSION));
         if (!in_array($extension, ['jpg', 'jpeg', 'png'])) {
             return asset('images/default-event.jpg');
         }
 
-        // Check if file exists and convert to base64
         if (file_exists(public_path('storage/' . $this->image))) {
             return $this->image_base64 ?? asset('storage/' . $this->image);
         }
@@ -248,7 +241,6 @@ class Event extends Model
      */
     public function deleteImage(): bool
     {
-        // Don't try to delete base64 images
         if (preg_match('/^data:image\/(jpeg|jpg|png);base64,/', $this->image)) {
             return true;
         }
@@ -325,6 +317,14 @@ class Event extends Model
               ->orWhereJsonContains('allowed_departments', $department);
         });
     }
+
+    public function scopeForYearLevel($query, $yearLevel)
+    {
+        return $query->where(function ($q) use ($yearLevel) {
+            $q->where('is_exclusive', false)
+              ->orWhereJsonContains('allowed_year_levels', $yearLevel);
+        });
+    }
     
     public function isAvailableForUserDepartment($userDepartment): bool
     {
@@ -352,6 +352,31 @@ class Event extends Model
         return false;
     }
 
+    public function isAvailableForYearLevel($yearLevel): bool
+    {
+        if (!$this->is_exclusive) {
+            return true;
+        }
+
+        if (empty($this->allowed_year_levels)) {
+            return true;
+        }
+
+        return in_array($yearLevel, $this->allowed_year_levels);
+    }
+
+    public function isAvailableForUser($user): bool
+    {
+        if (!$this->is_exclusive) {
+            return true;
+        }
+
+        $departmentMatch = $this->isAvailableForDepartment($user->department);
+        $yearLevelMatch = $this->isAvailableForYearLevel($user->year_level);
+
+        return $departmentMatch && $yearLevelMatch;
+    }
+
     public function getAccessibleDepartments(): array
     {
         if (!$this->is_exclusive) {
@@ -371,6 +396,15 @@ class Event extends Model
         return array_unique($departments);
     }
 
+    public function getAccessibleYearLevels(): array
+    {
+        if (!$this->is_exclusive || empty($this->allowed_year_levels)) {
+            return array_keys(self::YEAR_LEVELS);
+        }
+
+        return $this->allowed_year_levels;
+    }
+
     public function getDepartmentDisplayAttribute(): string
     {
         if (!$this->is_exclusive) {
@@ -379,6 +413,19 @@ class Event extends Model
 
         $departments = $this->getAccessibleDepartments();
         return implode(', ', $departments);
+    }
+
+    public function getYearLevelDisplayAttribute(): string
+    {
+        if (!$this->is_exclusive || empty($this->allowed_year_levels)) {
+            return 'All Years';
+        }
+
+        $years = array_map(function($year) {
+            return self::YEAR_LEVELS[$year] ?? $year;
+        }, $this->allowed_year_levels);
+
+        return implode(', ', $years);
     }
 
     public function getDepartmentNamesAttribute(): string
@@ -411,7 +458,7 @@ class Event extends Model
             return false;
         }
 
-        return $this->isAvailableForUserDepartment($user->department);
+        return $this->isAvailableForUser($user);
     }
 
     public function isRecurring(): bool
@@ -442,8 +489,16 @@ class Event extends Model
                     ->where('date', '>=', now())
                     ->where(function ($query) use ($user) {
                         $query->where('is_exclusive', false)
-                              ->orWhere('department', $user->department)
-                              ->orWhereJsonContains('allowed_departments', $user->department);
+                              ->orWhere(function ($q) use ($user) {
+                                  $q->where(function ($deptQuery) use ($user) {
+                                      $deptQuery->where('department', $user->department)
+                                                ->orWhereJsonContains('allowed_departments', $user->department);
+                                  })
+                                  ->where(function ($yearQuery) use ($user) {
+                                      $yearQuery->whereNull('allowed_year_levels')
+                                                ->orWhereJsonContains('allowed_year_levels', $user->year_level);
+                                  });
+                              });
                     });
     }
 
@@ -451,7 +506,6 @@ class Event extends Model
     {
         parent::boot();
 
-        // Generate token when creating new event
         static::creating(function ($event) {
             if (empty($event->token)) {
                 $event->token = self::generateUniqueToken();

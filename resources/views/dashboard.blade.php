@@ -10,69 +10,15 @@
     <link href="{{ asset('user/dashboard/dashboard.css') }}" rel="stylesheet">
     <link href="{{ asset('user/nav/css/navbar.css') }}" rel="stylesheet">
     <link href="{{ asset('user/footer/footer.css') }}" rel="stylesheet">
-    <!-- SweetAlert2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.min.css" rel="stylesheet">
-    <style>
-        /* Ensure SweetAlert stays below navigation */
-        .swal2-container {
-            z-index: 9998 !important;
-        }
 
-        /* If your nav has z-index, make sure it's higher */
-        nav,
-        .navbar {
-            z-index: 9999 !important;
-            position: relative;
-        }
-
-        /* Custom SweetAlert styling */
-        .swal2-popup {
-            border-radius: 15px;
-            padding: 2rem;
-        }
-
-        .swal2-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
-
-        .swal2-html-container {
-            font-size: 1rem;
-        }
-
-        .swal2-confirm,
-        .swal2-cancel {
-            padding: 0.75rem 2rem;
-            border-radius: 8px;
-            font-weight: 500;
-            font-size: 0.95rem;
-        }
-
-        .swal2-confirm {
-            background-color: #10b981 !important;
-        }
-
-        .swal2-confirm:hover {
-            background-color: #059669 !important;
-        }
-
-        .swal2-cancel {
-            background-color: #ef4444 !important;
-        }
-
-        .swal2-cancel:hover {
-            background-color: #dc2626 !important;
-        }
-    </style>
 </head>
 
 <body>
-    <!-- Include Navigation -->
     @include('layouts.navigation')
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <!-- Events Section -->
             <div class="events-section">
                 <div class="section-header">
                     <h2 class="section-title">
@@ -93,13 +39,19 @@
                 </div>
 
                 @if ($events->count() > 0)
-                    <!-- Events Grid -->
                     <div class="events-grid">
                         @foreach ($events as $event)
+                            @php
+                                $user = auth()->user();
+                                $canJoin = $event->canUserJoin($user);
+                                $isEligible = $event->isAvailableForUser($user);
+                                $departmentMatch = $event->isAvailableForDepartment($user->department);
+                                $yearLevelMatch = $event->isAvailableForYearLevel($user->year_level);
+                            @endphp
+
                             <div class="event-card"
                                 data-end-date="{{ \Carbon\Carbon::parse($event->date)->format('Y-m-d') }}"
                                 data-end-time="{{ \Carbon\Carbon::parse($event->end_time)->format('H:i:s') }}">
-                                <!-- Background Image -->
                                 <div class="event-image-container">
                                     @if ($event->image)
                                         <img src="{{ $event->image }}" alt="{{ e($event->title) }}"
@@ -112,21 +64,10 @@
                                     @endif
                                 </div>
 
-                                <!-- Status Badge (Top Left) -->
-                                <div
-                                    class="event-badge {{ $event->created_at >= now()->subWeek() ? 'new' : ($event->date >= now() && $event->date <= now()->addWeek() ? 'upcoming' : 'event') }}">
-                                    @if ($event->created_at >= now()->subWeek())
-                                        NEW
-                                    @elseif($event->date >= now() && $event->date <= now()->addWeek())
-                                        Early Bird
-                                    @elseif($event->is_recurring)
-                                        Popular
-                                    @else
-                                        EVENT
-                                    @endif
+                                <div class="event-badge" style="background: transparent; color: #ffffff; font-weight: 700; padding: 0.4rem 0.9rem; border: none; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 10px rgba(0, 0, 0, 0.5);">
+                                    {{ e($event->year_level_display ?? 'All Years') }}
                                 </div>
 
-                                <!-- Info Button -->
                                 <button class="info-btn" onclick="showEventInfo(this)"
                                     title="Event Details" 
                                     data-event-title="{{ e($event->title) }}"
@@ -134,17 +75,16 @@
                                     data-event-date="{{ $event->date->format('F d, Y') }}"
                                     data-event-time="{{ e($event->start_time ? $event->start_time->format('g:i A') : 'TBA') }}"
                                     data-event-department="{{ e($event->department_display) }}"
+                                    data-event-year-level="{{ e($event->year_level_display) }}"
                                     data-event-description="{{ e($event->description ?? 'No description available.') }}"
-                                    data-event-image="{{ $event->hasImage() ? $event->image_url : '' }}"
                                     data-event-status="{{ e($event->status) }}">
                                     <i class="fas fa-info"></i>
                                 </button>
 
-                                <!-- Department/Exclusivity Badge (Top Right) -->
                                 @if ($event->is_exclusive)
                                     <div class="exclusivity-badge exclusive">
                                         <i class="fas fa-graduation-cap"></i>
-                                        {{ auth()->user()->department }}
+                                        {{ $event->department_display }}
                                     </div>
                                 @else
                                     <div class="exclusivity-badge open">
@@ -153,18 +93,14 @@
                                     </div>
                                 @endif
 
-                                <!-- Event Content (Bottom Overlay) -->
                                 <div class="event-content">
-                                    <!-- Location Badge -->
                                     <div class="location-badge">
                                         <i class="fas fa-map-marker-alt"></i>
                                         <span>{{ e(Str::limit($event->location, 25)) }}</span>
                                     </div>
 
-                                    <!-- Event Title -->
                                     <h3 class="event-title">{{ e($event->title) }}</h3>
 
-                                    <!-- Button -->
                                     @if ($event->join_status === 'joined')
                                         <div class="flex-container">
                                             <button class="custom-btn leave-btn joined"
@@ -174,7 +110,6 @@
                                                 <span class="btn-text">Leave</span>
                                             </button>
 
-                                            <!-- Feedback Button -->
                                             <button class="custom-btn feedback-btn"
                                                 onclick="openFeedbackModal({{ $event->id }}, '{{ e($event->title) }}')">
                                                 <i class="fas fa-comment-dots"></i> Feedback
@@ -201,21 +136,55 @@
                                             </button>
                                         </div>
                                     @elseif($event->join_status === 'pending')
-                                        <button class="custom-btn leave-btn pending" disabled>
-                                            <span class="btn-text">Pending Approval</span>
-                                        </button>
+                                        <div class="flex-container">
+                                            <button class="custom-btn leave-btn pending" 
+                                                data-event-id="{{ $event->id }}"
+                                                data-event-title="{{ e($event->title) }}"
+                                                onclick="toggleEventJoin(this)">
+                                                <span class="btn-text">Cancel Request</span>
+                                            </button>
+                                            <button class="custom-btn" disabled style="opacity: 0.6;">
+                                                <span class="btn-text">Pending Approval</span>
+                                            </button>
+                                        </div>
                                     @else
-                                        <button class="register-btn" data-event-id="{{ $event->id }}"
-                                            data-event-title="{{ e($event->title) }}" onclick="toggleEventJoin(this)">
-                                            <span class="btn-text">Join Now <span class="time-left-badge"></span></span>
-                                        </button>
+                                        @if (!$isEligible)
+                                            <div style="text-align: center; padding: 0.5rem;">
+                                                <button class="register-btn" disabled style="opacity: 0.6; cursor: not-allowed;">
+                                                    <span class="btn-text">Not Eligible</span>
+                                                </button>
+                                                <p style="font-size: 0.75rem; color: #ef4444; margin-top: 0.5rem;">
+                                                    @if (!$departmentMatch)
+                                                        Department mismatch
+                                                    @elseif (!$yearLevelMatch)
+                                                        Year level mismatch
+                                                    @else
+                                                        Not eligible for this event
+                                                    @endif
+                                                </p>
+                                            </div>
+                                        @elseif ($event->status !== 'active')
+                                            <button class="register-btn" disabled style="opacity: 0.6; cursor: not-allowed;">
+                                                <span class="btn-text">{{ ucfirst($event->status) }}</span>
+                                            </button>
+                                        @elseif ($event->date < now())
+                                            <button class="register-btn" disabled style="opacity: 0.6; cursor: not-allowed;">
+                                                <span class="btn-text">Event Ended</span>
+                                            </button>
+                                        @else
+                                            <button class="register-btn" 
+                                                data-event-id="{{ $event->id }}"
+                                                data-event-title="{{ e($event->title) }}" 
+                                                onclick="toggleEventJoin(this)">
+                                                <span class="btn-text">Join Now <span class="time-left-badge"></span></span>
+                                            </button>
+                                        @endif
                                     @endif
                                 </div>
                             </div>
                         @endforeach
                     </div>
 
-                    <!-- Pagination -->
                     @if ($events->hasPages())
                         <div class="pagination-container">
                             <div class="pagination-wrapper">
@@ -235,12 +204,8 @@
                                     @foreach ($events->getUrlRange(1, $events->lastPage()) as $page => $url)
                                         @if ($page == $events->currentPage())
                                             <span class="pagination-btn active"><span>{{ $page }}</span></span>
-                                        @elseif (
-                                            $page == 1 ||
-                                                $page == $events->lastPage() ||
-                                                ($page >= $events->currentPage() - 2 && $page <= $events->currentPage() + 2))
-                                            <a href="{{ $url }}"
-                                                class="pagination-btn"><span>{{ $page }}</span></a>
+                                        @elseif ($page == 1 || $page == $events->lastPage() || ($page >= $events->currentPage() - 2 && $page <= $events->currentPage() + 2))
+                                            <a href="{{ $url }}" class="pagination-btn"><span>{{ $page }}</span></a>
                                         @elseif ($page == $events->currentPage() - 3 || $page == $events->currentPage() + 3)
                                             <span class="pagination-dots">...</span>
                                         @endif
@@ -260,14 +225,12 @@
                                 </div>
 
                                 <div class="pagination-info">
-                                    Showing {{ $events->firstItem() }} to {{ $events->lastItem() }} of
-                                    {{ $events->total() }} results
+                                    Showing {{ $events->firstItem() }} to {{ $events->lastItem() }} of {{ $events->total() }} results
                                 </div>
                             </div>
                         </div>
                     @endif
                 @else
-                    <!-- Empty State -->
                     <div class="empty-state">
                         <i class="fas fa-calendar-times"></i>
                         <h3>No events available</h3>
@@ -275,8 +238,7 @@
                             @if (request('department') || request('search'))
                                 No events match your current filters. Try adjusting your search criteria.
                             @else
-                                There are no events available for your department at the moment. Please check back
-                                later.
+                                There are no upcoming events available for your department at the moment. Please check back later.
                             @endif
                         </p>
                     </div>
@@ -285,77 +247,63 @@
         </div>
     </div>
 
-    <!-- Event Info Modal - Profile Card Style -->
+    <!-- ✅ CLEAN EVENT INFO MODAL -->
     <div id="eventInfoModal" class="modal-overlay">
         <div class="modal-content">
+            <button class="modal-close" onclick="closeEventInfo()">
+                <i class="fas fa-times"></i>
+            </button>
+            
             <div class="modal-header">
-                <div class="modal-event-image-container" id="modalImageContainer">
-                    <img src="" alt="Event" class="modal-event-image" id="modalImage" style="display: none;">
-                    <div class="modal-event-image-placeholder" id="modalImagePlaceholder" style="display: none;">
-                        <i class="fas fa-calendar-alt"></i>
+                <h2 class="modal-title" id="modalTitle">Event Title</h2>
+                <p class="modal-subtitle" id="modalSubtitle">
+                    <i class="fas fa-map-marker-alt"></i> <span id="modalSubLocation">Location</span> • <span id="modalSubDate">Date</span>
+                </p>
+            </div>
+            
+            <div class="modal-body">
+                <div class="description-box" style="border-top: none; padding-top: 0; margin-top: 0; margin-bottom: 1.5rem;">
+                    <div class="info-label">Event Description</div>
+                    <div class="info-text" id="modalDescription">
+                        Join us for an exciting event featuring industry leaders and innovators.
                     </div>
                 </div>
-                <button class="modal-close" onclick="closeEventInfo()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-profile-section">
-                <h2 class="modal-event-title" id="modalTitle">Event Title</h2>
-                <p class="modal-event-subtitle" id="modalSubtitle">Event Information</p>
-                <div class="modal-badges">
-                    <span class="modal-badge badge-featured">FEATURED</span>
-                    <span class="modal-badge" id="modalStatusBadge">ACTIVE</span>
-                </div>
-            </div>
-            <div class="modal-body" id="eventInfoContent">
+
                 <div class="info-grid">
                     <div class="info-item">
-                        <div class="info-item-icon">
-                            <i class="fas fa-map-marker-alt"></i>
-                        </div>
                         <div class="info-label">Location</div>
                         <div class="info-text" id="modalLocation">Convention Center</div>
                     </div>
                     <div class="info-item">
-                        <div class="info-item-icon">
-                            <i class="fas fa-calendar"></i>
-                        </div>
-                        <div class="info-label">Date & Time</div>
-                        <div class="info-text" id="modalDateTime">Nov 15, 2025</div>
+                        <div class="info-label">Date</div>
+                        <div class="info-text" id="modalDate">November 14, 2025</div>
                     </div>
                     <div class="info-item">
-                        <div class="info-item-icon">
-                            <i class="fas fa-graduation-cap"></i>
-                        </div>
+                        <div class="info-label">Time</div>
+                        <div class="info-text" id="modalTime">5:00 PM</div>
+                    </div>
+                    <div class="info-item">
                         <div class="info-label">Department</div>
                         <div class="info-text" id="modalDepartment">All Departments</div>
                     </div>
                     <div class="info-item">
-                        <div class="info-item-icon">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                        <div class="info-label">Time</div>
-                        <div class="info-text" id="modalTime">5:00 PM</div>
-                    </div>
-                </div>
-                <div class="description-box">
-                    <div class="info-label">Event Description</div>
-                    <div class="info-text" id="modalDescription">
-                        Join us for an exciting event featuring industry leaders and innovators.
+                        <div class="info-label">Year Level</div>
+                        <div class="info-text" id="modalYearLevel">All Years</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Feedback Modal -->
+    <!-- ✅ FEEDBACK MODAL -->
     <div id="feedbackModal" class="modal-overlay">
         <div class="modal-content">
+            <button class="modal-close" onclick="closeFeedbackModal()">
+                <i class="fas fa-times"></i>
+            </button>
             <div class="modal-header">
-                <h2>Event Feedback</h2>
-                <button class="modal-close" onclick="closeFeedbackModal()">
-                    <i class="fas fa-times"></i>
-                </button>
+                <h2 class="modal-title">Event Feedback</h2>
+                <p class="modal-subtitle">Share your thoughts about this event</p>
             </div>
             <div class="modal-body">
                 <form id="feedbackForm">
@@ -378,22 +326,14 @@
         </div>
     </div>
 
-    <!-- Include Navigation Script -->
     <script src="{{ asset('user/nav/js/navbar.js') }}"></script>
-
-    <!-- Toast container -->
     <div id="toastContainer"></div>
-
     @include('layouts.footer')
-    
-    <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.all.min.js"></script>
-
-    <!-- Dashboard JavaScript -->
     <script src="{{ asset('user/js/dashboard.js') }}"></script>
 
     <script>
-        // Show Event Info Modal with Profile Card Style
+        // ✅ Show Event Info Modal
         function showEventInfo(button) {
             const modal = document.getElementById('eventInfoModal');
             const eventTitle = button.getAttribute('data-event-title');
@@ -401,68 +341,55 @@
             const eventDate = button.getAttribute('data-event-date');
             const eventTime = button.getAttribute('data-event-time');
             const eventDepartment = button.getAttribute('data-event-department');
+            const eventYearLevel = button.getAttribute('data-event-year-level');
             const eventDescription = button.getAttribute('data-event-description');
-            const eventImage = button.getAttribute('data-event-image');
             const eventStatus = button.getAttribute('data-event-status');
 
-            // Update modal content
             document.getElementById('modalTitle').textContent = eventTitle;
-            document.getElementById('modalSubtitle').textContent = `${eventLocation} • ${eventDate}`;
+            document.getElementById('modalSubLocation').textContent = eventLocation;
+            document.getElementById('modalSubDate').textContent = eventDate;
             document.getElementById('modalLocation').textContent = eventLocation;
-            document.getElementById('modalDateTime').textContent = eventDate;
+            document.getElementById('modalDate').textContent = eventDate;
             document.getElementById('modalTime').textContent = eventTime;
             document.getElementById('modalDepartment').textContent = eventDepartment;
+            document.getElementById('modalYearLevel').textContent = eventYearLevel || 'All Years';
             document.getElementById('modalDescription').textContent = eventDescription;
 
-            // Update status badge
-            const statusBadge = document.getElementById('modalStatusBadge');
-            if (eventStatus === 'active') {
-                statusBadge.textContent = 'ACTIVE';
-                statusBadge.className = 'modal-badge badge-active';
-            } else {
-                statusBadge.textContent = 'INACTIVE';
-                statusBadge.className = 'modal-badge badge-inactive';
-            }
-
-            // Handle image display
-            const modalImage = document.getElementById('modalImage');
-            const modalPlaceholder = document.getElementById('modalImagePlaceholder');
-
-            if (eventImage) {
-                modalImage.src = eventImage;
-                modalImage.style.display = 'block';
-                modalPlaceholder.style.display = 'none';
-            } else {
-                modalImage.style.display = 'none';
-                modalPlaceholder.style.display = 'flex';
-            }
-
             modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
         }
 
         function closeEventInfo() {
             document.getElementById('eventInfoModal').classList.remove('active');
+            document.body.style.overflow = '';
         }
 
-        // Close modal when clicking outside
         document.getElementById('eventInfoModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeEventInfo();
             }
         });
 
+        // ✅ Feedback Modal
         function openFeedbackModal(eventId, eventTitle) {
-            document.getElementById('feedbackModal').style.display = 'flex';
+            document.getElementById('feedbackModal').classList.add('active');
             document.getElementById('feedbackEventId').value = eventId;
             document.getElementById('feedbackMessage').value = '';
             document.querySelectorAll('.stars .fa-star').forEach(s => s.classList.remove('selected'));
+            document.body.style.overflow = 'hidden';
         }
 
         function closeFeedbackModal() {
-            document.getElementById('feedbackModal').style.display = 'none';
+            document.getElementById('feedbackModal').classList.remove('active');
+            document.body.style.overflow = '';
         }
 
-        // Handle Star Rating
+        document.getElementById('feedbackModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeFeedbackModal();
+            }
+        });
+
         document.querySelectorAll('.stars .fa-star').forEach(star => {
             star.addEventListener('click', function() {
                 const value = this.dataset.value;
@@ -472,7 +399,6 @@
             });
         });
 
-        // Submit Feedback
         document.getElementById('feedbackForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const eventId = document.getElementById('feedbackEventId').value;
@@ -480,47 +406,64 @@
             const rating = document.querySelectorAll('.stars .selected').length;
 
             fetch(`/events/${eventId}/feedback`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify({
-                        feedback,
-                        rating
-                    })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    Swal.fire({
-                        icon: data.success ? 'success' : 'error',
-                        title: data.message,
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-                    closeFeedbackModal();
-                })
-                .catch(() => {
-                    Swal.fire('Error', 'Something went wrong. Please try again.', 'error');
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({ feedback, rating })
+            })
+            .then(res => res.json())
+            .then(data => {
+                Swal.fire({
+                    icon: data.success ? 'success' : 'error',
+                    title: data.message,
+                    timer: 2000,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
                 });
+                closeFeedbackModal();
+            })
+            .catch(() => {
+                Swal.fire('Error', 'Something went wrong. Please try again.', 'error');
+            });
         });
 
-        // Enhanced toggle event join with SweetAlert confirmation
+        // ✅ Event Join/Leave - UPDATED TO HANDLE BOTH JOINED AND PENDING
         function toggleEventJoin(button) {
             const eventId = button.getAttribute('data-event-id');
-            const isJoined = button.getAttribute('data-joined') === 'true';
+            const isJoined = button.classList.contains('joined');
+            const isPending = button.classList.contains('pending');
             const eventTitle = button.getAttribute('data-event-title');
-            const action = isJoined ? 'leave' : 'join';
+            
+            let action, title, message, confirmColor;
+            
+            if (isJoined) {
+                action = 'leave';
+                title = 'Leave Event?';
+                message = `Are you sure you want to leave <strong>"${eventTitle}"</strong>?`;
+                confirmColor = '#ef4444';
+            } else if (isPending) {
+                action = 'leave';
+                title = 'Cancel Request?';
+                message = `Are you sure you want to cancel your pending request for <strong>"${eventTitle}"</strong>?`;
+                confirmColor = '#ef4444';
+            } else {
+                action = 'join';
+                title = 'Join Event?';
+                message = `Are you sure you want to join <strong>"${eventTitle}"</strong>?`;
+                confirmColor = '#10b981';
+            }
 
-            // Show confirmation dialog
             Swal.fire({
-                title: isJoined ? 'Leave Event?' : 'Join Event?',
-                html: `Are you sure you want to ${action} <strong>"${eventTitle}"</strong>?`,
+                title: title,
+                html: message,
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Yes',
                 cancelButtonText: 'No',
-                confirmButtonColor: isJoined ? '#ef4444' : '#10b981',
+                confirmButtonColor: confirmColor,
                 cancelButtonColor: '#6b7280',
                 reverseButtons: true
             }).then((result) => {
@@ -552,123 +495,116 @@
 
         function processCertificateGeneration(button, eventId) {
             const url = `/events/${eventId}/generate-certificate`;
-
             button.disabled = true;
             button.style.opacity = '0.6';
 
             fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        Swal.fire({
-                            title: 'Success!',
-                            text: data.message,
-                            icon: 'success',
-                            timer: 2000,
-                            showConfirmButton: false,
-                            toast: true,
-                            position: 'top-end'
-                        }).then(() => {
-                            location.reload();
-                        });
-                    } else {
-                        Swal.fire({
-                            title: 'Error',
-                            text: data.message,
-                            icon: 'error',
-                            confirmButtonText: 'OK',
-                            confirmButtonColor: '#ef4444'
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: data.message,
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
                     Swal.fire({
                         title: 'Error',
-                        text: 'An error occurred. Please try again.',
+                        text: data.message,
                         icon: 'error',
                         confirmButtonText: 'OK',
                         confirmButtonColor: '#ef4444'
                     });
-                })
-                .finally(() => {
-                    button.disabled = false;
-                    button.style.opacity = '1';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'An error occurred. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#ef4444'
                 });
+            })
+            .finally(() => {
+                button.disabled = false;
+                button.style.opacity = '1';
+            });
         }
 
         function processEventAction(button, eventId, action, eventTitle) {
             const url = `/events/${eventId}/${action}`;
-
             button.disabled = true;
             button.style.opacity = '0.6';
-
             const method = action === 'leave' ? 'DELETE' : 'POST';
 
             fetch(url, {
-                    method: method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const isNowJoined = action === 'join';
-                        button.setAttribute('data-joined', isNowJoined);
-                        button.querySelector('.btn-text').textContent = isNowJoined ? 'Pending Approval' : 'Join Now';
-
-                        if (isNowJoined) {
-                            button.classList.add('pending');
-                        } else {
-                            button.classList.remove('pending');
-                        }
-
-                        Swal.fire({
-                            title: 'Success!',
-                            text: data.message,
-                            icon: 'success',
-                            timer: 2000,
-                            showConfirmButton: false,
-                            toast: true,
-                            position: 'top-end'
-                        });
-                    } else {
-                        Swal.fire({
-                            title: 'Error',
-                            text: data.message,
-                            icon: 'error',
-                            confirmButtonText: 'OK',
-                            confirmButtonColor: '#ef4444'
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: data.message,
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
                     Swal.fire({
                         title: 'Error',
-                        text: 'An error occurred. Please try again.',
+                        text: data.message,
                         icon: 'error',
                         confirmButtonText: 'OK',
                         confirmButtonColor: '#ef4444'
                     });
-                })
-                .finally(() => {
-                    button.disabled = false;
-                    button.style.opacity = '1';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'An error occurred. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#ef4444'
                 });
+            })
+            .finally(() => {
+                button.disabled = false;
+                button.style.opacity = '1';
+            });
         }
 
-        // Timer functionality
+        function showCertificateInfo(eventId) {
+            window.location.href = `/certificates?event_id=${eventId}`;
+        }
+
+        // ✅ Timer functionality for countdown
         document.addEventListener('DOMContentLoaded', function() {
             const images = document.querySelectorAll('.event-image');
             const eventCards = document.querySelectorAll('.event-card');
@@ -697,6 +633,8 @@
                     const diff = endDateTime - now;
 
                     if (diff <= 0) {
+                        timeLeftBadge.textContent = '';
+                        icon.classList.remove('blinking');
                         return;
                     }
 
@@ -717,6 +655,14 @@
 
                 updateTimer();
                 setInterval(updateTimer, 60000);
+            });
+
+            // Close modals on ESC key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeEventInfo();
+                    closeFeedbackModal();
+                }
             });
         });
     </script>

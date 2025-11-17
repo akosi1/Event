@@ -376,6 +376,10 @@
                href="{{ route('admin.event-joins.index') }}">
                 <i class="fas fa-users-cog"></i> Participants
             </a>
+                <a class="nav-link {{ request()->routeIs('admin.login-logs.*') ? 'active' : '' }}"
+                href="{{ route('admin.login-logs.index') }}">
+                    <i class="fas fa-shield-alt"></i> Login Activity
+                </a>
         </nav>
         
     </div>

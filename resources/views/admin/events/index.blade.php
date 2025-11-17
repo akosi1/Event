@@ -58,25 +58,27 @@
                 <div class="col-md-2">
                     <select class="form-select" name="department" onchange="this.form.submit()">
                         <option value="">All Departments</option>
-                        @foreach(['BSIT' => 'Bachelor of Science in Information Technology', 'BSBA' => 'Bachelor of Science in Business Administration', 'BSED' => 'Bachelor of Science in Education', 'BEED' => 'Bachelor of Elementary Education', 'BSHM' => 'Bachelor of Science in Hospitality Management'] as $code => $name)
+                        @foreach(['BSIT' => 'BSIT', 'BSBA' => 'BSBA', 'BSED' => 'BSED', 'BEED' => 'BEED', 'BSHM' => 'BSHM'] as $code => $name)
                             <option value="{{ $code }}" {{ request('department') == $code ? 'selected' : '' }}>
-                                {{ $code }}
+                                {{ $name }}
                             </option>
                         @endforeach
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" name="year_level" onchange="this.form.submit()">
+                        <option value="">All Year Levels</option>
+                        <option value="1" {{ request('year_level') == '1' ? 'selected' : '' }}>1st Year</option>
+                        <option value="2" {{ request('year_level') == '2' ? 'selected' : '' }}>2nd Year</option>
+                        <option value="3" {{ request('year_level') == '3' ? 'selected' : '' }}>3rd Year</option>
+                        <option value="4" {{ request('year_level') == '4' ? 'selected' : '' }}>4th Year</option>
                     </select>
                 </div>
                 <div class="col-md-2">
                     <select class="form-select" name="exclusivity" onchange="this.form.submit()">
                         <option value="">All Access Types</option>
                         <option value="open" {{ request('exclusivity') == 'open' ? 'selected' : '' }}>Open to All</option>
-                        <option value="exclusive" {{ request('exclusivity') == 'exclusive' ? 'selected' : '' }}>Department Exclusive</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select class="form-select" name="recurrence" onchange="this.form.submit()">
-                        <option value="">All Event Types</option>
-                        <option value="one_time" {{ request('recurrence') == 'one_time' ? 'selected' : '' }}>One-time</option>
-                        <option value="recurring" {{ request('recurrence') == 'recurring' ? 'selected' : '' }}>Recurring</option>
+                        <option value="exclusive" {{ request('exclusivity') == 'exclusive' ? 'selected' : '' }}>Exclusive</option>
                     </select>
                 </div>
                 <div class="col-md-1">
@@ -115,7 +117,7 @@
                             <th class="py-3">Access</th>
                             <th class="py-3">Type</th>
                             <th class="py-3">Status</th>
-                            <th class="py-3">Location</th>
+                            <th class="py-3">Participants</th>
                             <th class="py-3 text-center">Actions</th>
                         </tr>
                     </thead>
@@ -169,7 +171,17 @@
                                     <span class="badge bg-warning text-dark mb-1" title="{{ $event->department_display }}">
                                         <i class="fas fa-lock me-1"></i>Exclusive
                                     </span>
-                                    <br><small class="text-muted">{{ Str::limit($event->department_display, 25) }}</small>
+                                    <br>
+                                    <small class="text-muted d-block">{{ Str::limit($event->department_display, 20) }}</small>
+                                    @if($event->allowed_year_levels && count($event->allowed_year_levels) > 0)
+                                        <small class="text-muted d-block">
+                                            <i class="fas fa-graduation-cap me-1"></i>
+                                            @foreach($event->allowed_year_levels as $year)
+                                                {{ $year }}{{ !$loop->last ? ',' : '' }}
+                                            @endforeach
+                                            Year
+                                        </small>
+                                    @endif
                                 @else
                                     <span class="badge bg-success">
                                         <i class="fas fa-globe me-1"></i>Open to All
@@ -199,16 +211,13 @@
                                 </span>
                             </td>
                             <td>
-                                <span class="text-muted" title="{{ $event->location }}">
-                                    {{ Str::limit($event->location, 25) }}
-                                </span>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-users text-primary me-2"></i>
+                                    <span class="fw-semibold">{{ $event->joinedUsers->count() }}</span>
+                                </div>
                             </td>
                             <td class="text-center">
                                 <div class="btn-group" role="group">
-                                    <button type="button" class="btn btn-sm btn-outline-primary" 
-                                            title="View" onclick="viewEvent({{ $event->id }})">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
                                     <a href="{{ route('admin.events.edit', ['event' => $event->id]) }}" 
                                        class="btn btn-sm btn-outline-warning" title="Edit">
                                         <i class="fas fa-edit"></i>
@@ -287,12 +296,12 @@
                 <i class="fas fa-calendar-alt fa-4x text-muted mb-4"></i>
                 <h5 class="text-muted mb-3">No Events Found</h5>
                 <p class="text-muted mb-4">
-                    {{ request()->hasAny(['search', 'status', 'department', 'exclusivity', 'recurrence'])
+                    {{ request()->hasAny(['search', 'status', 'department', 'year_level', 'exclusivity', 'recurrence'])
                        ? 'No events match your search criteria.'
                        : 'Get started by creating your first event!' }}
                 </p>
                 <div>
-                    @if(request()->hasAny(['search', 'status', 'department', 'exclusivity', 'recurrence']))
+                    @if(request()->hasAny(['search', 'status', 'department', 'year_level', 'exclusivity', 'recurrence']))
                         <a href="{{ route('admin.events.index') }}" class="btn btn-outline-secondary me-2">
                             <i class="fas fa-times me-1"></i>Clear Filters
                         </a>
@@ -304,27 +313,6 @@
             </div>
         </div>
     @endif
-</div>
-
-<!-- View Event Modal -->
-<div class="modal fade" id="viewEventModal" tabindex="-1" aria-labelledby="viewEventModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="viewEventModalLabel">
-                    <i class="fas fa-eye me-2"></i>Event Details
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div id="viewEventContent" class="text-center py-4">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 <!-- Hidden form for delete -->
@@ -350,14 +338,6 @@
 .badge {
     padding: 0.35em 0.65em;
     font-weight: 500;
-}
-
-.modal-body img {
-    transition: transform 0.2s;
-}
-
-.modal-body img:hover {
-    transform: scale(1.05);
 }
 
 .pagination .page-link {
@@ -485,75 +465,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (result.isConfirmed) {
                     const form = document.getElementById('deleteForm');
                     form.action = `/admin/events/${eventId}`;
+                    
+                    if (isRecurring) {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'delete_series';
+                        input.value = '1';
+                        form.appendChild(input);
+                    }
+                    
                     form.submit();
                 }
             });
         });
     });
 });
-
-// View Event Function
-function viewEvent(eventId) {
-    const modal = new bootstrap.Modal(document.getElementById('viewEventModal'));
-    const content = document.getElementById('viewEventContent');
-    
-    // Show loading state
-    content.innerHTML = `
-        <div class="text-center py-4">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-        </div>
-    `;
-    
-    modal.show();
-    
-    // Fetch event details
-    fetch(`/admin/events/${eventId}`)
-        .then(response => response.json())
-        .then(data => {
-            content.innerHTML = `
-                <div class="row">
-                    ${data.image ? `
-                        <div class="col-12 mb-3">
-                            <img src="${data.image}" class="img-fluid rounded" alt="${data.title}">
-                        </div>
-                    ` : ''}
-                    <div class="col-12">
-                        <h4 class="mb-3">${data.title}</h4>
-                        <p class="text-muted">${data.description}</p>
-                        <hr>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <strong><i class="fas fa-calendar me-2"></i>Date:</strong><br>
-                                ${data.date}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <strong><i class="fas fa-clock me-2"></i>Time:</strong><br>
-                                ${data.time}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <strong><i class="fas fa-map-marker-alt me-2"></i>Location:</strong><br>
-                                ${data.location}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <strong><i class="fas fa-info-circle me-2"></i>Status:</strong><br>
-                                <span class="badge bg-${data.status === 'active' ? 'success' : data.status === 'postponed' ? 'warning' : 'danger'}">${data.status}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        })
-        .catch(error => {
-            content.innerHTML = `
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    Failed to load event details. Please try again.
-                </div>
-            `;
-        });
-}
 
 // Success Message
 @if(session('success'))
@@ -563,6 +489,16 @@ Swal.fire({
     text: '{{ session('success') }}',
     timer: 3000,
     showConfirmButton: false
+});
+@endif
+
+// Error Message
+@if(session('error'))
+Swal.fire({
+    icon: 'error',
+    title: 'Error!',
+    text: '{{ session('error') }}',
+    confirmButtonColor: '#d33'
 });
 @endif
 </script>

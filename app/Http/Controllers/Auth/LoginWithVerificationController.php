@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\LoginLog;
+use App\Helpers\IpGeolocation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -34,6 +36,10 @@ class LoginWithVerificationController extends Controller
         // Check if user is locked out
         if (Cache::has($lockoutKey)) {
             $lockoutEnd = Cache::get($lockoutKey);
+            
+            // Log lockout attempt
+            $this->logLoginAttempt($email, null, 'locked_out');
+            
             throw ValidationException::withMessages([
                 'locked_out' => true,
                 'lockout_end' => $lockoutEnd,
@@ -49,11 +55,17 @@ class LoginWithVerificationController extends Controller
 
             $remaining = $this->maxAttempts - $attempts;
 
+            // Log failed attempt
+            $this->logLoginAttempt($email, null, 'failed');
+
             if ($attempts >= $this->maxAttempts) {
                 // Lock out user
                 $lockoutEnd = now()->addSeconds($this->lockoutDuration)->timestamp;
                 Cache::put($lockoutKey, $lockoutEnd, $this->lockoutDuration);
                 Cache::forget($attemptsKey);
+
+                // Log lockout
+                $this->logLoginAttempt($email, null, 'locked_out');
 
                 throw ValidationException::withMessages([
                     'locked_out' => true,
@@ -116,6 +128,12 @@ class LoginWithVerificationController extends Controller
         $user = Auth::getProvider()->retrieveById($verification['user_id']);
         Auth::login($user, $request->boolean('remember'));
 
+        // Log successful login with login_at timestamp
+        $loginLog = $this->logLoginAttempt($user->email, $user->id, 'success');
+        
+        // Store login log ID in session for logout tracking
+        Session::put('current_login_log_id', $loginLog->id);
+
         Session::forget('login_verification');
 
         return redirect()->route('dashboard');
@@ -123,7 +141,17 @@ class LoginWithVerificationController extends Controller
 
     public function logout(Request $request)
     {
-        $email = Auth::check() ? Auth::user()->email : null;
+        $user = Auth::user();
+        $email = Auth::check() ? $user->email : null;
+
+        // Track logout with geolocation
+        if ($user) {
+            $loginLogId = Session::get('current_login_log_id');
+            
+            if ($loginLogId) {
+                $this->logLogout($loginLogId);
+            }
+        }
 
         if ($email) {
             $lockoutKey = "login_lockout:" . strtolower(trim($email));
@@ -136,5 +164,68 @@ class LoginWithVerificationController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect()->route('login');
+    }
+
+    /**
+     * Log login attempt with IP and geolocation.
+     */
+    protected function logLoginAttempt(string $email, ?int $userId, string $status): ?LoginLog
+    {
+        try {
+            $ip = IpGeolocation::getRealIp();
+            $geolocation = IpGeolocation::getGeolocation($ip);
+            $userAgent = IpGeolocation::getUserAgent();
+
+            return LoginLog::create([
+                'user_id' => $userId,
+                'email_attempted' => $email,
+                'ip_address' => $geolocation['ip'],
+                'user_agent' => $userAgent,
+                'status' => $status,
+                'city' => $geolocation['city'],
+                'region' => $geolocation['region'],
+                'country' => $geolocation['country'],
+                'country_code' => $geolocation['country_code'],
+                'latitude' => $geolocation['latitude'],
+                'longitude' => $geolocation['longitude'],
+                'login_at' => $status === 'success' ? now() : null,
+            ]);
+        } catch (\Exception $e) {
+            // Log error but don't break login flow
+            \Log::error('Failed to log login attempt: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Log logout with IP and geolocation.
+     */
+    protected function logLogout(int $loginLogId): void
+    {
+        try {
+            $loginLog = LoginLog::find($loginLogId);
+            
+            if (!$loginLog) {
+                return;
+            }
+
+            $ip = IpGeolocation::getRealIp();
+            $geolocation = IpGeolocation::getGeolocation($ip);
+            
+            $logoutTime = now();
+            $sessionDuration = $loginLog->login_at ? $logoutTime->diffInSeconds($loginLog->login_at) : null;
+
+            $loginLog->update([
+                'logout_at' => $logoutTime,
+                'logout_ip_address' => $geolocation['ip'],
+                'logout_city' => $geolocation['city'],
+                'logout_country' => $geolocation['country'],
+                'logout_latitude' => $geolocation['latitude'],
+                'logout_longitude' => $geolocation['longitude'],
+                'session_duration' => $sessionDuration,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Failed to log logout: ' . $e->getMessage());
+        }
     }
 }

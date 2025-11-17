@@ -118,6 +118,14 @@ class EventJoinController extends Controller
             ]);
         }
 
+        // Check if user can join this event based on year level restrictions
+        if (!$event->isAvailableForYearLevel($user->year_level)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This event is not available for your year level.'
+            ]);
+        }
+
         // Check event status
         if ($event->status !== 'active') {
             return response()->json([
@@ -160,14 +168,15 @@ class EventJoinController extends Controller
     }
 
     /**
-     * User leaves an event
+     * User leaves an event (works for both approved and pending joins)
      */
     public function leave(Request $request, Event $event)
     {
         $user = auth()->user();
 
+        // Find the join record - works for both approved and pending
         $join = EventJoin::where('user_id', $user->id)
-                         ->where('event_id', $request->event_id)
+                         ->where('event_id', $event->id)
                          ->first();
 
         if (!$join) {
@@ -177,32 +186,36 @@ class EventJoinController extends Controller
             ]);
         }
 
-        // Check if event is in the past
-        if ($event->date < now()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Cannot leave past events.'
-            ]);
-        }
+        // Store approval status before deletion for notification message
+        $wasApproved = $join->approved;
 
+        // Delete the join record
         $join->delete();
 
-        // Create notification for admin about leaving
+        // Create notification for admin about leaving/cancellation
+        $actionType = $wasApproved ? 'left' : 'cancelled their request for';
+        $notificationType = $wasApproved ? 'event_leave' : 'event_cancel';
+        
         Notification::create([
-            'type' => 'event_leave',
-            'message' => $user->full_name . ' (' . $user->department . ') left "' . $event->title . '"',
+            'type' => $notificationType,
+            'message' => $user->full_name . ' (' . $user->department . ') ' . $actionType . ' "' . $event->title . '"',
             'data' => [
                 'user_id' => $user->id,
                 'event_id' => $event->id,
                 'user_name' => $user->full_name,
                 'user_department' => $user->department,
-                'event_title' => $event->title
+                'event_title' => $event->title,
+                'was_approved' => $wasApproved
             ]
         ]);
 
+        $message = $wasApproved 
+            ? 'Successfully left the event!' 
+            : 'Successfully cancelled your join request!';
+
         return response()->json([
             'success' => true,
-            'message' => 'Successfully left the event!'
+            'message' => $message
         ]);
     }
 
