@@ -20,6 +20,7 @@
                     
                     <!-- Hidden input for base64 image -->
                     <input type="hidden" name="profile_picture" id="profile_picture_base64" value="{{ old('profile_picture') }}">
+                    <input type="hidden" name="remove_profile_picture" id="remove_profile_picture" value="0">
                     
                     <!-- Profile Picture Upload -->
                     <div class="mb-4 text-center">
@@ -35,6 +36,12 @@
                                        style="width: 40px; height: 40px; cursor: pointer;">
                                     <i class="fas fa-camera"></i>
                                 </label>
+                                @if($user->profile_picture)
+                                <button type="button" id="removeProfilePicture" class="position-absolute top-0 end-0 btn btn-danger btn-sm rounded-circle" 
+                                        style="width: 30px; height: 30px; padding: 0;" title="Remove picture">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                @endif
                             </div>
                         </div>
                         <input type="file" 
@@ -257,7 +264,7 @@
 
                     <!-- Action Buttons -->
                     <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-success">
+                        <button type="submit" class="btn btn-success" id="updateBtn">
                             <i class="fas fa-save me-1"></i> Update User
                         </button>
                         <a href="{{ route('admin.users.index') }}" class="btn btn-secondary">
@@ -315,6 +322,7 @@
 @endif
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 // Toggle Password Visibility
 document.getElementById('togglePassword').addEventListener('click', function() {
@@ -332,6 +340,17 @@ document.getElementById('togglePassword').addEventListener('click', function() {
     }
 });
 
+// Remove Profile Picture
+const removeBtn = document.getElementById('removeProfilePicture');
+if (removeBtn) {
+    removeBtn.addEventListener('click', function() {
+        document.getElementById('profilePreview').src = 'https://ui-avatars.com/api/?name={{ urlencode($user->full_name) }}&size=150&background=0d6efd&color=fff';
+        document.getElementById('profile_picture_base64').value = '';
+        document.getElementById('remove_profile_picture').value = '1';
+        this.style.display = 'none';
+    });
+}
+
 // Profile Picture Preview with Base64 Conversion
 document.getElementById('profile_picture').addEventListener('change', function(e) {
     const file = e.target.files[0];
@@ -339,7 +358,12 @@ document.getElementById('profile_picture').addEventListener('change', function(e
         // Validate file type
         const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
         if (!allowedTypes.includes(file.type)) {
-            alert('Invalid file type. Only PNG, JPEG, and JPG are allowed.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid File Type',
+                text: 'Only PNG, JPEG, and JPG are allowed.',
+                timer: 3000
+            });
             this.value = '';
             return;
         }
@@ -347,7 +371,12 @@ document.getElementById('profile_picture').addEventListener('change', function(e
         // Validate file size (2MB max)
         const maxSize = 2 * 1024 * 1024; // 2MB in bytes
         if (file.size > maxSize) {
-            alert('File size exceeds 2MB. Please choose a smaller image.');
+            Swal.fire({
+                icon: 'error',
+                title: 'File Too Large',
+                text: 'File size exceeds 2MB. Please choose a smaller image.',
+                timer: 3000
+            });
             this.value = '';
             return;
         }
@@ -361,28 +390,114 @@ document.getElementById('profile_picture').addEventListener('change', function(e
             
             // Store base64 in hidden input
             document.getElementById('profile_picture_base64').value = base64String;
+            
+            // Reset remove flag
+            document.getElementById('remove_profile_picture').value = '0';
+            
+            // Show remove button if hidden
+            const removeBtn = document.getElementById('removeProfilePicture');
+            if (removeBtn) {
+                removeBtn.style.display = 'block';
+            }
         };
         reader.readAsDataURL(file);
     }
 });
 
-// Form validation
-document.querySelector('form').addEventListener('submit', function(e) {
+// Form submission with AJAX
+document.getElementById('userForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
     const password = document.getElementById('password').value;
     const passwordConfirmation = document.getElementById('password_confirmation').value;
     
     if (password && password !== passwordConfirmation) {
-        e.preventDefault();
-        alert('Password confirmation does not match!');
+        Swal.fire({
+            icon: 'error',
+            title: 'Validation Error',
+            text: 'Password confirmation does not match!',
+            timer: 3000
+        });
         return false;
     }
     
     if (password && password.length < 8) {
-        e.preventDefault();
-        alert('Password must be at least 8 characters long!');
+        Swal.fire({
+            icon: 'error',
+            title: 'Validation Error',
+            text: 'Password must be at least 8 characters long!',
+            timer: 3000
+        });
         return false;
     }
+    
+    const updateBtn = document.getElementById('updateBtn');
+    const originalText = updateBtn.innerHTML;
+    updateBtn.disabled = true;
+    updateBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Updating...';
+    
+    const formData = new FormData(this);
+    
+    fetch(this.action, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json',
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: data.message || 'User updated successfully.',
+                timer: 3000,
+                showConfirmButton: false
+            }).then(() => {
+                // Stay on the same page but reload to show updated data
+                window.location.reload();
+            });
+        } else {
+            throw new Error(data.message || 'Failed to update user');
+        }
+    })
+    .catch(error => {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: error.message || 'Failed to update user.',
+            timer: 3000
+        });
+        updateBtn.disabled = false;
+        updateBtn.innerHTML = originalText;
+    });
 });
 </script>
+
+@if(session('success'))
+<script>
+    Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: '{{ session('success') }}',
+        timer: 3000,
+        showConfirmButton: false
+    });
+</script>
+@endif
+
+@if(session('error'))
+<script>
+    Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: '{{ session('error') }}',
+        timer: 3000,
+        showConfirmButton: false
+    });
+</script>
+@endif
 @endpush
 @endsection

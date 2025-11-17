@@ -71,40 +71,48 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'id_number' => 'required|string|max:50|unique:users',
-            'first_name' => 'required|string|max:50|regex:/^[a-zA-Z\s]+$/',
-            'middle_name' => 'nullable|string|max:50|regex:/^[a-zA-Z\s]+$/',
-            'last_name' => 'required|string|max:50|regex:/^[a-zA-Z\s]+$/',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'department' => 'required|in:BSIT,BSBA,BSED,BEED,BSHM',
-            'year_level' => 'required|in:1,2,3,4',
-            'role' => 'required|in:admin,user',
-            'status' => 'required|in:active,inactive',
-            'profile_picture' => 'nullable|string', // Changed to accept base64 string
-        ]);
+        try {
+            $validated = $request->validate([
+                'id_number' => 'required|string|max:50|unique:users',
+                'first_name' => 'required|string|max:50|regex:/^[a-zA-Z\s]+$/',
+                'middle_name' => 'nullable|string|max:50|regex:/^[a-zA-Z\s]+$/',
+                'last_name' => 'required|string|max:50|regex:/^[a-zA-Z\s]+$/',
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required|string|min:8|confirmed',
+                'department' => 'required|in:BSIT,BSBA,BSED,BEED,BSHM',
+                'year_level' => 'required|in:1,2,3,4',
+                'role' => 'required|in:admin,user',
+                'status' => 'required|in:active,inactive',
+                'profile_picture' => 'nullable|string',
+            ]);
 
-        $validated['password'] = Hash::make($validated['password']);
+            $validated['password'] = Hash::make($validated['password']);
 
-        // Handle base64 profile picture
-        if ($request->filled('profile_picture')) {
-            $base64Image = $request->input('profile_picture');
-            
-            // Validate and process base64 image
-            if ($this->isValidBase64Image($base64Image)) {
-                $validated['profile_picture'] = $base64Image;
+            // Handle base64 profile picture
+            if ($request->filled('profile_picture')) {
+                $base64Image = $request->input('profile_picture');
+                
+                // Validate and process base64 image
+                if ($this->isValidBase64Image($base64Image)) {
+                    $validated['profile_picture'] = $base64Image;
+                } else {
+                    return back()->withErrors(['profile_picture' => 'Invalid image format. Only PNG, JPEG, and JPG are allowed.'])->withInput();
+                }
             } else {
-                return back()->withErrors(['profile_picture' => 'Invalid image format. Only PNG, JPEG, and JPG are allowed.'])->withInput();
+                unset($validated['profile_picture']);
             }
-        } else {
-            unset($validated['profile_picture']);
+
+            User::create($validated);
+
+            return redirect()->route('admin.users.index')
+                ->with('success', 'User created successfully.');
+                
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            \Log::error('User creation failed: ' . $e->getMessage());
+            return back()->with('error', 'Failed to create user: ' . $e->getMessage())->withInput();
         }
-
-        User::create($validated);
-
-        return redirect()->route('admin.users.index')
-            ->with('success', 'User created successfully.');
     }
 
     public function show(User $user)
@@ -119,51 +127,105 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
-        $validated = $request->validate([
-            'id_number' => ['required', 'string', 'max:50', Rule::unique('users')->ignore($user->id)],
-            'first_name' => 'required|string|max:50|regex:/^[a-zA-Z\s]+$/',
-            'middle_name' => 'nullable|string|max:50|regex:/^[a-zA-Z\s]+$/',
-            'last_name' => 'required|string|max:50|regex:/^[a-zA-Z\s]+$/',
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-            'password' => 'nullable|string|min:8|confirmed',
-            'department' => 'required|in:BSIT,BSBA,BSED,BEED,BSHM',
-            'year_level' => 'required|in:1,2,3,4',
-            'role' => 'required|in:admin,user',
-            'status' => 'required|in:active,inactive',
-            'profile_picture' => 'nullable|string', // Changed to accept base64 string
-        ]);
+        try {
+            $validated = $request->validate([
+                'id_number' => ['required', 'string', 'max:50', Rule::unique('users')->ignore($user->id)],
+                'first_name' => 'required|string|max:50|regex:/^[a-zA-Z\s]+$/',
+                'middle_name' => 'nullable|string|max:50|regex:/^[a-zA-Z\s]+$/',
+                'last_name' => 'required|string|max:50|regex:/^[a-zA-Z\s]+$/',
+                'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+                'password' => 'nullable|string|min:8|confirmed',
+                'department' => 'required|in:BSIT,BSBA,BSED,BEED,BSHM',
+                'year_level' => 'required|in:1,2,3,4',
+                'role' => 'required|in:admin,user',
+                'status' => 'required|in:active,inactive',
+                'profile_picture' => 'nullable|string',
+                'remove_profile_picture' => 'nullable|boolean',
+            ]);
 
-        // Handle password update
-        if (!empty($validated['password'])) {
-            $validated['password'] = Hash::make($validated['password']);
-        } else {
-            unset($validated['password']);
-        }
-
-        // Handle base64 profile picture
-        if ($request->filled('profile_picture')) {
-            $base64Image = $request->input('profile_picture');
-            
-            // Validate and process base64 image
-            if ($this->isValidBase64Image($base64Image)) {
-                $validated['profile_picture'] = $base64Image;
+            // Handle password update
+            if (!empty($validated['password'])) {
+                $validated['password'] = Hash::make($validated['password']);
             } else {
-                return back()->withErrors(['profile_picture' => 'Invalid image format. Only PNG, JPEG, and JPG are allowed.'])->withInput();
+                unset($validated['password']);
             }
+
+            // Handle profile picture removal
+            if ($request->filled('remove_profile_picture') && $request->remove_profile_picture == '1') {
+                $validated['profile_picture'] = null;
+            }
+            // Handle new profile picture upload
+            elseif ($request->filled('profile_picture')) {
+                $base64Image = $request->input('profile_picture');
+                
+                // Validate and process base64 image
+                if ($this->isValidBase64Image($base64Image)) {
+                    $validated['profile_picture'] = $base64Image;
+                } else {
+                    return back()->withErrors(['profile_picture' => 'Invalid image format. Only PNG, JPEG, and JPG are allowed.'])->withInput();
+                }
+            }
+
+            // Remove helper fields that shouldn't be saved
+            unset($validated['remove_profile_picture']);
+
+            $user->update($validated);
+
+            // Check if request expects JSON (AJAX)
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'User updated successfully.',
+                    'user' => $user
+                ]);
+            }
+
+            return redirect()->route('admin.users.index')
+                ->with('success', 'User updated successfully.');
+                
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed.',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            \Log::error('User update failed: ' . $e->getMessage());
+            
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to update user: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            return back()->with('error', 'Failed to update user: ' . $e->getMessage())->withInput();
         }
-
-        $user->update($validated);
-
-        return redirect()->route('admin.users.index')
-            ->with('success', 'User updated successfully.');
     }
 
     public function destroy(User $user)
     {
-        $user->delete();
+        try {
+            // Prevent self-deletion
+            if ($user->id === auth()->id()) {
+                return redirect()->route('admin.users.index')
+                    ->with('error', 'You cannot delete your own account.');
+            }
 
-        return redirect()->route('admin.users.index')
-            ->with('success', 'User deleted successfully.');
+            $userName = $user->full_name;
+            $user->delete();
+
+            return redirect()->route('admin.users.index')
+                ->with('success', "User '{$userName}' deleted successfully.");
+                
+        } catch (\Exception $e) {
+            \Log::error('User deletion failed: ' . $e->getMessage());
+            return redirect()->route('admin.users.index')
+                ->with('error', 'Failed to delete user: ' . $e->getMessage());
+        }
     }
 
     /**
