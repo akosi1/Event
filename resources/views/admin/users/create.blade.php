@@ -11,6 +11,25 @@
                 <h5 class="mb-0"><i class="fas fa-user-plus me-2"></i>User Details</h5>
             </div>
             <div class="card-body">
+                @if ($errors->any())
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong><i class="fas fa-exclamation-triangle me-2"></i>Validation Errors:</strong>
+                        <ul class="mb-0 mt-2">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
+
+                @if (session('error'))
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-times-circle me-2"></i>{{ session('error') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
+
                 <form action="{{ route('admin.users.store') }}" method="POST" id="userForm">
                     @csrf
                     
@@ -177,10 +196,10 @@
                                 <button class="btn btn-outline-secondary" type="button" id="togglePassword">
                                     <i class="fas fa-eye"></i>
                                 </button>
+                                @error('password')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
-                            @error('password')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
                             <small class="form-text text-muted">Minimum 8 characters</small>
                         </div>
                         <div class="col-md-6">
@@ -235,7 +254,7 @@
 
                     <!-- Action Buttons -->
                     <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-success">
+                        <button type="submit" class="btn btn-success" id="submitBtn">
                             <i class="fas fa-save me-1"></i> Create User
                         </button>
                         <a href="{{ route('admin.users.index') }}" class="btn btn-secondary">
@@ -249,6 +268,7 @@
 </div>
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 // Toggle Password Visibility
 document.getElementById('togglePassword').addEventListener('click', function() {
@@ -273,7 +293,12 @@ document.getElementById('profile_picture').addEventListener('change', function(e
         // Validate file type
         const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
         if (!allowedTypes.includes(file.type)) {
-            alert('Invalid file type. Only PNG, JPEG, and JPG are allowed.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid File Type',
+                text: 'Only PNG, JPEG, and JPG are allowed.',
+                timer: 3000
+            });
             this.value = '';
             return;
         }
@@ -281,7 +306,12 @@ document.getElementById('profile_picture').addEventListener('change', function(e
         // Validate file size (2MB max)
         const maxSize = 2 * 1024 * 1024; // 2MB in bytes
         if (file.size > maxSize) {
-            alert('File size exceeds 2MB. Please choose a smaller image.');
+            Swal.fire({
+                icon: 'error',
+                title: 'File Too Large',
+                text: 'File size exceeds 2MB. Please choose a smaller image.',
+                timer: 3000
+            });
             this.value = '';
             return;
         }
@@ -299,6 +329,24 @@ document.getElementById('profile_picture').addEventListener('change', function(e
         reader.readAsDataURL(file);
     }
 });
+
+// Form validation before submit
+document.getElementById('userForm').addEventListener('submit', function(e) {
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Creating...';
+});
+
+// Show success message if exists
+@if(session('success'))
+    Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: '{{ session('success') }}',
+        timer: 3000,
+        showConfirmButton: false
+    });
+@endif
 </script>
 @endpush
 @endsection

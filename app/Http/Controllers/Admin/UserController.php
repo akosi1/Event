@@ -96,22 +96,29 @@ class UserController extends Controller
                 if ($this->isValidBase64Image($base64Image)) {
                     $validated['profile_picture'] = $base64Image;
                 } else {
-                    return back()->withErrors(['profile_picture' => 'Invalid image format. Only PNG, JPEG, and JPG are allowed.'])->withInput();
+                    return back()
+                        ->withErrors(['profile_picture' => 'Invalid image format. Only PNG, JPEG, and JPG are allowed.'])
+                        ->withInput();
                 }
             } else {
                 unset($validated['profile_picture']);
             }
 
-            User::create($validated);
+            $user = User::create($validated);
 
+            // FIXED: Redirect to users index, not notifications
             return redirect()->route('admin.users.index')
-                ->with('success', 'User created successfully.');
+                ->with('success', 'User "' . $user->full_name . '" created successfully.');
                 
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return back()->withErrors($e->errors())->withInput();
+            return back()
+                ->withErrors($e->errors())
+                ->withInput();
         } catch (\Exception $e) {
             \Log::error('User creation failed: ' . $e->getMessage());
-            return back()->with('error', 'Failed to create user: ' . $e->getMessage())->withInput();
+            return back()
+                ->with('error', 'Failed to create user: ' . $e->getMessage())
+                ->withInput();
         }
     }
 
@@ -162,7 +169,9 @@ class UserController extends Controller
                 if ($this->isValidBase64Image($base64Image)) {
                     $validated['profile_picture'] = $base64Image;
                 } else {
-                    return back()->withErrors(['profile_picture' => 'Invalid image format. Only PNG, JPEG, and JPG are allowed.'])->withInput();
+                    return back()
+                        ->withErrors(['profile_picture' => 'Invalid image format. Only PNG, JPEG, and JPG are allowed.'])
+                        ->withInput();
                 }
             }
 
@@ -180,8 +189,9 @@ class UserController extends Controller
                 ]);
             }
 
+            // FIXED: Always redirect to users index after update
             return redirect()->route('admin.users.index')
-                ->with('success', 'User updated successfully.');
+                ->with('success', 'User "' . $user->full_name . '" updated successfully.');
                 
         } catch (\Illuminate\Validation\ValidationException $e) {
             if ($request->expectsJson() || $request->ajax()) {
@@ -191,7 +201,9 @@ class UserController extends Controller
                     'errors' => $e->errors()
                 ], 422);
             }
-            return back()->withErrors($e->errors())->withInput();
+            return back()
+                ->withErrors($e->errors())
+                ->withInput();
         } catch (\Exception $e) {
             \Log::error('User update failed: ' . $e->getMessage());
             
@@ -202,7 +214,9 @@ class UserController extends Controller
                 ], 500);
             }
             
-            return back()->with('error', 'Failed to update user: ' . $e->getMessage())->withInput();
+            return back()
+                ->with('error', 'Failed to update user: ' . $e->getMessage())
+                ->withInput();
         }
     }
 
@@ -218,6 +232,7 @@ class UserController extends Controller
             $userName = $user->full_name;
             $user->delete();
 
+            // FIXED: Always redirect to users index after deletion
             return redirect()->route('admin.users.index')
                 ->with('success', "User '{$userName}' deleted successfully.");
                 
