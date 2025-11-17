@@ -100,9 +100,11 @@
                             <td class="py-2 align-middle text-center">
                                 <div class="action-buttons-compact d-flex justify-content-center gap-1">
                                     @if(!$join->approved)
-                                        <form action="{{ route('admin.event-joins.approve', $join) }}" method="POST">
+                                        <form action="{{ route('admin.event-joins.approve', $join->id) }}" 
+                                              method="POST" 
+                                              class="approve-form">
                                             @csrf
-                                            <button class="btn btn-success btn-sm" title="Approve">
+                                            <button type="submit" class="btn btn-success btn-sm" title="Approve">
                                                 Approve
                                             </button>
                                         </form>
@@ -162,6 +164,55 @@
                 }
             });
         });
+
+        // Handle approve form submissions with AJAX to prevent redirect
+        const approveForms = document.querySelectorAll('.approve-form');
+        approveForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const button = this.querySelector('button');
+                const originalText = button.innerHTML;
+                button.disabled = true;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                
+                fetch(this.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                    },
+                    body: new FormData(this)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: data.message || 'Event join approved successfully.',
+                            timer: 3000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        throw new Error(data.message || 'Failed to approve');
+                    }
+                })
+                .catch(error => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: error.message || 'Failed to approve event join.',
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                    button.disabled = false;
+                    button.innerHTML = originalText;
+                });
+            });
+        });
     });
 </script>
 
@@ -177,6 +228,17 @@
         icon: 'success',
         title: 'Success!',
         text: '{{ session('success') }}',
+        timer: 3000,
+        showConfirmButton: false
+    });
+</script>
+@endif
+@if(session('error'))
+<script>
+    Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: '{{ session('error') }}',
         timer: 3000,
         showConfirmButton: false
     });

@@ -224,26 +224,180 @@ class EventJoinController extends Controller
      */
     public function approve(Request $request, $id)
     {
-        $this->authorize('approve-eventjoin');
+        try {
+            $this->authorize('approve-eventjoin');
 
-        $eventJoin = EventJoin::findOrFail($id);
-        $eventJoin->approve(auth()->user());
+            $eventJoin = EventJoin::with(['user', 'event'])->findOrFail($id);
+            
+            // Check if already approved
+            if ($eventJoin->approved) {
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'This event join has already been approved.'
+                    ], 400);
+                }
+                
+                return redirect()->route('admin.event-joins.index')
+                                ->with('error', 'This event join has already been approved.');
+            }
 
-        return redirect()->back()->with('success', 'Event join approved successfully.');
+            // Approve the join
+            $eventJoin->approve(auth()->user());
+
+            // Create notification for user
+            Notification::create([
+                'user_id' => $eventJoin->user_id,
+                'type' => 'event_join_approved',
+                'message' => 'Your request to join "' . $eventJoin->event->title . '" has been approved!',
+                'data' => [
+                    'event_id' => $eventJoin->event_id,
+                    'event_title' => $eventJoin->event->title,
+                    'event_date' => $eventJoin->event->date->format('Y-m-d'),
+                    'approved_by' => auth()->user()->full_name,
+                    'approved_at' => now()->toDateTimeString()
+                ]
+            ]);
+
+            // If it's an AJAX request, return JSON
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Event join approved successfully.'
+                ]);
+            }
+
+            // Otherwise redirect with flash message
+            return redirect()->route('admin.event-joins.index')
+                            ->with('success', 'Event join approved successfully.');
+                            
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You do not have permission to approve event joins.'
+                ], 403);
+            }
+            
+            return redirect()->route('admin.event-joins.index')
+                            ->with('error', 'You do not have permission to approve event joins.');
+                            
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Event join request not found.'
+                ], 404);
+            }
+            
+            return redirect()->route('admin.event-joins.index')
+                            ->with('error', 'Event join request not found.');
+                            
+        } catch (\Exception $e) {
+            \Log::error('Event join approval failed: ' . $e->getMessage());
+            
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to approve: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            return redirect()->back()
+                            ->with('error', 'Failed to approve event join: ' . $e->getMessage());
+        }
     }
 
     /**
      * Reject event join request
      */
-    public function reject(EventJoin $eventJoin)
+    public function reject(Request $request, $id)
     {
-        $this->authorize('approve-eventjoin');
+        try {
+            $this->authorize('approve-eventjoin');
 
-        if (!$eventJoin->approved) {
-            $eventJoin->reject(auth()->user());
-            return redirect()->back()->with('success', 'Event join rejected successfully.');
+            $eventJoin = EventJoin::with(['user', 'event'])->findOrFail($id);
+
+            // Check if already approved
+            if ($eventJoin->approved) {
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Cannot reject an already approved event join.'
+                    ], 400);
+                }
+                
+                return redirect()->route('admin.event-joins.index')
+                                ->with('error', 'Cannot reject an already approved event join.');
+            }
+
+            // Store event details before deletion
+            $userName = $eventJoin->user->full_name;
+            $eventTitle = $eventJoin->event->title;
+            $userId = $eventJoin->user_id;
+            $eventId = $eventJoin->event_id;
+
+            // Delete the join request (rejection means removing the request)
+            $eventJoin->delete();
+
+            // Create notification for user about rejection
+            Notification::create([
+                'user_id' => $userId,
+                'type' => 'event_join_rejected',
+                'message' => 'Your request to join "' . $eventTitle . '" has been rejected.',
+                'data' => [
+                    'event_id' => $eventId,
+                    'event_title' => $eventTitle,
+                    'rejected_by' => auth()->user()->full_name,
+                    'rejected_at' => now()->toDateTimeString()
+                ]
+            ]);
+
+            // If it's an AJAX request, return JSON
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Event join rejected successfully.'
+                ]);
+            }
+
+            return redirect()->route('admin.event-joins.index')
+                            ->with('success', 'Event join rejected successfully.');
+                            
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You do not have permission to reject event joins.'
+                ], 403);
+            }
+            
+            return redirect()->route('admin.event-joins.index')
+                            ->with('error', 'You do not have permission to reject event joins.');
+                            
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Event join request not found.'
+                ], 404);
+            }
+            
+            return redirect()->route('admin.event-joins.index')
+                            ->with('error', 'Event join request not found.');
+                            
+        } catch (\Exception $e) {
+            \Log::error('Event join rejection failed: ' . $e->getMessage());
+            
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to reject: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            return redirect()->back()
+                            ->with('error', 'Failed to reject event join: ' . $e->getMessage());
         }
-
-        return redirect()->back()->with('error', 'Cannot reject an already approved event join.');
     }
 }
