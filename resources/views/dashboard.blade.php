@@ -11,7 +11,6 @@
     <link href="{{ asset('user/nav/css/navbar.css') }}" rel="stylesheet">
     <link href="{{ asset('user/footer/footer.css') }}" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.min.css" rel="stylesheet">
-
 </head>
 
 <body>
@@ -247,48 +246,65 @@
         </div>
     </div>
 
-    <!-- ✅ CLEAN EVENT INFO MODAL -->
+    <!-- ✅ RECEIPT STYLE EVENT INFO MODAL -->
     <div id="eventInfoModal" class="modal-overlay">
         <div class="modal-content">
             <button class="modal-close" onclick="closeEventInfo()">
                 <i class="fas fa-times"></i>
             </button>
             
+            <!-- Receipt Header -->
             <div class="modal-header">
-                <h2 class="modal-title" id="modalTitle">Event Title</h2>
-                <p class="modal-subtitle" id="modalSubtitle">
-                    <i class="fas fa-map-marker-alt"></i> <span id="modalSubLocation">Location</span> • <span id="modalSubDate">Date</span>
+                <h2 class="modal-title" id="modalTitle">EVENT DETAILS</h2>
+                <p class="modal-subtitle">
+                    <i class="fas fa-calendar-alt"></i> 
+                    <span id="modalHeaderDate">Date</span>
                 </p>
             </div>
             
+            <!-- Receipt Body -->
             <div class="modal-body">
-                <div class="description-box" style="border-top: none; padding-top: 0; margin-top: 0; margin-bottom: 1.5rem;">
-                    <div class="info-label">Event Description</div>
-                    <div class="info-text" id="modalDescription">
-                        Join us for an exciting event featuring industry leaders and innovators.
-                    </div>
+                <!-- Event Title as First Item -->
+                <div class="info-item">
+                    <span class="info-label">Event</span>
+                    <span class="info-text" id="modalEventName">Event Name</span>
                 </div>
 
-                <div class="info-grid">
-                    <div class="info-item">
-                        <div class="info-label">Location</div>
-                        <div class="info-text" id="modalLocation">Convention Center</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Date</div>
-                        <div class="info-text" id="modalDate">November 14, 2025</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Time</div>
-                        <div class="info-text" id="modalTime">5:00 PM</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Department</div>
-                        <div class="info-text" id="modalDepartment">All Departments</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Year Level</div>
-                        <div class="info-text" id="modalYearLevel">All Years</div>
+                <!-- Location -->
+                <div class="info-item">
+                    <span class="info-label">Location</span>
+                    <span class="info-text" id="modalLocation">Location</span>
+                </div>
+
+                <!-- Date -->
+                <div class="info-item">
+                    <span class="info-label">Date</span>
+                    <span class="info-text" id="modalDate">Date</span>
+                </div>
+
+                <!-- Time -->
+                <div class="info-item">
+                    <span class="info-label">Time</span>
+                    <span class="info-text" id="modalTime">Time</span>
+                </div>
+
+                <!-- Department -->
+                <div class="info-item">
+                    <span class="info-label">Department</span>
+                    <span class="info-text" id="modalDepartment">Department</span>
+                </div>
+
+                <!-- Year Level -->
+                <div class="info-item">
+                    <span class="info-label">Year Level</span>
+                    <span class="info-text" id="modalYearLevel">Year Level</span>
+                </div>
+
+                <!-- Description Box -->
+                <div class="description-box">
+                    <div class="info-label">Description</div>
+                    <div class="info-text" id="modalDescription">
+                        Event description will appear here.
                     </div>
                 </div>
             </div>
@@ -326,14 +342,13 @@
         </div>
     </div>
 
-    <!-- <script src="{{ asset('user/nav/js/navbar.js') }}"></script> -->
     <div id="toastContainer"></div>
     @include('layouts.footer')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.all.min.js"></script>
     <script src="{{ asset('user/js/dashboard.js') }}"></script>
 
     <script>
-        // ✅ Show Event Info Modal
+        // ✅ Show Event Info Modal - RECEIPT STYLE
         function showEventInfo(button) {
             const modal = document.getElementById('eventInfoModal');
             const eventTitle = button.getAttribute('data-event-title');
@@ -343,11 +358,11 @@
             const eventDepartment = button.getAttribute('data-event-department');
             const eventYearLevel = button.getAttribute('data-event-year-level');
             const eventDescription = button.getAttribute('data-event-description');
-            const eventStatus = button.getAttribute('data-event-status');
 
-            document.getElementById('modalTitle').textContent = eventTitle;
-            document.getElementById('modalSubLocation').textContent = eventLocation;
-            document.getElementById('modalSubDate').textContent = eventDate;
+            // Set modal content
+            document.getElementById('modalTitle').textContent = 'EVENT DETAILS';
+            document.getElementById('modalHeaderDate').textContent = eventDate;
+            document.getElementById('modalEventName').textContent = eventTitle;
             document.getElementById('modalLocation').textContent = eventLocation;
             document.getElementById('modalDate').textContent = eventDate;
             document.getElementById('modalTime').textContent = eventTime;
@@ -430,7 +445,7 @@
             });
         });
 
-        // ✅ Event Join/Leave - UPDATED TO HANDLE BOTH JOINED AND PENDING
+        // ✅ Event Join/Leave - HANDLES BOTH JOINED AND PENDING
         function toggleEventJoin(button) {
             const eventId = button.getAttribute('data-event-id');
             const isJoined = button.classList.contains('joined');
