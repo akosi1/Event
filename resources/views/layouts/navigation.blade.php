@@ -2,7 +2,7 @@
 <nav class="navbar" id="navbar">
     <div class="nav-container">
         <a href="{{ route('dashboard') }}" class="nav-logo">
-            <img src="images/logo.png" alt="MCC Logo"> MCC E&PO</h3>
+            <img src="{{ asset('images/logo.png') }}" alt="MCC Logo">
             <span>MCC E&PO</span>
         </a>
 
