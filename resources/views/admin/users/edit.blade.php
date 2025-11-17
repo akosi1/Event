@@ -14,25 +14,6 @@
                 </h5>
             </div>
             <div class="card-body">
-                @if ($errors->any())
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <strong><i class="fas fa-exclamation-triangle me-2"></i>Validation Errors:</strong>
-                        <ul class="mb-0 mt-2">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                @endif
-
-                @if (session('error'))
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="fas fa-times-circle me-2"></i>{{ session('error') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                @endif
-
                 <form action="{{ route('admin.users.update', $user) }}" method="POST" id="userForm">
                     @csrf
                     @method('PUT')
@@ -209,10 +190,10 @@
                                 <button class="btn btn-outline-secondary" type="button" id="togglePassword">
                                     <i class="fas fa-eye"></i>
                                 </button>
-                                @error('password')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
                             </div>
+                            @error('password')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                             <small class="form-text text-muted">Minimum 8 characters if changing</small>
                         </div>
                         <div class="col-md-6">
@@ -423,13 +404,14 @@ document.getElementById('profile_picture').addEventListener('change', function(e
     }
 });
 
-// Form submission validation
+// Form submission with AJAX
 document.getElementById('userForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
     const password = document.getElementById('password').value;
     const passwordConfirmation = document.getElementById('password_confirmation').value;
     
     if (password && password !== passwordConfirmation) {
-        e.preventDefault();
         Swal.fire({
             icon: 'error',
             title: 'Validation Error',
@@ -440,7 +422,6 @@ document.getElementById('userForm').addEventListener('submit', function(e) {
     }
     
     if (password && password.length < 8) {
-        e.preventDefault();
         Swal.fire({
             icon: 'error',
             title: 'Validation Error',
@@ -451,12 +432,52 @@ document.getElementById('userForm').addEventListener('submit', function(e) {
     }
     
     const updateBtn = document.getElementById('updateBtn');
+    const originalText = updateBtn.innerHTML;
     updateBtn.disabled = true;
     updateBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Updating...';
+    
+    const formData = new FormData(this);
+    
+    fetch(this.action, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json',
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: data.message || 'User updated successfully.',
+                timer: 3000,
+                showConfirmButton: false
+            }).then(() => {
+                // Stay on the same page but reload to show updated data
+                window.location.reload();
+            });
+        } else {
+            throw new Error(data.message || 'Failed to update user');
+        }
+    })
+    .catch(error => {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: error.message || 'Failed to update user.',
+            timer: 3000
+        });
+        updateBtn.disabled = false;
+        updateBtn.innerHTML = originalText;
+    });
 });
+</script>
 
-// Show success message
 @if(session('success'))
+<script>
     Swal.fire({
         icon: 'success',
         title: 'Success!',
@@ -464,7 +485,19 @@ document.getElementById('userForm').addEventListener('submit', function(e) {
         timer: 3000,
         showConfirmButton: false
     });
-@endif
 </script>
+@endif
+
+@if(session('error'))
+<script>
+    Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: '{{ session('error') }}',
+        timer: 3000,
+        showConfirmButton: false
+    });
+</script>
+@endif
 @endpush
 @endsection
