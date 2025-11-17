@@ -15,7 +15,7 @@
                     @csrf
                     
                     <!-- Hidden input for base64 image -->
-                    <input type="hidden" name="profile_picture" id="profile_picture_base64">
+                    <input type="hidden" name="profile_picture" id="profile_picture_base64" value="{{ old('profile_picture') }}">
                     
                     <!-- Profile Picture Upload -->
                     <div class="mb-4 text-center">
@@ -23,7 +23,7 @@
                         <div class="d-flex justify-content-center mb-3">
                             <div class="position-relative">
                                 <img id="profilePreview" 
-                                     src="https://ui-avatars.com/api/?name=User&size=150&background=0d6efd&color=fff" 
+                                     src="{{ old('profile_picture') ?: 'https://ui-avatars.com/api/?name=User&size=150&background=0d6efd&color=fff' }}" 
                                      alt="Profile Preview" 
                                      class="rounded-circle border border-3 border-primary" 
                                      style="width: 150px; height: 150px; object-fit: cover;">
@@ -235,7 +235,7 @@
 
                     <!-- Action Buttons -->
                     <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-success">
+                        <button type="submit" class="btn btn-success" id="createBtn">
                             <i class="fas fa-save me-1"></i> Create User
                         </button>
                         <a href="{{ route('admin.users.index') }}" class="btn btn-secondary">
@@ -249,6 +249,7 @@
 </div>
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 // Toggle Password Visibility
 document.getElementById('togglePassword').addEventListener('click', function() {
@@ -273,7 +274,12 @@ document.getElementById('profile_picture').addEventListener('change', function(e
         // Validate file type
         const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
         if (!allowedTypes.includes(file.type)) {
-            alert('Invalid file type. Only PNG, JPEG, and JPG are allowed.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid File Type',
+                text: 'Only PNG, JPEG, and JPG are allowed.',
+                timer: 3000
+            });
             this.value = '';
             return;
         }
@@ -281,7 +287,12 @@ document.getElementById('profile_picture').addEventListener('change', function(e
         // Validate file size (2MB max)
         const maxSize = 2 * 1024 * 1024; // 2MB in bytes
         if (file.size > maxSize) {
-            alert('File size exceeds 2MB. Please choose a smaller image.');
+            Swal.fire({
+                icon: 'error',
+                title: 'File Too Large',
+                text: 'File size exceeds 2MB. Please choose a smaller image.',
+                timer: 3000
+            });
             this.value = '';
             return;
         }
@@ -299,6 +310,85 @@ document.getElementById('profile_picture').addEventListener('change', function(e
         reader.readAsDataURL(file);
     }
 });
+
+// Form validation before submit
+document.getElementById('userForm').addEventListener('submit', function(e) {
+    const password = document.getElementById('password').value;
+    const passwordConfirmation = document.getElementById('password_confirmation').value;
+    
+    if (password !== passwordConfirmation) {
+        e.preventDefault();
+        Swal.fire({
+            icon: 'error',
+            title: 'Password Mismatch',
+            text: 'Password and Confirm Password must match!',
+            timer: 3000
+        });
+        return false;
+    }
+    
+    if (password.length < 8) {
+        e.preventDefault();
+        Swal.fire({
+            icon: 'error',
+            title: 'Password Too Short',
+            text: 'Password must be at least 8 characters long!',
+            timer: 3000
+        });
+        return false;
+    }
+    
+    // Show loading state
+    const createBtn = document.getElementById('createBtn');
+    createBtn.disabled = true;
+    createBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Creating User...';
+});
 </script>
+
+@if($errors->any())
+<script>
+    Swal.fire({
+        icon: 'error',
+        title: 'Validation Errors',
+        html: `
+            <div class="text-start">
+                <ul class="mb-0">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        `,
+        confirmButtonText: 'OK',
+        customClass: {
+            confirmButton: 'btn btn-primary'
+        }
+    });
+</script>
+@endif
+
+@if(session('error'))
+<script>
+    Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: '{{ session('error') }}',
+        timer: 3000,
+        showConfirmButton: false
+    });
+</script>
+@endif
+
+@if(session('success'))
+<script>
+    Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: '{{ session('success') }}',
+        timer: 3000,
+        showConfirmButton: false
+    });
+</script>
+@endif
 @endpush
 @endsection

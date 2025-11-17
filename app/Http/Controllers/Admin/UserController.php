@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
@@ -72,6 +73,7 @@ class UserController extends Controller
     public function store(Request $request)
     {
         try {
+            // Validate the incoming request
             $validated = $request->validate([
                 'id_number' => 'required|string|max:50|unique:users',
                 'first_name' => 'required|string|max:50|regex:/^[a-zA-Z\s]+$/',
@@ -84,8 +86,27 @@ class UserController extends Controller
                 'role' => 'required|in:admin,user',
                 'status' => 'required|in:active,inactive',
                 'profile_picture' => 'nullable|string',
+            ], [
+                // Custom error messages
+                'id_number.required' => 'The ID number field is required.',
+                'id_number.unique' => 'This ID number is already registered.',
+                'first_name.required' => 'The first name field is required.',
+                'first_name.regex' => 'The first name may only contain letters and spaces.',
+                'last_name.required' => 'The last name field is required.',
+                'last_name.regex' => 'The last name may only contain letters and spaces.',
+                'email.required' => 'The email address field is required.',
+                'email.email' => 'Please provide a valid email address.',
+                'email.unique' => 'This email address is already registered.',
+                'password.required' => 'The password field is required.',
+                'password.min' => 'Password must be at least 8 characters long.',
+                'password.confirmed' => 'Password confirmation does not match.',
+                'department.required' => 'Please select a department.',
+                'year_level.required' => 'Please select a year level.',
+                'role.required' => 'Please select a role.',
+                'status.required' => 'Please select a status.',
             ]);
 
+            // Hash the password
             $validated['password'] = Hash::make($validated['password']);
 
             // Handle base64 profile picture
@@ -96,22 +117,53 @@ class UserController extends Controller
                 if ($this->isValidBase64Image($base64Image)) {
                     $validated['profile_picture'] = $base64Image;
                 } else {
-                    return back()->withErrors(['profile_picture' => 'Invalid image format. Only PNG, JPEG, and JPG are allowed.'])->withInput();
+                    return redirect()
+                        ->route('admin.users.create')
+                        ->withErrors(['profile_picture' => 'Invalid image format. Only PNG, JPEG, and JPG are allowed. Maximum file size is 2MB.'])
+                        ->withInput();
                 }
             } else {
                 unset($validated['profile_picture']);
             }
 
-            User::create($validated);
+            // Create the user
+            $user = User::create($validated);
 
-            return redirect()->route('admin.users.index')
-                ->with('success', 'User created successfully.');
+            // Log successful creation
+            Log::info('User created successfully', [
+                'user_id' => $user->id,
+                'created_by' => auth()->id()
+            ]);
+
+            return redirect()
+                ->route('admin.users.index')
+                ->with('success', 'User created successfully! Welcome ' . $user->full_name . '!');
                 
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return back()->withErrors($e->errors())->withInput();
+            // Log validation errors
+            Log::warning('User creation validation failed', [
+                'errors' => $e->errors(),
+                'input' => $request->except(['password', 'password_confirmation'])
+            ]);
+
+            // Return to create page with validation errors
+            return redirect()
+                ->route('admin.users.create')
+                ->withErrors($e->errors())
+                ->withInput();
+                
         } catch (\Exception $e) {
-            \Log::error('User creation failed: ' . $e->getMessage());
-            return back()->with('error', 'Failed to create user: ' . $e->getMessage())->withInput();
+            // Log unexpected errors
+            Log::error('User creation failed with exception', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            // Return to create page with error message
+            return redirect()
+                ->route('admin.users.create')
+                ->with('error', 'Failed to create user. Please try again.')
+                ->withInput();
         }
     }
 
@@ -141,6 +193,18 @@ class UserController extends Controller
                 'status' => 'required|in:active,inactive',
                 'profile_picture' => 'nullable|string',
                 'remove_profile_picture' => 'nullable|boolean',
+            ], [
+                'id_number.required' => 'The ID number field is required.',
+                'id_number.unique' => 'This ID number is already registered.',
+                'first_name.required' => 'The first name field is required.',
+                'first_name.regex' => 'The first name may only contain letters and spaces.',
+                'last_name.required' => 'The last name field is required.',
+                'last_name.regex' => 'The last name may only contain letters and spaces.',
+                'email.required' => 'The email address field is required.',
+                'email.email' => 'Please provide a valid email address.',
+                'email.unique' => 'This email address is already registered.',
+                'password.min' => 'Password must be at least 8 characters long.',
+                'password.confirmed' => 'Password confirmation does not match.',
             ]);
 
             // Handle password update
@@ -162,7 +226,16 @@ class UserController extends Controller
                 if ($this->isValidBase64Image($base64Image)) {
                     $validated['profile_picture'] = $base64Image;
                 } else {
-                    return back()->withErrors(['profile_picture' => 'Invalid image format. Only PNG, JPEG, and JPG are allowed.'])->withInput();
+                    if ($request->expectsJson() || $request->ajax()) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Invalid image format. Only PNG, JPEG, and JPG are allowed. Maximum file size is 2MB.',
+                        ], 422);
+                    }
+                    return redirect()
+                        ->route('admin.users.edit', $user)
+                        ->withErrors(['profile_picture' => 'Invalid image format. Only PNG, JPEG, and JPG are allowed. Maximum file size is 2MB.'])
+                        ->withInput();
                 }
             }
 
@@ -170,6 +243,12 @@ class UserController extends Controller
             unset($validated['remove_profile_picture']);
 
             $user->update($validated);
+
+            // Log successful update
+            Log::info('User updated successfully', [
+                'user_id' => $user->id,
+                'updated_by' => auth()->id()
+            ]);
 
             // Check if request expects JSON (AJAX)
             if ($request->expectsJson() || $request->ajax()) {
@@ -180,10 +259,16 @@ class UserController extends Controller
                 ]);
             }
 
-            return redirect()->route('admin.users.index')
+            return redirect()
+                ->route('admin.users.index')
                 ->with('success', 'User updated successfully.');
                 
         } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::warning('User update validation failed', [
+                'user_id' => $user->id,
+                'errors' => $e->errors()
+            ]);
+
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
                     'success' => false,
@@ -191,18 +276,29 @@ class UserController extends Controller
                     'errors' => $e->errors()
                 ], 422);
             }
-            return back()->withErrors($e->errors())->withInput();
+            return redirect()
+                ->route('admin.users.edit', $user)
+                ->withErrors($e->errors())
+                ->withInput();
+                
         } catch (\Exception $e) {
-            \Log::error('User update failed: ' . $e->getMessage());
+            Log::error('User update failed', [
+                'user_id' => $user->id,
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Failed to update user: ' . $e->getMessage()
+                    'message' => 'Failed to update user. Please try again.'
                 ], 500);
             }
             
-            return back()->with('error', 'Failed to update user: ' . $e->getMessage())->withInput();
+            return redirect()
+                ->route('admin.users.edit', $user)
+                ->with('error', 'Failed to update user. Please try again.')
+                ->withInput();
         }
     }
 
@@ -211,20 +307,32 @@ class UserController extends Controller
         try {
             // Prevent self-deletion
             if ($user->id === auth()->id()) {
-                return redirect()->route('admin.users.index')
+                return redirect()
+                    ->route('admin.users.index')
                     ->with('error', 'You cannot delete your own account.');
             }
 
             $userName = $user->full_name;
             $user->delete();
 
-            return redirect()->route('admin.users.index')
+            Log::info('User deleted successfully', [
+                'user_id' => $user->id,
+                'deleted_by' => auth()->id()
+            ]);
+
+            return redirect()
+                ->route('admin.users.index')
                 ->with('success', "User '{$userName}' deleted successfully.");
                 
         } catch (\Exception $e) {
-            \Log::error('User deletion failed: ' . $e->getMessage());
-            return redirect()->route('admin.users.index')
-                ->with('error', 'Failed to delete user: ' . $e->getMessage());
+            Log::error('User deletion failed', [
+                'user_id' => $user->id,
+                'message' => $e->getMessage()
+            ]);
+            
+            return redirect()
+                ->route('admin.users.index')
+                ->with('error', 'Failed to delete user. Please try again.');
         }
     }
 
