@@ -45,7 +45,7 @@
             @csrf
             @method('PUT')
             
-            <input type="hidden" name="profile_picture_base64" id="profile_picture_base64">
+            <input type="hidden" ame="profile_picture_base64" id="profile_picture_base64">
             <input type="file" id="profile_picture_header" name="profile_picture_file" accept="image/jpeg,image/png,image/gif" hidden onchange="previewImage(event)">
 
             {{-- Profile Information Card --}}
