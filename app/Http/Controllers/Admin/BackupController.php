@@ -6,14 +6,15 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
-use Symfony\Component\Process\Process;
-use Symfony\Component\Process\Exception\ProcessFailedException;
+use Illuminate\Support\Facades\Log;
 
 class BackupController extends Controller
 {
     /**
      * Download database backup
      * Database: u802714156_events
+     * Username: u802714156_eventsOrgPass
+     * Password: 1OrgEvents2025
      */
     public function download(Request $request)
     {
@@ -24,6 +25,11 @@ class BackupController extends Controller
             $password = Config::get('database.connections.mysql.password'); // 1OrgEvents2025
             $host = Config::get('database.connections.mysql.host', 'localhost');
             $port = Config::get('database.connections.mysql.port', 3306);
+
+            // Validate database configuration
+            if (empty($database) || empty($username)) {
+                throw new \Exception('Database configuration is missing in .env file');
+            }
 
             // Create backup filename with timestamp
             $filename = 'backup_' . $database . '_' . date('Y-m-d_H-i-s') . '.sql';
@@ -39,16 +45,16 @@ class BackupController extends Controller
             // Try mysqldump first (if available on server), fallback to manual backup
             if ($this->commandExists('mysqldump')) {
                 try {
-                    \Log::info('Attempting mysqldump backup...');
+                    Log::info('Attempting mysqldump backup...');
                     $this->mysqldumpBackup($fullPath, $host, $port, $username, $password, $database);
-                    \Log::info('mysqldump backup successful');
+                    Log::info('mysqldump backup successful');
                 } catch (\Exception $e) {
-                    \Log::warning('mysqldump failed, switching to manual backup: ' . $e->getMessage());
+                    Log::warning('mysqldump failed, switching to manual backup: ' . $e->getMessage());
                     $this->manualDatabaseBackup($fullPath);
                 }
             } else {
-                // Manual backup method (most reliable for shared hosting)
-                \Log::info('Using manual backup method');
+                // Manual backup method (most reliable for shared hosting like Hostinger)
+                Log::info('Using manual backup method (shared hosting compatible)');
                 $this->manualDatabaseBackup($fullPath);
             }
 
@@ -61,7 +67,7 @@ class BackupController extends Controller
                 throw new \Exception('Backup file is empty');
             }
 
-            \Log::info('Backup created successfully: ' . $filename . ' (' . filesize($fullPath) . ' bytes)');
+            Log::info('Backup created successfully: ' . $filename . ' (' . filesize($fullPath) . ' bytes)');
 
             // Download the file and automatically delete after sending
             return response()->download($fullPath, $filename, [
@@ -73,59 +79,57 @@ class BackupController extends Controller
             ])->deleteFileAfterSend(true);
 
         } catch (\Exception $e) {
-            \Log::error('Database backup failed: ' . $e->getMessage());
-            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            Log::error('Database backup failed: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
             
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to create database backup. Please contact support.'
+                'message' => 'Failed to create database backup: ' . $e->getMessage()
             ], 500);
         }
     }
 
     /**
      * Create backup using mysqldump command (faster for large databases)
+     * This works on VPS/dedicated servers but may not work on shared hosting
      */
     private function mysqldumpBackup($filePath, $host, $port, $username, $password, $database)
     {
         // Build mysqldump command with proper escaping
+        // Note: --no-tablespaces option requires PROCESS privilege
         $command = sprintf(
-            'mysqldump --user=%s --password=%s --host=%s --port=%s --single-transaction --quick --lock-tables=false --no-tablespaces %s',
+            'mysqldump --user=%s --password=%s --host=%s --port=%s --single-transaction --quick --lock-tables=false %s > %s 2>&1',
             escapeshellarg($username),
             escapeshellarg($password),
             escapeshellarg($host),
             escapeshellarg($port),
-            escapeshellarg($database)
+            escapeshellarg($database),
+            escapeshellarg($filePath)
         );
 
-        // Execute command and capture output
-        $output = shell_exec($command . ' 2>&1');
+        // Execute command
+        exec($command, $output, $returnCode);
         
-        if ($output === null || empty($output)) {
-            throw new \Exception('mysqldump command produced no output');
+        // Check if command succeeded
+        if ($returnCode !== 0) {
+            throw new \Exception('mysqldump command failed with code ' . $returnCode . ': ' . implode("\n", $output));
         }
 
-        // Check for error messages in output
-        if (stripos($output, 'ERROR') !== false || stripos($output, 'Access denied') !== false) {
-            throw new \Exception('mysqldump error: ' . substr($output, 0, 200));
-        }
-
-        // Write output to file
-        $bytesWritten = file_put_contents($filePath, $output);
-        
-        if ($bytesWritten === false || $bytesWritten === 0) {
-            throw new \Exception('Failed to write mysqldump output to file');
+        // Verify output file exists and has content
+        if (!file_exists($filePath) || filesize($filePath) === 0) {
+            throw new \Exception('mysqldump produced no output or empty file');
         }
     }
 
     /**
-     * Manual database backup (fallback method - works on all hosting)
+     * Manual database backup (fallback method - works on ALL hosting including shared hosting)
      * Database: u802714156_events
      * 
      * FIXED VERSION:
-     * - Proper INSERT syntax with parentheses
-     * - Correct value escaping (no double escaping)
+     * - Proper INSERT syntax with parentheses around column list
+     * - Correct value escaping using addslashes() only (no double escaping)
      * - Error handling for each table
+     * - Works on Hostinger and all shared hosting providers
      */
     private function manualDatabaseBackup($filePath)
     {
@@ -136,7 +140,7 @@ class BackupController extends Controller
         $tableKey = 'Tables_in_' . $database;
         
         if (empty($tables)) {
-            throw new \Exception('No tables found in database');
+            throw new \Exception('No tables found in database: ' . $database);
         }
 
         // Start building SQL dump
@@ -145,6 +149,7 @@ class BackupController extends Controller
         $sql .= "-- ========================================\n";
         $sql .= "-- Database: {$database}\n";
         $sql .= "-- Generated: " . date('Y-m-d H:i:s') . "\n";
+        $sql .= "-- Host: " . Config::get('database.connections.mysql.host') . "\n";
         $sql .= "-- ========================================\n\n";
         $sql .= "SET FOREIGN_KEY_CHECKS=0;\n";
         $sql .= "SET SQL_MODE='NO_AUTO_VALUE_ON_ZERO';\n";
@@ -179,16 +184,18 @@ class BackupController extends Controller
                     foreach ($rows as $row) {
                         $row = (array) $row;
                         
-                        // FIXED: Proper value escaping without double escaping
+                        // ✅ FIXED: Proper value escaping using addslashes() only
+                        // No more double escaping with PDO::quote()
                         $values = array_map(function($value) {
                             if (is_null($value)) {
                                 return 'NULL';
                             }
                             // Use addslashes for proper SQL escaping
+                            // Cast to string to handle all data types safely
                             return "'" . addslashes((string)$value) . "'";
                         }, $row);
                         
-                        // FIXED: Proper INSERT syntax - parentheses around column list
+                        // ✅ FIXED: Proper INSERT syntax with parentheses around column list
                         $sql .= "INSERT INTO `{$tableName}` (`" . implode('`, `', $columns) . "`) VALUES (" . implode(', ', $values) . ");\n";
                         $rowCount++;
                     }
@@ -200,7 +207,7 @@ class BackupController extends Controller
                 $tableCount++;
                 
             } catch (\Exception $e) {
-                \Log::warning("Failed to backup table {$tableName}: " . $e->getMessage());
+                Log::warning("Failed to backup table {$tableName}: " . $e->getMessage());
                 $sql .= "-- ERROR backing up table {$tableName}: " . $e->getMessage() . "\n\n";
             }
         }
@@ -208,9 +215,10 @@ class BackupController extends Controller
         $sql .= "COMMIT;\n";
         $sql .= "SET FOREIGN_KEY_CHECKS=1;\n\n";
         $sql .= "-- ========================================\n";
-        $sql .= "-- Backup completed\n";
+        $sql .= "-- Backup completed successfully\n";
         $sql .= "-- Tables backed up: {$tableCount}\n";
         $sql .= "-- Total rows: {$rowCount}\n";
+        $sql .= "-- File size: " . strlen($sql) . " bytes\n";
         $sql .= "-- ========================================\n";
         
         // Write SQL to file
@@ -224,7 +232,7 @@ class BackupController extends Controller
             throw new \Exception('Backup file is empty (0 bytes written)');
         }
         
-        \Log::info("Manual backup completed: {$tableCount} tables, {$rowCount} rows, {$bytesWritten} bytes");
+        Log::info("Manual backup completed: {$tableCount} tables, {$rowCount} rows, {$bytesWritten} bytes");
     }
 
     /**
@@ -234,12 +242,11 @@ class BackupController extends Controller
     {
         try {
             $whereIsCommand = PHP_OS_FAMILY === 'Windows' ? 'where' : 'which';
-            $process = Process::fromShellCommandline("$whereIsCommand $command");
-            $process->run();
+            $output = shell_exec("$whereIsCommand $command 2>&1");
             
-            return $process->isSuccessful();
+            return !empty($output);
         } catch (\Exception $e) {
-            \Log::warning("Command check failed for {$command}: " . $e->getMessage());
+            Log::warning("Command check failed for {$command}: " . $e->getMessage());
             return false;
         }
     }
@@ -247,6 +254,8 @@ class BackupController extends Controller
     /**
      * Clean old backup files (optional maintenance task)
      * Keeps backups for specified number of days
+     * 
+     * Can be called manually or via scheduled task
      */
     public function cleanOldBackups($daysToKeep = 7)
     {
@@ -269,17 +278,17 @@ class BackupController extends Controller
                     if ($fileAge >= $maxAge) {
                         if (unlink($file)) {
                             $deletedCount++;
-                            \Log::info("Deleted old backup: " . basename($file));
+                            Log::info("Deleted old backup: " . basename($file));
                         }
                     }
                 }
             }
             
-            \Log::info("Cleaned {$deletedCount} old backup files (kept last {$daysToKeep} days)");
+            Log::info("Cleaned {$deletedCount} old backup files (kept last {$daysToKeep} days)");
             return $deletedCount;
             
         } catch (\Exception $e) {
-            \Log::error("Failed to clean old backups: " . $e->getMessage());
+            Log::error("Failed to clean old backups: " . $e->getMessage());
             return 0;
         }
     }
