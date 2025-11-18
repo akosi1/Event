@@ -105,21 +105,6 @@
 
 <div class="mobile-overlay" id="mobileOverlay"></div>
 
-<!-- ✨ LOADING ANIMATION OVERLAY -->
-<div class="page-loader" id="pageLoader">
-    <div class="loader-content">
-        <div class="loader-logo">
-            <img src="{{ asset('images/logo.png') }}" alt="MCC Logo">
-        </div>
-        <div class="loader-spinner">
-            <div class="spinner-ring"></div>
-            <div class="spinner-ring"></div>
-            <div class="spinner-ring"></div>
-        </div>
-        <div class="loader-text">Loading...</div>
-    </div>
-</div>
-
 <style>
 /* ========================================
    ROOT VARIABLES
@@ -138,20 +123,14 @@
 }
 
 /* ========================================
-   PREVENT ALL TRANSITION GLITCHES ON LOAD
+   PREVENT TRANSITION GLITCHES ON LOAD
    ======================================== */
-* {
-    -webkit-transition: none !important;
-    -moz-transition: none !important;
-    -o-transition: none !important;
-    transition: none !important;
+.navbar * {
+    transition-duration: 0s !important;
 }
 
-body.loaded * {
-    -webkit-transition: all 0.3s ease !important;
-    -moz-transition: all 0.3s ease !important;
-    -o-transition: all 0.3s ease !important;
-    transition: all 0.3s ease !important;
+body.loaded .navbar * {
+    transition-duration: 0.3s !important;
 }
 
 /* ========================================
@@ -167,13 +146,10 @@ body.loaded * {
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--border-color);
     padding: 8px 20px;
-}
-
-body.loaded .navbar {
     transition: all 0.3s ease;
 }
 
-body.loaded .navbar.scrolled {
+.navbar.scrolled {
     background: var(--nav-bg-scrolled);
     box-shadow: 0 2px 20px rgba(229, 62, 62, 0.1);
 }
@@ -187,7 +163,7 @@ body.loaded .navbar.scrolled {
 }
 
 /* ========================================
-   LOGO - AGGRESSIVE FIX FOR ALL GLITCHING
+   LOGO - FIXED TO PREVENT GLITCHING
    ======================================== */
 .nav-logo {
     display: flex;
@@ -199,40 +175,31 @@ body.loaded .navbar.scrolled {
     text-decoration: none;
     font-family: 'Oswald', sans-serif;
     z-index: 1002;
-    /* CRITICAL FIXES - NO TRANSITIONS ON LOGO */
-    transition: none !important;
+    /* CRITICAL FIXES */
     will-change: auto;
-    transform: translate3d(0, 0, 0);
+    transform: translateZ(0);
     backface-visibility: hidden;
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
 }
 
-.nav-logo * {
-    transition: none !important;
+body.loaded .nav-logo {
+    transition: transform 0.3s ease;
 }
 
 body.loaded .nav-logo:hover {
-    transform: scale(1.05) translate3d(0, 0, 0);
+    transform: scale(1.05);
 }
 
 .nav-logo img {
     width: 32px;
     height: 32px;
     border-radius: 4px;
-    /* AGGRESSIVE IMAGE FIXES */
+    /* PREVENT IMAGE GLITCHING */
     display: block;
     image-rendering: -webkit-optimize-contrast;
     image-rendering: crisp-edges;
-    transform: translate3d(0, 0, 0);
+    transform: translateZ(0);
     backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    transition: none !important;
-    /* PREVENT ANY LAYOUT SHIFT */
-    min-width: 32px;
-    min-height: 32px;
-    max-width: 32px;
-    max-height: 32px;
 }
 
 /* ========================================
@@ -247,7 +214,10 @@ body.loaded .nav-logo:hover {
     cursor: pointer;
     padding: 8px;
     z-index: 1002;
-    transition: none !important;
+}
+
+body.loaded .mobile-toggle {
+    transition: all 0.3s ease;
 }
 
 body.loaded .mobile-toggle:hover {
@@ -284,9 +254,19 @@ body.loaded .mobile-toggle:hover {
     padding: 8px 0;
 }
 
+body.loaded .nav-btn,
+body.loaded .dropdown-btn {
+    transition: all 0.3s ease;
+}
+
 .nav-btn i,
 .dropdown-btn i {
     font-size: 16px;
+}
+
+body.loaded .nav-btn i,
+body.loaded .dropdown-btn i {
+    transition: all 0.3s ease;
 }
 
 .nav-btn::after {
@@ -297,6 +277,10 @@ body.loaded .mobile-toggle:hover {
     width: 0;
     height: 2px;
     background: var(--accent-red);
+}
+
+body.loaded .nav-btn::after {
+    transition: width 0.3s ease;
 }
 
 body.loaded .nav-btn:hover,
@@ -324,14 +308,12 @@ body.loaded .nav-btn:hover::after {
     border: 2px solid var(--accent-red);
     display: block;
     /* PREVENT IMAGE GLITCHING */
-    transform: translate3d(0, 0, 0);
+    transform: translateZ(0);
     backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    transition: none !important;
-    min-width: 32px;
-    min-height: 32px;
-    max-width: 32px;
-    max-height: 32px;
+}
+
+body.loaded .user-profile-pic {
+    transition: all 0.3s ease;
 }
 
 .user-profile-initials {
@@ -346,7 +328,10 @@ body.loaded .nav-btn:hover::after {
     font-weight: 600;
     color: var(--text-primary);
     border: 2px solid var(--accent-red);
-    transition: none !important;
+}
+
+body.loaded .user-profile-initials {
+    transition: all 0.3s ease;
 }
 
 .user-btn {
@@ -355,7 +340,7 @@ body.loaded .nav-btn:hover::after {
 
 body.loaded .user-btn:hover .user-profile-pic,
 body.loaded .user-btn:hover .user-profile-initials {
-    transform: scale(1.1) translate3d(0, 0, 0);
+    transform: scale(1.1);
     box-shadow: 0 0 10px rgba(229, 62, 62, 0.5);
 }
 
@@ -372,6 +357,10 @@ body.loaded .user-btn:hover .user-profile-initials {
 
 .dropdown-arrow {
     font-size: 12px !important;
+}
+
+body.loaded .dropdown-arrow {
+    transition: transform 0.2s ease;
 }
 
 body.loaded .dropdown.active .dropdown-arrow {
@@ -392,6 +381,10 @@ body.loaded .dropdown.active .dropdown-arrow {
     transform: translateY(-10px);
     z-index: 1001;
     backdrop-filter: blur(10px);
+}
+
+body.loaded .dropdown-menu {
+    transition: all 0.3s ease;
 }
 
 .dropdown-menu-right {
@@ -449,11 +442,19 @@ body.loaded .dropdown.active .dropdown-menu {
     font-family: inherit;
 }
 
+body.loaded .dropdown-item {
+    transition: all 0.3s ease;
+}
+
 .dropdown-item i {
     font-size: 16px;
     width: 20px;
     text-align: center;
     color: rgba(255, 255, 255, 0.8);
+}
+
+body.loaded .dropdown-item i {
+    transition: all 0.3s ease;
 }
 
 body.loaded .dropdown-item:hover {
@@ -529,6 +530,10 @@ body.loaded .dropdown-item.logout:hover {
     z-index: 998;
     opacity: 0;
     pointer-events: none;
+}
+
+body.loaded .mobile-overlay {
+    transition: opacity 0.3s ease;
 }
 
 body.loaded .mobile-overlay.active {
@@ -757,315 +762,30 @@ body.loaded .mobile-overlay.active {
         display: none;
     }
 }
-
-/* ========================================
-   LOADING ANIMATION - BEAUTIFUL LOADER
-   ======================================== */
-.page-loader {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #5e2a84 0%, #3d1a5f 50%, #2c0e44 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    opacity: 1;
-    visibility: visible;
-    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.page-loader.hidden {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-}
-
-.loader-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2rem;
-    animation: fadeInUp 0.6s ease;
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Loader Logo */
-.loader-logo {
-    position: relative;
-    width: 120px;
-    height: 120px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: pulse 2s ease-in-out infinite;
-}
-
-.loader-logo::before {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle, rgba(229, 62, 62, 0.3) 0%, transparent 70%);
-    border-radius: 50%;
-    animation: ripple 2s ease-out infinite;
-}
-
-.loader-logo img {
-    width: 100px;
-    height: 100px;
-    object-fit: contain;
-    filter: drop-shadow(0 0 20px rgba(229, 62, 62, 0.5));
-    animation: rotate3d 3s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0%, 100% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.05);
-    }
-}
-
-@keyframes ripple {
-    0% {
-        transform: scale(0.8);
-        opacity: 1;
-    }
-    100% {
-        transform: scale(1.5);
-        opacity: 0;
-    }
-}
-
-@keyframes rotate3d {
-    0% {
-        transform: rotateY(0deg);
-    }
-    50% {
-        transform: rotateY(180deg);
-    }
-    100% {
-        transform: rotateY(360deg);
-    }
-}
-
-/* Loader Spinner */
-.loader-spinner {
-    position: relative;
-    width: 80px;
-    height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.spinner-ring {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border: 3px solid transparent;
-    border-top-color: #e53e3e;
-    border-radius: 50%;
-    animation: spin 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
-}
-
-.spinner-ring:nth-child(2) {
-    width: 70%;
-    height: 70%;
-    border-top-color: #f56565;
-    animation-delay: -0.3s;
-}
-
-.spinner-ring:nth-child(3) {
-    width: 40%;
-    height: 40%;
-    border-top-color: #fc8181;
-    animation-delay: -0.6s;
-}
-
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-/* Loader Text */
-.loader-text {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #ffffff;
-    text-transform: uppercase;
-    letter-spacing: 3px;
-    animation: textPulse 1.5s ease-in-out infinite;
-    font-family: 'Oswald', sans-serif;
-    text-shadow: 0 0 20px rgba(229, 62, 62, 0.5);
-}
-
-@keyframes textPulse {
-    0%, 100% {
-        opacity: 0.6;
-    }
-    50% {
-        opacity: 1;
-    }
-}
-
-/* Loading dots animation */
-.loader-text::after {
-    content: '';
-    animation: dots 1.5s steps(4, end) infinite;
-}
-
-@keyframes dots {
-    0%, 20% {
-        content: '';
-    }
-    40% {
-        content: '.';
-    }
-    60% {
-        content: '..';
-    }
-    80%, 100% {
-        content: '...';
-    }
-}
-
-/* Mobile Loader Adjustments */
-@media (max-width: 768px) {
-    .loader-logo {
-        width: 100px;
-        height: 100px;
-    }
-    
-    .loader-logo img {
-        width: 80px;
-        height: 80px;
-    }
-    
-    .loader-spinner {
-        width: 60px;
-        height: 60px;
-    }
-    
-    .loader-text {
-        font-size: 1rem;
-        letter-spacing: 2px;
-    }
-}
-
-@media (max-width: 480px) {
-    .loader-logo {
-        width: 80px;
-        height: 80px;
-    }
-    
-    .loader-logo img {
-        width: 60px;
-        height: 60px;
-    }
-    
-    .loader-spinner {
-        width: 50px;
-        height: 50px;
-    }
-    
-    .loader-text {
-        font-size: 0.9rem;
-        letter-spacing: 1.5px;
-    }
-    
-    .loader-content {
-        gap: 1.5rem;
-    }
-}
 </style>
 
 <script>
-// Navigation JavaScript - WITH LOADING ON ALL NAVIGATION ACTIONS
+// Navigation JavaScript - Fixed for page refresh and logo glitches
 (function() {
     'use strict';
     
-    // Get loader element
-    const pageLoader = document.getElementById('pageLoader');
-    
-    // Show loader immediately on page load
-    if (pageLoader) {
-        pageLoader.style.display = 'flex';
-    }
-    
-    // Hide page content initially
-    document.documentElement.style.visibility = 'hidden';
-    
-    function hideLoader() {
-        if (pageLoader) {
-            // Add hidden class for smooth fade out
-            pageLoader.classList.add('hidden');
-            
-            // Remove from DOM after animation completes (smooth timing)
-            setTimeout(() => {
-                pageLoader.style.display = 'none';
-            }, 600);
-        }
-        
-        // Show page content with smooth transition
+    // Add loaded class immediately to prevent initial transition flash
+    function addLoadedClass() {
+        // Small delay to ensure DOM is ready
         setTimeout(() => {
-            document.documentElement.style.visibility = 'visible';
             document.body.classList.add('loaded');
         }, 100);
     }
     
-    function showLoader() {
-        if (pageLoader) {
-            pageLoader.classList.remove('hidden');
-            pageLoader.style.display = 'flex';
-            // Force reflow for smooth animation
-            void pageLoader.offsetWidth;
-        }
-    }
-    
-    // Wait for complete page load including images
-    function waitForPageLoad() {
-        // Check if page is already loaded
-        if (document.readyState === 'complete') {
-            initNavigation();
-            // Smooth hide after everything is ready
-            setTimeout(() => {
-                hideLoader();
-            }, 600);
-        } else {
-            // Wait for full page load
-            window.addEventListener('load', function() {
-                initNavigation();
-                setTimeout(() => {
-                    hideLoader();
-                }, 600);
-            });
-        }
-    }
-    
-    // Initialize
+    // Initialize on DOMContentLoaded
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', waitForPageLoad);
+        document.addEventListener('DOMContentLoaded', function() {
+            addLoadedClass();
+            initNavigation();
+        });
     } else {
-        waitForPageLoad();
+        addLoadedClass();
+        initNavigation();
     }
     
     function initNavigation() {
@@ -1080,34 +800,6 @@ body.loaded .mobile-overlay.active {
             console.warn('Navigation elements not found');
             return;
         }
-        
-        // ========================================
-        // ✨ SHOW LOADER ON ALL LINK CLICKS
-        // ========================================
-        const allLinks = document.querySelectorAll('a[href]:not([target="_blank"]):not([href^="#"]):not([href^="javascript:"])');
-        
-        allLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
-                const href = this.getAttribute('href');
-                
-                // Only show loader for internal navigation (not external or hash links)
-                if (href && !href.startsWith('http') && !href.startsWith('//') && !href.startsWith('#')) {
-                    showLoader();
-                }
-            });
-        });
-        
-        // ========================================
-        // ✨ SHOW LOADER ON FORM SUBMISSIONS
-        // ========================================
-        const allForms = document.querySelectorAll('form');
-        
-        allForms.forEach(form => {
-            form.addEventListener('submit', function(e) {
-                // Show loader on form submit (like logout)
-                showLoader();
-            });
-        });
         
         // Initialize scroll state on page load
         checkScrollPosition();
@@ -1228,35 +920,27 @@ body.loaded .mobile-overlay.active {
             }
         }
         
-        // Handle page visibility change
+        // Handle page visibility change (fixes issues when switching tabs)
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden && window.innerWidth > 768) {
                 resetMobileMenu();
             }
         });
         
-        // Handle back/forward navigation - SMOOTH TRANSITION
+        // Handle back/forward navigation (CRITICAL FOR PREVENTING GLITCHES)
         window.addEventListener('pageshow', function(event) {
-            // Always ensure loaded class is present
-            document.body.classList.add('loaded');
-            
             if (event.persisted) {
-                // Page was loaded from cache
-                setTimeout(() => {
-                    hideLoader();
-                    resetMobileMenu();
-                    checkScrollPosition();
-                }, 400);
+                // Page was loaded from cache (back/forward button)
+                resetMobileMenu();
+                checkScrollPosition();
+                // Re-add loaded class to ensure transitions work
+                document.body.classList.add('loaded');
             }
         });
         
-        // Show loader before page unload - SMOOTH
-        let isNavigating = false;
+        // Handle before unload (PREVENTS TRANSITION FLASH)
         window.addEventListener('beforeunload', function() {
-            if (!isNavigating) {
-                isNavigating = true;
-                showLoader();
-            }
+            document.body.classList.remove('loaded');
         });
     }
 })();
