@@ -774,7 +774,7 @@ body.loaded .mobile-overlay.active {
     z-index: 9999;
     opacity: 1;
     visibility: visible;
-    transition: opacity 0.5s ease, visibility 0.5s ease;
+    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .page-loader.hidden {
@@ -1019,41 +1019,53 @@ body.loaded .mobile-overlay.active {
             // Add hidden class for smooth fade out
             pageLoader.classList.add('hidden');
             
-            // Remove from DOM after animation completes
+            // Remove from DOM after animation completes (smooth timing)
             setTimeout(() => {
                 pageLoader.style.display = 'none';
-            }, 500);
+            }, 600);
         }
         
-        // Show page content
-        document.documentElement.style.visibility = 'visible';
-        document.body.classList.add('loaded');
+        // Show page content with smooth transition
+        setTimeout(() => {
+            document.documentElement.style.visibility = 'visible';
+            document.body.classList.add('loaded');
+        }, 100);
     }
     
     function showLoader() {
         if (pageLoader) {
             pageLoader.classList.remove('hidden');
             pageLoader.style.display = 'flex';
+            // Force reflow for smooth animation
+            void pageLoader.offsetWidth;
         }
-        document.documentElement.style.visibility = 'hidden';
     }
     
-    // Initialize on DOMContentLoaded
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
+    // Wait for complete page load including images
+    function waitForPageLoad() {
+        // Check if page is already loaded
+        if (document.readyState === 'complete') {
             initNavigation();
-            
-            // Hide loader after content is ready (minimum 800ms for smooth experience)
+            // Smooth hide after everything is ready
             setTimeout(() => {
                 hideLoader();
-            }, 800);
-        });
+            }, 600);
+        } else {
+            // Wait for full page load
+            window.addEventListener('load', function() {
+                initNavigation();
+                setTimeout(() => {
+                    hideLoader();
+                }, 600);
+            });
+        }
+    }
+    
+    // Initialize
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', waitForPageLoad);
     } else {
-        initNavigation();
-        // Hide loader after short delay
-        setTimeout(() => {
-            hideLoader();
-        }, 800);
+        waitForPageLoad();
     }
     
     function initNavigation() {
@@ -1223,35 +1235,28 @@ body.loaded .mobile-overlay.active {
             }
         });
         
-        // Handle back/forward navigation
+        // Handle back/forward navigation - SMOOTH TRANSITION
         window.addEventListener('pageshow', function(event) {
             // Always ensure loaded class is present
             document.body.classList.add('loaded');
             
             if (event.persisted) {
-                // Page was loaded from cache - show brief loader
-                showLoader();
+                // Page was loaded from cache
                 setTimeout(() => {
                     hideLoader();
                     resetMobileMenu();
                     checkScrollPosition();
-                }, 500);
-            } else {
-                // Normal page load
-                hideLoader();
+                }, 400);
             }
         });
         
-        // Show loader before page unload
+        // Show loader before page unload - SMOOTH
+        let isNavigating = false;
         window.addEventListener('beforeunload', function() {
-            showLoader();
-        });
-        
-        // Handle page load complete
-        window.addEventListener('load', function() {
-            setTimeout(() => {
-                hideLoader();
-            }, 300);
+            if (!isNavigating) {
+                isNavigating = true;
+                showLoader();
+            }
         });
     }
 })();
