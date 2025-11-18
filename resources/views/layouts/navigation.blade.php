@@ -123,14 +123,20 @@
 }
 
 /* ========================================
-   PREVENT TRANSITION GLITCHES ON LOAD
+   PREVENT ALL TRANSITION GLITCHES ON LOAD
    ======================================== */
-.navbar * {
-    transition-duration: 0s !important;
+* {
+    -webkit-transition: none !important;
+    -moz-transition: none !important;
+    -o-transition: none !important;
+    transition: none !important;
 }
 
-body.loaded .navbar * {
-    transition-duration: 0.3s !important;
+body.loaded * {
+    -webkit-transition: all 0.3s ease !important;
+    -moz-transition: all 0.3s ease !important;
+    -o-transition: all 0.3s ease !important;
+    transition: all 0.3s ease !important;
 }
 
 /* ========================================
@@ -146,10 +152,13 @@ body.loaded .navbar * {
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--border-color);
     padding: 8px 20px;
+}
+
+body.loaded .navbar {
     transition: all 0.3s ease;
 }
 
-.navbar.scrolled {
+body.loaded .navbar.scrolled {
     background: var(--nav-bg-scrolled);
     box-shadow: 0 2px 20px rgba(229, 62, 62, 0.1);
 }
@@ -163,7 +172,7 @@ body.loaded .navbar * {
 }
 
 /* ========================================
-   LOGO - FIXED TO PREVENT GLITCHING
+   LOGO - AGGRESSIVE FIX FOR ALL GLITCHING
    ======================================== */
 .nav-logo {
     display: flex;
@@ -175,31 +184,40 @@ body.loaded .navbar * {
     text-decoration: none;
     font-family: 'Oswald', sans-serif;
     z-index: 1002;
-    /* CRITICAL FIXES */
+    /* CRITICAL FIXES - NO TRANSITIONS ON LOGO */
+    transition: none !important;
     will-change: auto;
-    transform: translateZ(0);
+    transform: translate3d(0, 0, 0);
     backface-visibility: hidden;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-body.loaded .nav-logo {
-    transition: transform 0.3s ease;
+.nav-logo * {
+    transition: none !important;
 }
 
 body.loaded .nav-logo:hover {
-    transform: scale(1.05);
+    transform: scale(1.05) translate3d(0, 0, 0);
 }
 
 .nav-logo img {
     width: 32px;
     height: 32px;
     border-radius: 4px;
-    /* PREVENT IMAGE GLITCHING */
+    /* AGGRESSIVE IMAGE FIXES */
     display: block;
     image-rendering: -webkit-optimize-contrast;
     image-rendering: crisp-edges;
-    transform: translateZ(0);
+    transform: translate3d(0, 0, 0);
     backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transition: none !important;
+    /* PREVENT ANY LAYOUT SHIFT */
+    min-width: 32px;
+    min-height: 32px;
+    max-width: 32px;
+    max-height: 32px;
 }
 
 /* ========================================
@@ -214,10 +232,7 @@ body.loaded .nav-logo:hover {
     cursor: pointer;
     padding: 8px;
     z-index: 1002;
-}
-
-body.loaded .mobile-toggle {
-    transition: all 0.3s ease;
+    transition: none !important;
 }
 
 body.loaded .mobile-toggle:hover {
@@ -254,19 +269,9 @@ body.loaded .mobile-toggle:hover {
     padding: 8px 0;
 }
 
-body.loaded .nav-btn,
-body.loaded .dropdown-btn {
-    transition: all 0.3s ease;
-}
-
 .nav-btn i,
 .dropdown-btn i {
     font-size: 16px;
-}
-
-body.loaded .nav-btn i,
-body.loaded .dropdown-btn i {
-    transition: all 0.3s ease;
 }
 
 .nav-btn::after {
@@ -277,10 +282,6 @@ body.loaded .dropdown-btn i {
     width: 0;
     height: 2px;
     background: var(--accent-red);
-}
-
-body.loaded .nav-btn::after {
-    transition: width 0.3s ease;
 }
 
 body.loaded .nav-btn:hover,
@@ -308,12 +309,14 @@ body.loaded .nav-btn:hover::after {
     border: 2px solid var(--accent-red);
     display: block;
     /* PREVENT IMAGE GLITCHING */
-    transform: translateZ(0);
+    transform: translate3d(0, 0, 0);
     backface-visibility: hidden;
-}
-
-body.loaded .user-profile-pic {
-    transition: all 0.3s ease;
+    -webkit-backface-visibility: hidden;
+    transition: none !important;
+    min-width: 32px;
+    min-height: 32px;
+    max-width: 32px;
+    max-height: 32px;
 }
 
 .user-profile-initials {
@@ -328,10 +331,7 @@ body.loaded .user-profile-pic {
     font-weight: 600;
     color: var(--text-primary);
     border: 2px solid var(--accent-red);
-}
-
-body.loaded .user-profile-initials {
-    transition: all 0.3s ease;
+    transition: none !important;
 }
 
 .user-btn {
@@ -340,7 +340,7 @@ body.loaded .user-profile-initials {
 
 body.loaded .user-btn:hover .user-profile-pic,
 body.loaded .user-btn:hover .user-profile-initials {
-    transform: scale(1.1);
+    transform: scale(1.1) translate3d(0, 0, 0);
     box-shadow: 0 0 10px rgba(229, 62, 62, 0.5);
 }
 
@@ -357,10 +357,6 @@ body.loaded .user-btn:hover .user-profile-initials {
 
 .dropdown-arrow {
     font-size: 12px !important;
-}
-
-body.loaded .dropdown-arrow {
-    transition: transform 0.2s ease;
 }
 
 body.loaded .dropdown.active .dropdown-arrow {
@@ -381,10 +377,6 @@ body.loaded .dropdown.active .dropdown-arrow {
     transform: translateY(-10px);
     z-index: 1001;
     backdrop-filter: blur(10px);
-}
-
-body.loaded .dropdown-menu {
-    transition: all 0.3s ease;
 }
 
 .dropdown-menu-right {
@@ -442,19 +434,11 @@ body.loaded .dropdown.active .dropdown-menu {
     font-family: inherit;
 }
 
-body.loaded .dropdown-item {
-    transition: all 0.3s ease;
-}
-
 .dropdown-item i {
     font-size: 16px;
     width: 20px;
     text-align: center;
     color: rgba(255, 255, 255, 0.8);
-}
-
-body.loaded .dropdown-item i {
-    transition: all 0.3s ease;
 }
 
 body.loaded .dropdown-item:hover {
@@ -530,10 +514,6 @@ body.loaded .dropdown-item.logout:hover {
     z-index: 998;
     opacity: 0;
     pointer-events: none;
-}
-
-body.loaded .mobile-overlay {
-    transition: opacity 0.3s ease;
 }
 
 body.loaded .mobile-overlay.active {
@@ -765,26 +745,30 @@ body.loaded .mobile-overlay.active {
 </style>
 
 <script>
-// Navigation JavaScript - Fixed for page refresh and logo glitches
+// Navigation JavaScript - AGGRESSIVE FIX FOR GLITCHING
 (function() {
     'use strict';
     
-    // Add loaded class immediately to prevent initial transition flash
-    function addLoadedClass() {
-        // Small delay to ensure DOM is ready
+    // Immediately add loaded class BEFORE any rendering
+    document.documentElement.style.visibility = 'hidden';
+    
+    function initializeLoadedState() {
+        // Add loaded class immediately
+        document.body.classList.add('loaded');
+        // Make page visible after class is added
         setTimeout(() => {
-            document.body.classList.add('loaded');
-        }, 100);
+            document.documentElement.style.visibility = 'visible';
+        }, 50);
     }
     
-    // Initialize on DOMContentLoaded
+    // Initialize as early as possible
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function() {
-            addLoadedClass();
+            initializeLoadedState();
             initNavigation();
         });
     } else {
-        addLoadedClass();
+        initializeLoadedState();
         initNavigation();
     }
     
@@ -920,27 +904,35 @@ body.loaded .mobile-overlay.active {
             }
         }
         
-        // Handle page visibility change (fixes issues when switching tabs)
+        // Handle page visibility change
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden && window.innerWidth > 768) {
                 resetMobileMenu();
             }
         });
         
-        // Handle back/forward navigation (CRITICAL FOR PREVENTING GLITCHES)
+        // Handle back/forward navigation - CRITICAL
         window.addEventListener('pageshow', function(event) {
+            // Always ensure loaded class is present
+            document.body.classList.add('loaded');
+            document.documentElement.style.visibility = 'visible';
+            
             if (event.persisted) {
-                // Page was loaded from cache (back/forward button)
+                // Page was loaded from cache
                 resetMobileMenu();
                 checkScrollPosition();
-                // Re-add loaded class to ensure transitions work
-                document.body.classList.add('loaded');
             }
         });
         
-        // Handle before unload (PREVENTS TRANSITION FLASH)
+        // Prevent transition flash before unload
         window.addEventListener('beforeunload', function() {
-            document.body.classList.remove('loaded');
+            document.documentElement.style.visibility = 'hidden';
+        });
+        
+        // Handle page load complete
+        window.addEventListener('load', function() {
+            document.body.classList.add('loaded');
+            document.documentElement.style.visibility = 'visible';
         });
     }
 })();
