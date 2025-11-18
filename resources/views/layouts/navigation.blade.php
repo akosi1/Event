@@ -999,14 +999,14 @@ body.loaded .mobile-overlay.active {
 </style>
 
 <script>
-// Navigation JavaScript - WITH BEAUTIFUL LOADING ANIMATION
+// Navigation JavaScript - WITH LOADING ON ALL NAVIGATION ACTIONS
 (function() {
     'use strict';
     
     // Get loader element
     const pageLoader = document.getElementById('pageLoader');
     
-    // Show loader immediately
+    // Show loader immediately on page load
     if (pageLoader) {
         pageLoader.style.display = 'flex';
     }
@@ -1068,6 +1068,34 @@ body.loaded .mobile-overlay.active {
             console.warn('Navigation elements not found');
             return;
         }
+        
+        // ========================================
+        // ✨ SHOW LOADER ON ALL LINK CLICKS
+        // ========================================
+        const allLinks = document.querySelectorAll('a[href]:not([target="_blank"]):not([href^="#"]):not([href^="javascript:"])');
+        
+        allLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                
+                // Only show loader for internal navigation (not external or hash links)
+                if (href && !href.startsWith('http') && !href.startsWith('//') && !href.startsWith('#')) {
+                    showLoader();
+                }
+            });
+        });
+        
+        // ========================================
+        // ✨ SHOW LOADER ON FORM SUBMISSIONS
+        // ========================================
+        const allForms = document.querySelectorAll('form');
+        
+        allForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                // Show loader on form submit (like logout)
+                showLoader();
+            });
+        });
         
         // Initialize scroll state on page load
         checkScrollPosition();
@@ -1195,7 +1223,7 @@ body.loaded .mobile-overlay.active {
             }
         });
         
-        // Handle back/forward navigation - SHOW LOADER
+        // Handle back/forward navigation
         window.addEventListener('pageshow', function(event) {
             // Always ensure loaded class is present
             document.body.classList.add('loaded');
