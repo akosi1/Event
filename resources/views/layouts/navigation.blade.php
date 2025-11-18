@@ -105,7 +105,7 @@
 
 <div class="mobile-overlay" id="mobileOverlay"></div>
 
-<!-- ✨ SMOOTH LOADING ANIMATION OVERLAY -->
+<!-- ✨ LOADING ANIMATION OVERLAY -->
 <div class="page-loader" id="pageLoader">
     <div class="loader-content">
         <div class="loader-logo">
@@ -116,7 +116,7 @@
             <div class="spinner-ring"></div>
             <div class="spinner-ring"></div>
         </div>
-        <div class="loader-text">Loading</div>
+        <div class="loader-text">Loading...</div>
     </div>
 </div>
 
@@ -138,23 +138,20 @@
 }
 
 /* ========================================
-   PREVENT TRANSITION GLITCHES ON LOAD
+   PREVENT ALL TRANSITION GLITCHES ON LOAD
    ======================================== */
-.no-transitions * {
+* {
+    -webkit-transition: none !important;
+    -moz-transition: none !important;
+    -o-transition: none !important;
     transition: none !important;
-    animation: none !important;
 }
 
-/* ========================================
-   SMOOTH PAGE TRANSITION
-   ======================================== */
-html {
-    opacity: 0;
-    transition: opacity 0.4s ease-in-out;
-}
-
-html.page-ready {
-    opacity: 1;
+body.loaded * {
+    -webkit-transition: all 0.3s ease !important;
+    -moz-transition: all 0.3s ease !important;
+    -o-transition: all 0.3s ease !important;
+    transition: all 0.3s ease !important;
 }
 
 /* ========================================
@@ -170,10 +167,13 @@ html.page-ready {
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--border-color);
     padding: 8px 20px;
+}
+
+body.loaded .navbar {
     transition: all 0.3s ease;
 }
 
-.navbar.scrolled {
+body.loaded .navbar.scrolled {
     background: var(--nav-bg-scrolled);
     box-shadow: 0 2px 20px rgba(229, 62, 62, 0.1);
 }
@@ -187,7 +187,7 @@ html.page-ready {
 }
 
 /* ========================================
-   LOGO
+   LOGO - AGGRESSIVE FIX FOR ALL GLITCHING
    ======================================== */
 .nav-logo {
     display: flex;
@@ -199,18 +199,40 @@ html.page-ready {
     text-decoration: none;
     font-family: 'Oswald', sans-serif;
     z-index: 1002;
-    transition: transform 0.3s ease;
+    /* CRITICAL FIXES - NO TRANSITIONS ON LOGO */
+    transition: none !important;
+    will-change: auto;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-.nav-logo:hover {
-    transform: scale(1.05);
+.nav-logo * {
+    transition: none !important;
+}
+
+body.loaded .nav-logo:hover {
+    transform: scale(1.05) translate3d(0, 0, 0);
 }
 
 .nav-logo img {
     width: 32px;
     height: 32px;
     border-radius: 4px;
+    /* AGGRESSIVE IMAGE FIXES */
     display: block;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transition: none !important;
+    /* PREVENT ANY LAYOUT SHIFT */
+    min-width: 32px;
+    min-height: 32px;
+    max-width: 32px;
+    max-height: 32px;
 }
 
 /* ========================================
@@ -225,10 +247,10 @@ html.page-ready {
     cursor: pointer;
     padding: 8px;
     z-index: 1002;
-    transition: all 0.3s ease;
+    transition: none !important;
 }
 
-.mobile-toggle:hover {
+body.loaded .mobile-toggle:hover {
     color: var(--accent-red);
     transform: scale(1.1);
 }
@@ -260,13 +282,11 @@ html.page-ready {
     cursor: pointer;
     font-family: 'Oswald', sans-serif;
     padding: 8px 0;
-    transition: all 0.3s ease;
 }
 
 .nav-btn i,
 .dropdown-btn i {
     font-size: 16px;
-    transition: transform 0.3s ease;
 }
 
 .nav-btn::after {
@@ -277,20 +297,19 @@ html.page-ready {
     width: 0;
     height: 2px;
     background: var(--accent-red);
-    transition: width 0.3s ease;
 }
 
-.nav-btn:hover,
-.dropdown-btn:hover {
+body.loaded .nav-btn:hover,
+body.loaded .dropdown-btn:hover {
     color: var(--accent-red);
 }
 
-.nav-btn:hover i,
-.dropdown-btn:hover i {
+body.loaded .nav-btn:hover i,
+body.loaded .dropdown-btn:hover i {
     transform: scale(1.1);
 }
 
-.nav-btn:hover::after {
+body.loaded .nav-btn:hover::after {
     width: 100%;
 }
 
@@ -304,7 +323,15 @@ html.page-ready {
     object-fit: cover;
     border: 2px solid var(--accent-red);
     display: block;
-    transition: all 0.3s ease;
+    /* PREVENT IMAGE GLITCHING */
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transition: none !important;
+    min-width: 32px;
+    min-height: 32px;
+    max-width: 32px;
+    max-height: 32px;
 }
 
 .user-profile-initials {
@@ -319,16 +346,16 @@ html.page-ready {
     font-weight: 600;
     color: var(--text-primary);
     border: 2px solid var(--accent-red);
-    transition: all 0.3s ease;
+    transition: none !important;
 }
 
 .user-btn {
     padding: 4px 0;
 }
 
-.user-btn:hover .user-profile-pic,
-.user-btn:hover .user-profile-initials {
-    transform: scale(1.1);
+body.loaded .user-btn:hover .user-profile-pic,
+body.loaded .user-btn:hover .user-profile-initials {
+    transform: scale(1.1) translate3d(0, 0, 0);
     box-shadow: 0 0 10px rgba(229, 62, 62, 0.5);
 }
 
@@ -345,11 +372,9 @@ html.page-ready {
 
 .dropdown-arrow {
     font-size: 12px !important;
-    transition: transform 0.3s ease;
 }
 
-.dropdown.active .dropdown-arrow,
-.dropdown:hover .dropdown-arrow {
+body.loaded .dropdown.active .dropdown-arrow {
     transform: rotate(180deg);
 }
 
@@ -367,7 +392,6 @@ html.page-ready {
     transform: translateY(-10px);
     z-index: 1001;
     backdrop-filter: blur(10px);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dropdown-menu-right {
@@ -377,14 +401,14 @@ html.page-ready {
 }
 
 @media (min-width: 769px) {
-    .dropdown:hover .dropdown-menu {
+    body.loaded .dropdown:hover .dropdown-menu {
         opacity: 1;
         visibility: visible;
         transform: translateY(0);
     }
 }
 
-.dropdown.active .dropdown-menu {
+body.loaded .dropdown.active .dropdown-menu {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
@@ -423,7 +447,6 @@ html.page-ready {
     width: 100%;
     text-align: left;
     font-family: inherit;
-    transition: all 0.3s ease;
 }
 
 .dropdown-item i {
@@ -431,15 +454,14 @@ html.page-ready {
     width: 20px;
     text-align: center;
     color: rgba(255, 255, 255, 0.8);
-    transition: all 0.3s ease;
 }
 
-.dropdown-item:hover {
+body.loaded .dropdown-item:hover {
     color: var(--accent-red);
     background: var(--hover-bg);
 }
 
-.dropdown-item:hover i {
+body.loaded .dropdown-item:hover i {
     color: var(--accent-red);
     transform: scale(1.1);
 }
@@ -483,7 +505,7 @@ html.page-ready {
     padding-top: 12px;
 }
 
-.dropdown-item.logout:hover {
+body.loaded .dropdown-item.logout:hover {
     color: #ef4444;
     background: rgba(239, 68, 68, 0.1);
 }
@@ -507,10 +529,9 @@ html.page-ready {
     z-index: 998;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s ease;
 }
 
-.mobile-overlay.active {
+body.loaded .mobile-overlay.active {
     display: block;
     opacity: 1;
     pointer-events: auto;
@@ -554,10 +575,13 @@ html.page-ready {
         align-items: stretch;
         height: calc(100vh - 60px);
         justify-content: flex-start;
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .nav-content.active {
+    body.loaded .nav-content {
+        transition: transform 0.3s ease;
+    }
+
+    body.loaded .nav-content.active {
         transform: translateX(0);
     }
 
@@ -574,7 +598,7 @@ html.page-ready {
         display: none;
     }
 
-    .nav-btn:active {
+    body.loaded .nav-btn:active {
         background: var(--active-bg);
         color: var(--accent-red);
     }
@@ -591,7 +615,7 @@ html.page-ready {
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    .dropdown.active .dropdown-btn {
+    body.loaded .dropdown.active .dropdown-btn {
         background: var(--active-bg);
         color: var(--accent-red);
     }
@@ -609,10 +633,13 @@ html.page-ready {
         overflow: hidden;
         margin: 0;
         min-width: 100%;
-        transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .dropdown.active .dropdown-menu {
+    body.loaded .dropdown-menu {
+        transition: max-height 0.3s ease;
+    }
+
+    body.loaded .dropdown.active .dropdown-menu {
         max-height: 500px;
     }
 
@@ -645,6 +672,7 @@ html.page-ready {
         font-size: 12px;
     }
 
+    /* Mobile Scrollbar */
     .nav-content::-webkit-scrollbar {
         width: 4px;
     }
@@ -663,6 +691,7 @@ html.page-ready {
     }
 }
 
+/* Extra small devices */
 @media (max-width: 480px) {
     .navbar {
         padding: 8px 12px;
@@ -701,6 +730,7 @@ html.page-ready {
     }
 }
 
+/* Landscape orientation fix */
 @media (max-width: 768px) and (orientation: landscape) {
     .nav-content {
         top: 50px;
@@ -721,6 +751,7 @@ html.page-ready {
     }
 }
 
+/* Print Styles */
 @media print {
     .navbar {
         display: none;
@@ -728,7 +759,7 @@ html.page-ready {
 }
 
 /* ========================================
-   ✨ ULTRA SMOOTH LOADING ANIMATION
+   LOADING ANIMATION - BEAUTIFUL LOADER
    ======================================== */
 .page-loader {
     position: fixed;
@@ -743,13 +774,13 @@ html.page-ready {
     z-index: 9999;
     opacity: 1;
     visibility: visible;
-    transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-                visibility 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.page-loader.fade-out {
+.page-loader.hidden {
     opacity: 0;
     visibility: hidden;
+    pointer-events: none;
 }
 
 .loader-content {
@@ -757,7 +788,7 @@ html.page-ready {
     flex-direction: column;
     align-items: center;
     gap: 2rem;
-    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: fadeInUp 0.6s ease;
 }
 
 @keyframes fadeInUp {
@@ -771,6 +802,7 @@ html.page-ready {
     }
 }
 
+/* Loader Logo */
 .loader-logo {
     position: relative;
     width: 120px;
@@ -831,6 +863,7 @@ html.page-ready {
     }
 }
 
+/* Loader Spinner */
 .loader-spinner {
     position: relative;
     width: 80px;
@@ -873,6 +906,7 @@ html.page-ready {
     }
 }
 
+/* Loader Text */
 .loader-text {
     font-size: 1.25rem;
     font-weight: 600;
@@ -893,6 +927,7 @@ html.page-ready {
     }
 }
 
+/* Loading dots animation */
 .loader-text::after {
     content: '';
     animation: dots 1.5s steps(4, end) infinite;
@@ -913,6 +948,7 @@ html.page-ready {
     }
 }
 
+/* Mobile Loader Adjustments */
 @media (max-width: 768px) {
     .loader-logo {
         width: 100px;
@@ -963,60 +999,75 @@ html.page-ready {
 </style>
 
 <script>
-// ✨ ULTRA SMOOTH NAVIGATION WITH PERFECT LOADING
+// Navigation JavaScript - WITH LOADING ON ALL NAVIGATION ACTIONS
 (function() {
     'use strict';
     
+    // Get loader element
     const pageLoader = document.getElementById('pageLoader');
-    const htmlElement = document.documentElement;
-    let isNavigating = false;
     
-    // Disable all transitions initially
-    htmlElement.classList.add('no-transitions');
-    
-    // Show loader immediately
-    function showLoader() {
-        if (pageLoader && !pageLoader.classList.contains('fade-out')) {
-            pageLoader.classList.remove('fade-out');
-            pageLoader.style.display = 'flex';
-        }
+    // Show loader immediately on page load
+    if (pageLoader) {
+        pageLoader.style.display = 'flex';
     }
     
-    // Hide loader with smooth fade
+    // Hide page content initially
+    document.documentElement.style.visibility = 'hidden';
+    
     function hideLoader() {
         if (pageLoader) {
-            pageLoader.classList.add('fade-out');
+            // Add hidden class for smooth fade out
+            pageLoader.classList.add('hidden');
+            
+            // Remove from DOM after animation completes (smooth timing)
             setTimeout(() => {
                 pageLoader.style.display = 'none';
-            }, 500);
+            }, 600);
         }
-    }
-    
-    // Initialize page
-    function initPage() {
-        // Wait for all resources
-        if (document.readyState === 'complete') {
-            startApp();
-        } else {
-            window.addEventListener('load', startApp);
-        }
-    }
-    
-    function startApp() {
-        // Enable transitions after a small delay
-        setTimeout(() => {
-            htmlElement.classList.remove('no-transitions');
-            htmlElement.classList.add('page-ready');
-        }, 100);
         
-        // Hide loader smoothly
+        // Show page content with smooth transition
         setTimeout(() => {
-            hideLoader();
-            initNavigation();
-        }, 400);
+            document.documentElement.style.visibility = 'visible';
+            document.body.classList.add('loaded');
+        }, 100);
     }
     
-    // Initialize navigation
+    function showLoader() {
+        if (pageLoader) {
+            pageLoader.classList.remove('hidden');
+            pageLoader.style.display = 'flex';
+            // Force reflow for smooth animation
+            void pageLoader.offsetWidth;
+        }
+    }
+    
+    // Wait for complete page load including images
+    function waitForPageLoad() {
+        // Check if page is already loaded
+        if (document.readyState === 'complete') {
+            initNavigation();
+            // Smooth hide after everything is ready
+            setTimeout(() => {
+                hideLoader();
+            }, 600);
+        } else {
+            // Wait for full page load
+            window.addEventListener('load', function() {
+                initNavigation();
+                setTimeout(() => {
+                    hideLoader();
+                }, 600);
+            });
+        }
+    }
+    
+    // Initialize
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', waitForPageLoad);
+    } else {
+        waitForPageLoad();
+    }
+    
     function initNavigation() {
         const navbar = document.getElementById('navbar');
         const mobileToggle = document.getElementById('mobileToggle');
@@ -1024,9 +1075,47 @@ html.page-ready {
         const mobileOverlay = document.getElementById('mobileOverlay');
         const dropdowns = document.querySelectorAll('.dropdown');
         
-        if (!navbar || !navContent) return;
+        // Check if elements exist
+        if (!navbar || !navContent) {
+            console.warn('Navigation elements not found');
+            return;
+        }
         
-        // Scroll handling
+        // ========================================
+        // ✨ SHOW LOADER ON ALL LINK CLICKS
+        // ========================================
+        const allLinks = document.querySelectorAll('a[href]:not([target="_blank"]):not([href^="#"]):not([href^="javascript:"])');
+        
+        allLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                
+                // Only show loader for internal navigation (not external or hash links)
+                if (href && !href.startsWith('http') && !href.startsWith('//') && !href.startsWith('#')) {
+                    showLoader();
+                }
+            });
+        });
+        
+        // ========================================
+        // ✨ SHOW LOADER ON FORM SUBMISSIONS
+        // ========================================
+        const allForms = document.querySelectorAll('form');
+        
+        allForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                // Show loader on form submit (like logout)
+                showLoader();
+            });
+        });
+        
+        // Initialize scroll state on page load
+        checkScrollPosition();
+        
+        // Reset mobile menu state on page load
+        resetMobileMenu();
+        
+        // Scroll effect with debouncing
         let scrollTimeout;
         window.addEventListener('scroll', function() {
             if (scrollTimeout) {
@@ -1043,8 +1132,6 @@ html.page-ready {
             }
         }
         
-        checkScrollPosition();
-        
         // Mobile menu toggle
         if (mobileToggle) {
             mobileToggle.addEventListener('click', function(e) {
@@ -1056,6 +1143,7 @@ html.page-ready {
         
         function toggleMobileMenu() {
             const isActive = navContent.classList.contains('active');
+            
             if (isActive) {
                 closeMobileMenu();
             } else {
@@ -1077,6 +1165,8 @@ html.page-ready {
                 mobileOverlay.classList.remove('active');
             }
             document.body.style.overflow = '';
+            
+            // Close all dropdowns when closing mobile menu
             dropdowns.forEach(dropdown => dropdown.classList.remove('active'));
         }
         
@@ -1089,7 +1179,7 @@ html.page-ready {
             dropdowns.forEach(dropdown => dropdown.classList.remove('active'));
         }
         
-        // Close mobile menu on overlay click
+        // Close mobile menu when clicking overlay
         if (mobileOverlay) {
             mobileOverlay.addEventListener('click', closeMobileMenu);
         }
@@ -1104,12 +1194,14 @@ html.page-ready {
                         e.preventDefault();
                         e.stopPropagation();
                         
+                        // Close other dropdowns
                         dropdowns.forEach(d => {
                             if (d !== dropdown) {
                                 d.classList.remove('active');
                             }
                         });
                         
+                        // Toggle current dropdown
                         dropdown.classList.toggle('active');
                     }
                 });
@@ -1136,69 +1228,36 @@ html.page-ready {
             }
         }
         
-        // Handle page visibility
+        // Handle page visibility change
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden && window.innerWidth > 768) {
                 resetMobileMenu();
             }
         });
         
-        // ✨ SMOOTH NAVIGATION - Show loader on link clicks
-        const allLinks = document.querySelectorAll('a[href]:not([target="_blank"]):not([href^="#"]):not([href^="javascript:"])');
-        
-        allLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
-                const href = this.getAttribute('href');
-                
-                // Only show loader for internal navigation
-                if (href && !href.startsWith('http') && !href.startsWith('//') && !href.startsWith('#')) {
-                    if (!isNavigating) {
-                        isNavigating = true;
-                        showLoader();
-                    }
-                }
-            });
+        // Handle back/forward navigation - SMOOTH TRANSITION
+        window.addEventListener('pageshow', function(event) {
+            // Always ensure loaded class is present
+            document.body.classList.add('loaded');
+            
+            if (event.persisted) {
+                // Page was loaded from cache
+                setTimeout(() => {
+                    hideLoader();
+                    resetMobileMenu();
+                    checkScrollPosition();
+                }, 400);
+            }
         });
         
-        // ✨ SMOOTH NAVIGATION - Show loader on form submissions
-        const allForms = document.querySelectorAll('form');
-        
-        allForms.forEach(form => {
-            form.addEventListener('submit', function(e) {
-                if (!isNavigating) {
-                    isNavigating = true;
-                    showLoader();
-                }
-            });
+        // Show loader before page unload - SMOOTH
+        let isNavigating = false;
+        window.addEventListener('beforeunload', function() {
+            if (!isNavigating) {
+                isNavigating = true;
+                showLoader();
+            }
         });
-    }
-    
-    // Handle back/forward navigation smoothly
-    window.addEventListener('pageshow', function(event) {
-        isNavigating = false;
-        
-        if (event.persisted) {
-            // Page loaded from cache
-            htmlElement.classList.add('page-ready');
-            setTimeout(() => {
-                hideLoader();
-            }, 200);
-        }
-    });
-    
-    // Show loader before unload
-    window.addEventListener('beforeunload', function() {
-        if (!isNavigating) {
-            isNavigating = true;
-            showLoader();
-        }
-    });
-    
-    // Start initialization
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initPage);
-    } else {
-        initPage();
     }
 })();
 </script>
