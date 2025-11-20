@@ -38,7 +38,7 @@
         <div class="card shadow-sm">
             <div class="card-header bg-light">
                 <h5 class="card-title text-dark mb-0">
-                    <i class="fas fa-user-check me-2"></i>Event Joins Status
+                    <i class="fas fa-user-check me-2"></i>Event participants Status
                 </h5>
             </div>
             <div class="card-body" style="height: 400px;">
@@ -78,7 +78,7 @@
         <div class="card shadow-sm">
             <div class="card-header bg-gradient-primary">
                 <h5 class="card-title text-dark mb-0 d-flex align-items-center">
-                    <i class="fas fa-trophy me-2"></i>Top Events by Join Count
+                    <i class="fas fa-trophy me-2"></i>Top Events by Participants Count
                 </h5>
             </div>
             <div class="card-body" style="height: 400px;">
