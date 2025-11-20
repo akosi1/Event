@@ -32,7 +32,7 @@
     @endforeach
 </div>
 
-<!-- Charts Row 1: Event Joins Status & Events by Month -->
+<!-- Charts Row 1: Event Joins Status & Events by Month (Line Chart) -->
 <div class="row mt-4">
     <div class="col-md-6">
         <div class="card shadow-sm">
@@ -50,7 +50,7 @@
         <div class="card shadow-sm">
             <div class="card-header bg-light">
                 <h5 class="card-title text-dark mb-0">
-                    <i class="fas fa-chart-bar me-2"></i>Events by Month ({{ $currentYear }})
+                    <i class="fas fa-chart-line me-2"></i>Events by Month ({{ $currentYear }})
                 </h5>
             </div>
             <div class="card-body" style="height: 400px;">
@@ -60,7 +60,7 @@
     </div>
 </div>
 
-<!-- Charts Row 2: Events by Location & Top Events by Join Count -->
+<!-- Charts Row 2: Events by Location & Top Events by Join Count (Gray) -->
 <div class="row mt-4">
     <div class="col-md-6">
         <div class="card shadow-sm">
@@ -88,17 +88,17 @@
     </div>
 </div>
 
-<!-- Charts Row 3: Top Event Names - Line Chart -->
+<!-- Charts Row 3: Active vs Cancelled Events - Bar Chart -->
 <div class="row mt-4">
     <div class="col-md-12">
         <div class="card shadow-sm">
             <div class="card-header bg-gradient-success">
                 <h5 class="card-title text-dark mb-0 d-flex align-items-center">
-                    <i class="fas fa-chart-line me-2"></i>Top Event Names Frequency
+                    <i class="fas fa-chart-bar me-2"></i>Active vs Cancelled Events
                 </h5>
             </div>
             <div class="card-body" style="height: 400px;">
-                <canvas id="eventNamesChart"></canvas>
+                <canvas id="activeCancelledEventsChart"></canvas>
             </div>
         </div>
     </div>
@@ -459,8 +459,8 @@ function changeEventNamesPage(page) {
 function escapeHtml(text) {
     const map = {
         '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
+        '<': '<',
+        '>': '>',
         '"': '&quot;',
         "'": '&#039;'
     };
@@ -523,40 +523,107 @@ function initCharts() {
         }
     });
 
-    // Chart 2: Monthly Events - Bar Chart
+    // Chart 2: Monthly Events - Line Chart (UPDATED)
     const monthlyCtx = document.getElementById('eventsChart').getContext('2d');
     const monthlyData = @json($monthlyEvents);
+    
+    // Create gradient for the line chart
+    const gradient = monthlyCtx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(54, 162, 235, 0.6)');
+    gradient.addColorStop(1, 'rgba(54, 162, 235, 0.05)');
+    
     new Chart(monthlyCtx, {
-        type: 'bar',
+        type: 'line',
         data: {
             labels: monthlyData.map(item => item.month),
             datasets: [{
                 label: 'Number of Events',
                 data: monthlyData.map(item => item.count),
-                backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                backgroundColor: gradient,
                 borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 2
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 0,
+                pointHoverRadius: 6,
+                pointHoverBackgroundColor: 'rgba(54, 162, 235, 1)',
+                pointHoverBorderColor: '#fff',
+                pointHoverBorderWidth: 2
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
             scales: { 
                 y: { 
                     beginAtZero: true, 
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)',
+                        drawBorder: false
+                    },
                     ticks: { 
                         stepSize: 1,
-                        font: { size: 12 }
+                        font: { size: 12 },
+                        color: '#666',
+                        padding: 10
+                    },
+                    border: {
+                        display: false
                     }
                 },
                 x: {
-                    ticks: { font: { size: 12 } }
+                    grid: {
+                        display: false,
+                        drawBorder: false
+                    },
+                    ticks: { 
+                        font: { size: 12 },
+                        color: '#666',
+                        maxRotation: 0,
+                        minRotation: 0,
+                        padding: 10
+                    },
+                    border: {
+                        display: false
+                    }
                 }
             },
             plugins: { 
                 legend: { 
                     position: 'top',
-                    labels: { font: { size: 12 } }
+                    labels: { 
+                        font: { size: 12 },
+                        color: '#666',
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        padding: 15,
+                        boxWidth: 8,
+                        boxHeight: 8
+                    }
+                },
+                tooltip: {
+                    enabled: true,
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    titleColor: '#333',
+                    bodyColor: '#666',
+                    borderColor: 'rgba(0, 0, 0, 0.1)',
+                    borderWidth: 1,
+                    padding: 12,
+                    titleFont: { size: 12, weight: 'bold' },
+                    bodyFont: { size: 11 },
+                    displayColors: true,
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': ' + context.parsed.y;
+                        }
+                    }
                 }
             }
         }
@@ -645,7 +712,7 @@ function initCharts() {
         }
     });
 
-    // Chart 4: Top Events by Joins - Horizontal Bar Chart
+    // Chart 4: Top Events by Joins - Horizontal Bar Chart (GRAY instead of red) (UPDATED)
     const topEventsByJoinsCtx = document.getElementById('topEventsByJoinsChart').getContext('2d');
     const topEventsByJoinsData = @json($topEventsByJoins);
     new Chart(topEventsByJoinsCtx, {
@@ -655,8 +722,8 @@ function initCharts() {
             datasets: [{
                 label: 'Join Count',
                 data: topEventsByJoinsData.map(item => item.join_count),
-                backgroundColor: 'rgba(255, 99, 132, 0.8)',
-                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: 'rgba(128, 128, 128, 0.8)', // Gray color
+                borderColor: 'rgba(128, 128, 128, 1)', // Gray color
                 borderWidth: 2
             }]
         },
@@ -691,133 +758,54 @@ function initCharts() {
         }
     });
 
-// Chart 5: Event Names - Line Chart with Gradient
-    const eventNamesCtx = document.getElementById('eventNamesChart').getContext('2d');
-    const eventNamesData = @json($eventNamesData);
-    
-    // Create gradients for multiple datasets
-    const gradient1 = eventNamesCtx.createLinearGradient(0, 0, 0, 400);
-    gradient1.addColorStop(0, 'rgba(96, 211, 255, 0.6)');
-    gradient1.addColorStop(1, 'rgba(96, 211, 255, 0.05)');
-    
-    const gradient2 = eventNamesCtx.createLinearGradient(0, 0, 0, 400);
-    gradient2.addColorStop(0, 'rgba(255, 140, 184, 0.6)');
-    gradient2.addColorStop(1, 'rgba(255, 140, 184, 0.05)');
-    
-    new Chart(eventNamesCtx, {
-        type: 'line',
+    // Chart 5: Active vs Cancelled Events - Bar Chart (NEW)
+    const activeCancelledCtx = document.getElementById('activeCancelledEventsChart').getContext('2d');
+    const activeCancelledData = @json($activeCancelledData);
+    new Chart(activeCancelledCtx, {
+        type: 'bar',
         data: {
-            labels: eventNamesData.map((item, index) => item.title.length > 20 ? item.title.substring(0, 20) + '...' : item.title),
-            datasets: [
-                {
-                    label: 'Event Frequency',
-                    data: eventNamesData.map(item => item.count),
-                    backgroundColor: gradient1,
-                    borderColor: 'rgba(96, 211, 255, 1)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4,
-                    pointBackgroundColor: 'rgba(96, 211, 255, 1)',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 0,
-                    pointHoverRadius: 6,
-                    pointHoverBackgroundColor: 'rgba(96, 211, 255, 1)',
-                    pointHoverBorderColor: '#fff',
-                    pointHoverBorderWidth: 2
-                },
-                {
-                    label: 'Trend',
-                    data: eventNamesData.map((item, index) => {
-                        // Create a slight variation for second line
-                        return Math.max(0, item.count - Math.floor(Math.random() * 2));
-                    }),
-                    backgroundColor: gradient2,
-                    borderColor: 'rgba(255, 140, 184, 1)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4,
-                    pointBackgroundColor: 'rgba(255, 140, 184, 1)',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 0,
-                    pointHoverRadius: 6,
-                    pointHoverBackgroundColor: 'rgba(255, 140, 184, 1)',
-                    pointHoverBorderColor: '#fff',
-                    pointHoverBorderWidth: 2
-                }
-            ]
+            labels: ['Active Events', 'Cancelled Events'],
+            datasets: [{
+                label: 'Event Status',
+                data: [activeCancelledData.active, activeCancelledData.cancelled],
+                backgroundColor: [
+                    'rgba(40, 167, 69, 0.8)', // Green for Active
+                    'rgba(220, 53, 69, 0.8)'  // Red for Cancelled
+                ],
+                borderColor: [
+                    'rgba(40, 167, 69, 1)',
+                    'rgba(220, 53, 69, 1)'
+                ],
+                borderWidth: 2
+            }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            interaction: {
-                intersect: false,
-                mode: 'index'
-            },
             scales: {
                 y: { 
                     beginAtZero: true,
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.05)',
-                        drawBorder: false
-                    },
                     ticks: { 
                         stepSize: 1,
-                        font: { size: 11 },
-                        color: '#666',
-                        padding: 10
-                    },
-                    border: {
-                        display: false
+                        font: { size: 12 }
                     }
                 },
                 x: {
-                    grid: {
-                        display: false,
-                        drawBorder: false
-                    },
-                    ticks: { 
-                        font: { size: 10 },
-                        color: '#666',
-                        maxRotation: 0,
-                        minRotation: 0,
-                        padding: 10
-                    },
-                    border: {
-                        display: false
-                    }
+                    ticks: { font: { size: 12 } }
                 }
             },
             plugins: {
                 legend: { 
-                    display: true,
-                    position: 'top',
-                    align: 'start',
-                    labels: { 
-                        font: { size: 11 },
-                        color: '#666',
-                        usePointStyle: true,
-                        pointStyle: 'circle',
-                        padding: 15,
-                        boxWidth: 8,
-                        boxHeight: 8
-                    }
+                    display: false 
                 },
                 tooltip: {
-                    enabled: true,
-                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                    titleColor: '#333',
-                    bodyColor: '#666',
-                    borderColor: 'rgba(0, 0, 0, 0.1)',
-                    borderWidth: 1,
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
                     padding: 12,
-                    titleFont: { size: 12, weight: 'bold' },
-                    bodyFont: { size: 11 },
-                    displayColors: true,
+                    titleFont: { size: 14 },
+                    bodyFont: { size: 13 },
                     callbacks: {
                         label: function(context) {
-                            return context.dataset.label + ': ' + context.parsed.y;
+                            return context.parsed.y + ' ' + context.label.toLowerCase();
                         }
                     }
                 }

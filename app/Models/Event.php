@@ -8,21 +8,23 @@ use Illuminate\Database\Eloquent\{
     Relations\HasMany,
     Relations\BelongsToMany,
     Relations\BelongsTo,
-    ModelNotFoundException
+    ModelNotFoundException,
+    SoftDeletes
 };
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class Event extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'token', 'title', 'description', 'date', 'start_time', 'end_time', 'location', 'status',
         'department', 'is_exclusive', 'allowed_departments', 'allowed_year_levels', 'is_recurring',
         'recurrence_pattern', 'recurrence_interval', 'recurrence_end_date',
         'recurrence_count', 'repeat_type', 'repeat_interval', 'repeat_until',
-        'parent_event_id', 'cancel_reason', 'image', 'certificate_template_image'
+        'parent_event_id', 'cancel_reason', 'cancellation_document', 'cancellation_document_name',
+        'image', 'certificate_template_image'
     ];
 
     protected $casts = [
@@ -35,6 +37,7 @@ class Event extends Model
         'is_recurring' => 'boolean',
         'allowed_departments' => 'array',
         'allowed_year_levels' => 'array',
+        'deleted_at' => 'datetime',
     ];
 
     const DEPARTMENTS = [
@@ -157,7 +160,161 @@ class Event extends Model
             return true;
         }
 
-        return file_exists(public_path('storage/' . $this->image));
+        return Storage::disk('public')->exists($this->image);
+    }
+
+    /**
+     * Check if event has cancellation document
+     */
+    public function hasCancellationDocument(): bool
+    {
+        return !empty($this->cancellation_document);
+    }
+
+    /**
+     * Get cancellation document URL
+     */
+    public function getCancellationDocumentUrlAttribute(): ?string
+    {
+        if (!$this->cancellation_document) {
+            return null;
+        }
+
+        // If it's base64, return as-is for direct viewing
+        if (preg_match('/^data:(application\/pdf|application\/vnd\.openxmlformats-officedocument\.wordprocessingml\.document);base64,/', $this->cancellation_document)) {
+            return $this->cancellation_document;
+        }
+
+        // If it's a file path
+        if (Storage::disk('public')->exists($this->cancellation_document)) {
+            return asset('storage/' . $this->cancellation_document);
+        }
+
+        return null;
+    }
+
+    /**
+     * Get cancellation document extension
+     */
+    public function getCancellationDocumentExtensionAttribute(): ?string
+    {
+        if (!$this->cancellation_document) {
+            return null;
+        }
+
+        // Check base64 mime type
+        if (preg_match('/^data:application\/pdf;base64,/', $this->cancellation_document)) {
+            return 'pdf';
+        }
+        
+        if (preg_match('/^data:application\/vnd\.openxmlformats-officedocument\.wordprocessingml\.document;base64,/', $this->cancellation_document)) {
+            return 'docx';
+        }
+
+        // Check file name
+        if ($this->cancellation_document_name) {
+            return strtolower(pathinfo($this->cancellation_document_name, PATHINFO_EXTENSION));
+        }
+
+        // Check file path
+        return strtolower(pathinfo($this->cancellation_document, PATHINFO_EXTENSION));
+    }
+
+    /**
+     * Get cancellation document type (user-friendly)
+     */
+    public function getCancellationDocumentTypeAttribute(): string
+    {
+        $extension = $this->cancellation_document_extension;
+        
+        return match($extension) {
+            'pdf' => 'PDF Document',
+            'docx' => 'Word Document',
+            'doc' => 'Word Document',
+            default => 'Document'
+        };
+    }
+
+    /**
+     * Get cancellation document icon class
+     */
+    public function getCancellationDocumentIconAttribute(): string
+    {
+        $extension = $this->cancellation_document_extension;
+        
+        return match($extension) {
+            'pdf' => 'fas fa-file-pdf text-danger',
+            'docx', 'doc' => 'fas fa-file-word text-primary',
+            default => 'fas fa-file text-muted'
+        };
+    }
+
+    /**
+     * Get cancellation document size (formatted)
+     */
+    public function getCancellationDocumentSizeFormattedAttribute(): string
+    {
+        if (!$this->cancellation_document) {
+            return '0 KB';
+        }
+
+        // If it's base64
+        if (preg_match('/^data:(.*);base64,/', $this->cancellation_document)) {
+            $size = (strlen($this->cancellation_document) * 3) / 4;
+        } 
+        // If it's a file path
+        elseif (Storage::disk('public')->exists($this->cancellation_document)) {
+            $size = Storage::disk('public')->size($this->cancellation_document);
+        } else {
+            return 'Unknown';
+        }
+
+        // Format size
+        if ($size < 1024) {
+            return number_format($size, 2) . ' B';
+        } elseif ($size < 1048576) {
+            return number_format($size / 1024, 2) . ' KB';
+        } else {
+            return number_format($size / 1048576, 2) . ' MB';
+        }
+    }
+
+    /**
+     * Get cancellation document name with proper fallback
+     */
+    public function getCancellationDocumentNameAttribute(): ?string
+    {
+        if (!empty($this->attributes['cancellation_document_name'])) {
+            return $this->attributes['cancellation_document_name'];
+        }
+        
+        if ($this->cancellation_document && !preg_match('/^data:/', $this->cancellation_document)) {
+            return basename($this->cancellation_document);
+        }
+        
+        return 'cancellation_document.' . ($this->cancellation_document_extension ?? 'pdf');
+    }
+
+    /**
+     * Delete cancellation document file
+     */
+    public function deleteCancellationDocument(): bool
+    {
+        // Don't delete base64 data, just clear the field
+        if (preg_match('/^data:/', $this->cancellation_document)) {
+            return true;
+        }
+
+        if ($this->cancellation_document && Storage::disk('public')->exists($this->cancellation_document)) {
+            try {
+                Storage::disk('public')->delete($this->cancellation_document);
+                return true;
+            } catch (\Exception $e) {
+                \Log::error('Failed to delete cancellation document: ' . $e->getMessage());
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -173,11 +330,10 @@ class Event extends Model
             return $this->image;
         }
 
-        $filePath = public_path('storage/' . $this->image);
-        if (file_exists($filePath)) {
+        if (Storage::disk('public')->exists($this->image)) {
             try {
-                $imageData = file_get_contents($filePath);
-                $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+                $imageData = Storage::disk('public')->get($this->image);
+                $extension = strtolower(pathinfo($this->image, PATHINFO_EXTENSION));
                 
                 $mimeType = match($extension) {
                     'jpg', 'jpeg' => 'jpeg',
@@ -217,7 +373,7 @@ class Event extends Model
             return asset('images/default-event.jpg');
         }
 
-        if (file_exists(public_path('storage/' . $this->image))) {
+        if (Storage::disk('public')->exists($this->image)) {
             return $this->image_base64 ?? asset('storage/' . $this->image);
         }
 
@@ -245,10 +401,9 @@ class Event extends Model
             return true;
         }
 
-        $path = public_path('storage/' . $this->image);
-        if ($this->image && file_exists($path)) {
+        if ($this->image && Storage::disk('public')->exists($this->image)) {
             try {
-                unlink($path);
+                Storage::disk('public')->delete($this->image);
                 return true;
             } catch (\Exception $e) {
                 \Log::error('Failed to delete event image: ' . $e->getMessage());
@@ -302,6 +457,11 @@ class Event extends Model
     public function scopeActive($query)
     {
         return $query->where('status', 'active');
+    }
+
+    public function scopeCancelled($query)
+    {
+        return $query->where('status', 'cancelled');
     }
 
     public function scopeUpcoming($query)
@@ -483,6 +643,11 @@ class Event extends Model
         return $pattern . $interval;
     }
 
+    public function getHasEndedAttribute(): bool
+    {
+        return $this->date < now();
+    }
+
     public static function availableForUser($user)
     {
         return static::where('status', 'active')
@@ -512,8 +677,9 @@ class Event extends Model
             }
         });
 
-        static::deleting(function ($event) {
+        static::forceDeleting(function ($event) {
             $event->deleteImage();
+            $event->deleteCancellationDocument();
         });
     }
 }

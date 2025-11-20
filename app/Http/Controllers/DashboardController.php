@@ -13,9 +13,16 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
-        // Query active events
+        // Query active and cancelled events
         $query = Event::with('joins.user')
-            ->where('status', 'active')
+            ->where(function ($q) {
+                $q->where('status', 'active')
+                  ->orWhere(function ($subQ) {
+                      // Include cancelled events that are within 2 days of cancellation
+                      $subQ->where('status', 'cancelled')
+                           ->where('updated_at', '>=', now()->subDays(2));
+                  });
+            })
             ->whereNull('parent_event_id');
 
         // ✅ FILTER OUT PAST EVENTS - Only show upcoming and ongoing events
@@ -42,7 +49,7 @@ class DashboardController extends Controller
             }
         }
 
-        // Search functionality
+        // Search functionality - now includes cancelled events
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -70,6 +77,11 @@ class DashboardController extends Controller
             $event->is_joined = $event->isJoinedByUser($user->id);
             $event->join_status = $event->joinStatus($user->id);
 
+            // Add document-related attributes for the frontend
+            $event->cancellation_document_url = $event->hasCancellationDocument() ? $event->cancellation_document_url : null;
+            $event->cancellation_document_extension = $event->hasCancellationDocument() ? $event->cancellation_document_extension : null;
+            $event->cancellation_document_name = $event->hasCancellationDocument() ? $event->cancellation_document_name : null;
+
             return $event;
         });
 
@@ -78,5 +90,17 @@ class DashboardController extends Controller
             ->get();
 
         return view('dashboard', compact('events', 'certificates'));
+    }
+
+    // ✅ NEW METHOD: Return single event details as JSON
+    public function getEventDetails(Event $event) // Model binding will handle the ID lookup
+    {
+        // Add the document attributes needed for the frontend viewer
+        $eventData = $event->toArray();
+        $eventData['cancellation_document_url'] = $event->hasCancellationDocument() ? $event->cancellation_document_url : null;
+        $eventData['cancellation_document_extension'] = $event->hasCancellationDocument() ? $event->cancellation_document_extension : null;
+        $eventData['cancellation_document_name'] = $event->hasCancellationDocument() ? $event->cancellation_document_name : null;
+
+        return response()->json($eventData);
     }
 }

@@ -52,7 +52,7 @@ Route::get('/public', function () {
         Route::get('/certificates', [CertificateController::class, 'index'])->name('certificates');
         Route::post('/events/{event_id}/generate-certificate', [CertificateController::class, 'generateCertificate'])
             ->name('certificate.generate');
-
+Route::get('/events/{event}', [DashboardController::class, 'getEventDetails'])->name('events.show');
         // Profile management
         Route::match(['put', 'patch'], '/profile', [ProfileController::class, 'update'])
     ->name('profile.update');

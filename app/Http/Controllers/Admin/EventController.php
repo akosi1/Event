@@ -45,8 +45,7 @@ class EventController extends Controller
 
     public function index(Request $request)
     {
-        $query = Event::with(['parentEvent', 'childEvents'])
-                      ->whereNull('parent_event_id');
+        $query = Event::with(['parentEvent', 'childEvents'])->whereNull('parent_event_id');
 
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
@@ -69,39 +68,89 @@ class EventController extends Controller
         }
 
         if ($request->filled('year_level')) {
-            $query->where(function ($q) use ($request) {
-                $q->whereJsonContains('allowed_year_levels', $request->year_level);
-            });
+            $query->whereJsonContains('allowed_year_levels', $request->year_level);
         }
 
         if ($request->filled('exclusivity')) {
-            if ($request->exclusivity === 'exclusive') {
-                $query->where('is_exclusive', true);
-            } elseif ($request->exclusivity === 'open') {
-                $query->where('is_exclusive', false);
-            }
+            $query->where('is_exclusive', $request->exclusivity === 'exclusive');
         }
 
         if ($request->filled('recurrence')) {
-            if ($request->recurrence === 'recurring') {
-                $query->where('is_recurring', true);
-            } elseif ($request->recurrence === 'one_time') {
-                $query->where('is_recurring', false);
-            }
+            $query->where('is_recurring', $request->recurrence === 'recurring');
         }
 
         $perPage = $request->get('per_page', 10);
         $events = $query->orderBy('created_at', 'desc')->paginate($perPage);
-
         $events->appends($request->query());
 
         return view('admin.events.index', compact('events'));
     }
 
+    public function archive(Request $request)
+    {
+        $query = Event::onlyTrashed()->with(['parentEvent', 'childEvents'])->whereNull('parent_event_id');
+
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('title', 'like', '%' . $request->search . '%')
+                  ->orWhere('description', 'like', '%' . $request->search . '%')
+                  ->orWhere('location', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        $perPage = $request->get('per_page', 10);
+        $archivedEvents = $query->orderBy('deleted_at', 'desc')->paginate($perPage);
+        $archivedEvents->appends($request->query());
+
+        return view('admin.events.archive', compact('archivedEvents'));
+    }
+
+    public function restore($id)
+    {
+        try {
+            $event = Event::onlyTrashed()->findOrFail($id);
+            
+            if ($event->isRecurring() && request()->boolean('restore_series')) {
+                $event->childEvents()->onlyTrashed()->restore();
+            }
+            
+            $event->restore();
+
+            return redirect()->route('admin.events.archive')
+                            ->with('success', 'Event "' . $event->title . '" restored successfully!');
+        } catch (\Exception $e) {
+            \Log::error('Event restoration failed: ' . $e->getMessage());
+            return redirect()->route('admin.events.archive')
+                            ->with('error', 'Failed to restore event: ' . $e->getMessage());
+        }
+    }
+
+    public function forceDelete($id)
+    {
+        try {
+            $event = Event::onlyTrashed()->findOrFail($id);
+            
+            if ($event->isRecurring() && request()->boolean('delete_series')) {
+                $event->childEvents()->onlyTrashed()->forceDelete();
+            }
+            
+            $event->deleteImage();
+            $event->deleteCancellationDocument();
+            
+            $event->forceDelete();
+
+            return redirect()->route('admin.events.archive')
+                            ->with('success', 'Event "' . $event->title . '" permanently deleted!');
+        } catch (\Exception $e) {
+            \Log::error('Event permanent deletion failed: ' . $e->getMessage());
+            return redirect()->route('admin.events.archive')
+                            ->with('error', 'Failed to permanently delete event: ' . $e->getMessage());
+        }
+    }
+
     public function print(Request $request)
     {
-        $query = Event::with(['parentEvent', 'childEvents', 'joinedUsers'])
-                      ->whereNull('parent_event_id');
+        $query = Event::with(['parentEvent', 'childEvents', 'joinedUsers'])->whereNull('parent_event_id');
 
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
@@ -124,25 +173,15 @@ class EventController extends Controller
         }
 
         if ($request->filled('year_level')) {
-            $query->where(function ($q) use ($request) {
-                $q->whereJsonContains('allowed_year_levels', $request->year_level);
-            });
+            $query->whereJsonContains('allowed_year_levels', $request->year_level);
         }
 
         if ($request->filled('exclusivity')) {
-            if ($request->exclusivity === 'exclusive') {
-                $query->where('is_exclusive', true);
-            } elseif ($request->exclusivity === 'open') {
-                $query->where('is_exclusive', false);
-            }
+            $query->where('is_exclusive', $request->exclusivity === 'exclusive');
         }
 
         if ($request->filled('recurrence')) {
-            if ($request->recurrence === 'recurring') {
-                $query->where('is_recurring', true);
-            } elseif ($request->recurrence === 'one_time') {
-                $query->where('is_recurring', false);
-            }
+            $query->where('is_recurring', $request->recurrence === 'recurring');
         }
 
         $events = $query->orderBy('date', 'asc')->get();
@@ -169,9 +208,8 @@ class EventController extends Controller
         try {
             $validated = $this->validateEventData($request);
 
-            $fileFields = ['image', 'certificate_template_image'];
-
-            foreach ($fileFields as $field) {
+            // Handle image uploads (base64)
+            foreach (['image', 'certificate_template_image'] as $field) {
                 if ($request->filled($field)) {
                     $base64String = $request->input($field);
 
@@ -179,7 +217,6 @@ class EventController extends Controller
                         return back()->withErrors([$field => 'Invalid base64 image format.'])->withInput();
                     }
 
-                    // Check base64 size (2MB)
                     $imageSize = (strlen($base64String) * 3) / 4;
                     if ($imageSize > 2097152) {
                         return back()->withErrors([$field => 'Image size must not exceed 2MB.'])->withInput();
@@ -187,6 +224,26 @@ class EventController extends Controller
 
                     $validated[$field] = $base64String;
                 }
+            }
+
+            // Handle cancellation document upload (BASE64)
+            if ($request->filled('cancellation_document_base64')) {
+                $base64Doc = $request->input('cancellation_document_base64');
+                $docName = $request->input('cancellation_document_name');
+                
+                // Validate base64 format
+                if (!preg_match('/^data:(application\/pdf|application\/vnd\.openxmlformats-officedocument\.wordprocessingml\.document);base64,/', $base64Doc, $matches)) {
+                    return back()->withErrors(['cancellation_document' => 'Invalid document format. Only PDF and DOCX allowed.'])->withInput();
+                }
+                
+                // Check size (5MB limit)
+                $docSize = (strlen($base64Doc) * 3) / 4;
+                if ($docSize > 5242880) {
+                    return back()->withErrors(['cancellation_document' => 'Document size must not exceed 5MB.'])->withInput();
+                }
+                
+                $validated['cancellation_document'] = $base64Doc;
+                $validated['cancellation_document_name'] = $docName;
             }
 
             $validated = $this->processDepartmentExclusivity($validated, $request);
@@ -256,31 +313,28 @@ class EventController extends Controller
         try {
             $validated = $this->validateEventData($request, $event);
 
+            // Handle image removal
             if ($request->filled('remove_image') && $request->remove_image == '1') {
-                if ($event->image && Storage::disk('public')->exists($event->image)) {
-                    try {
-                        Storage::disk('public')->delete($event->image);
-                    } catch (\Exception $e) {
-                        \Log::error('Failed to delete old image: ' . $e->getMessage());
-                    }
-                }
+                $event->deleteImage();
                 $validated['image'] = null;
             }
 
+            // Handle certificate removal
             if ($request->filled('remove_certificate') && $request->remove_certificate == '1') {
-                if ($event->certificate_template_image && Storage::disk('public')->exists($event->certificate_template_image)) {
-                    try {
-                        Storage::disk('public')->delete($event->certificate_template_image);
-                    } catch (\Exception $e) {
-                        \Log::error('Failed to delete old certificate: ' . $e->getMessage());
-                    }
+                if ($event->certificate_template_image) {
+                    $validated['certificate_template_image'] = null;
                 }
-                $validated['certificate_template_image'] = null;
             }
 
-            $fileFields = ['image', 'certificate_template_image'];
+            // Handle document removal
+            if ($request->filled('remove_cancellation_document') && $request->remove_cancellation_document == '1') {
+                $event->deleteCancellationDocument();
+                $validated['cancellation_document'] = null;
+                $validated['cancellation_document_name'] = null;
+            }
 
-            foreach($fileFields as $field){
+            // Handle new image uploads (base64)
+            foreach (['image', 'certificate_template_image'] as $field) {
                 if ($request->filled($field)) {
                     $base64String = $request->input($field);
 
@@ -288,7 +342,6 @@ class EventController extends Controller
                         return back()->withErrors([$field => 'Invalid base64 image format.'])->withInput();
                     }
 
-                    // Check base64 size (2MB)
                     $imageSize = (strlen($base64String) * 3) / 4;
                     if ($imageSize > 2097152) {
                         return back()->withErrors([$field => 'Image size must not exceed 2MB.'])->withInput();
@@ -298,10 +351,34 @@ class EventController extends Controller
                 }
             }
 
+            // Handle new document upload (BASE64)
+            if ($request->filled('cancellation_document_base64')) {
+                $base64Doc = $request->input('cancellation_document_base64');
+                $docName = $request->input('cancellation_document_name');
+                
+                // Validate base64 format
+                if (!preg_match('/^data:(application\/pdf|application\/vnd\.openxmlformats-officedocument\.wordprocessingml\.document);base64,/', $base64Doc)) {
+                    return back()->withErrors(['cancellation_document' => 'Invalid document format. Only PDF and DOCX allowed.'])->withInput();
+                }
+                
+                // Check size (5MB limit)
+                $docSize = (strlen($base64Doc) * 3) / 4;
+                if ($docSize > 5242880) {
+                    return back()->withErrors(['cancellation_document' => 'Document size must not exceed 5MB.'])->withInput();
+                }
+                
+                // Delete old document
+                $event->deleteCancellationDocument();
+                
+                $validated['cancellation_document'] = $base64Doc;
+                $validated['cancellation_document_name'] = $docName;
+            }
+
             $validated = $this->processDepartmentExclusivity($validated, $request);
 
             unset($validated['remove_image']);
             unset($validated['remove_certificate']);
+            unset($validated['remove_cancellation_document']);
 
             $oldStatus = $event->status;
 
@@ -346,26 +423,18 @@ class EventController extends Controller
     {
         try {
             if ($event->isRecurring() && request()->boolean('delete_series')) {
-                $this->eventRecurrenceService->deleteRecurringSeries($event);
-                $message = 'Event series "' . $event->title . '" deleted successfully!';
+                $event->childEvents()->delete();
+                $message = 'Event series "' . $event->title . '" deleted successfully! You can restore it from Archive.';
             } else {
-                if ($event->image && Storage::disk('public')->exists($event->image)) {
-                    try {
-                        Storage::disk('public')->delete($event->image);
-                    } catch (\Exception $e) {
-                        \Log::error('Failed to delete image: ' . $e->getMessage());
-                    }
-                }
-                $event->delete();
-                $message = 'Event "' . $event->title . '" deleted successfully!';
+                $message = 'Event "' . $event->title . '" deleted successfully! You can restore it from Archive.';
             }
+            
+            $event->delete();
 
-            return redirect()->route('admin.events.index')
-                            ->with('success', $message);
+            return redirect()->route('admin.events.index')->with('success', $message);
         } catch (\Exception $e) {
             \Log::error('Event deletion failed: ' . $e->getMessage());
-            return redirect()->route('admin.events.index')
-                            ->with('error', 'Failed to delete event: ' . $e->getMessage());
+            return redirect()->route('admin.events.index')->with('error', 'Failed to delete event: ' . $e->getMessage());
         }
     }
 
@@ -413,8 +482,11 @@ class EventController extends Controller
             'cancel_reason' => 'required_if:status,postponed,cancelled|nullable|string',
             'image' => ['nullable', 'string', 'regex:/^data:image\/(jpeg|png|jpg);base64,/'],
             'certificate_template_image' => ['nullable', 'string', 'regex:/^data:image\/(jpeg|png|jpg);base64,/'],
+            'cancellation_document_base64' => ['nullable', 'string', 'regex:/^data:(application\/pdf|application\/vnd\.openxmlformats-officedocument\.wordprocessingml\.document);base64,/'],
+            'cancellation_document_name' => 'nullable|string|max:255',
             'remove_image' => 'nullable|boolean',
             'remove_certificate' => 'nullable|boolean',
+            'remove_cancellation_document' => 'nullable|boolean',
             'is_exclusive' => 'boolean',
             'allowed_departments' => 'nullable|array',
             'allowed_departments.*' => 'string|in:' . implode(',', array_keys(self::DEPARTMENTS)),
@@ -460,7 +532,6 @@ class EventController extends Controller
         ]);
 
         $user = Auth::user();
-
         $feedbackPreview = strlen($request->feedback) > 100 
             ? substr($request->feedback, 0, 100) . '...' 
             : $request->feedback;

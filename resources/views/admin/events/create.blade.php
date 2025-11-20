@@ -72,6 +72,33 @@
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         gap: 10px;
     }
+    .file-upload-area {
+        border: 2px dashed #dee2e6;
+        border-radius: 8px;
+        padding: 30px;
+        text-align: center;
+        background: #f8f9fc;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+    .file-upload-area:hover {
+        border-color: #667eea;
+        background: #fff;
+    }
+    .file-upload-area.dragover {
+        border-color: #667eea;
+        background: #e7f3ff;
+    }
+    .doc-preview-card {
+        border: 2px solid #28a745;
+        border-radius: 8px;
+        padding: 20px;
+        background: #fff;
+        margin-top: 15px;
+    }
+    .doc-icon-large {
+        font-size: 3rem;
+    }
 </style>
 @endpush
 
@@ -88,7 +115,7 @@
                 </div>
             </div>
             <div class="card-body">
-                <form action="{{ route('admin.events.store') }}" method="POST" id="eventForm">
+                <form action="{{ route('admin.events.store') }}" method="POST" id="eventForm" enctype="multipart/form-data">
                     @csrf
 
                     <!-- Basic Information -->
@@ -189,6 +216,55 @@
                                 @error('cancel_reason')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cancellation Document Section -->
+                    <div class="mb-4" id="cancellationDocSection" style="display: {{ in_array(old('status'), ['postponed', 'cancelled']) ? 'block' : 'none' }};">
+                        <h6 class="text-primary mb-3"><i class="fas fa-file-alt me-2"></i>Cancellation Document</h6>
+                        
+                        <div class="alert alert-info mb-3">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Upload official cancellation document (PDF or DOCX only, Max 5MB)
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Upload Document</label>
+                            <div class="file-upload-area" id="fileUploadArea">
+                                <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+                                <h6>Click to upload or drag and drop</h6>
+                                <p class="text-muted mb-0">PDF or DOCX (Max 5MB)</p>
+                                <input type="file" class="form-control d-none @error('cancellation_document') is-invalid @enderror" 
+                                       id="cancellationDocInput" 
+                                       name="cancellation_document" 
+                                       accept=".pdf,.docx">
+                            </div>
+                            @error('cancellation_document')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Document Preview -->
+                        <div id="docPreview" style="display: none;">
+                            <div class="doc-preview-card">
+                                <div class="row align-items-center">
+                                    <div class="col-md-2 text-center">
+                                        <i id="docIcon" class="fas fa-file doc-icon-large"></i>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <h6 class="mb-1 fw-bold" id="docName"></h6>
+                                        <small class="text-success" id="docSize"></small>
+                                        <div class="progress mt-2" style="height: 5px;">
+                                            <div class="progress-bar bg-success" style="width: 100%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 text-end">
+                                        <button type="button" class="btn btn-danger btn-sm" onclick="removeDocument()">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -435,28 +511,26 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Handle exclusivity toggle
-    const isExclusiveCheckbox = document.getElementById('is_exclusive');
-    const departmentSelection = document.getElementById('departmentSelection');
+    const $ = (id) => document.getElementById(id);
+    const show = (el, display = 'block') => el && (el.style.display = display);
+    const hide = (el) => el && (el.style.display = 'none');
 
-    isExclusiveCheckbox.addEventListener('change', function() {
-        departmentSelection.style.display = this.checked ? 'block' : 'none';
+    // Handle exclusivity toggle
+    $('is_exclusive')?.addEventListener('change', function() {
+        show($('departmentSelection'), this.checked ? 'block' : 'none');
     });
 
     // Handle recurring toggle
-    const isRecurringCheckbox = document.getElementById('is_recurring');
-    const recurrenceSettings = document.getElementById('recurrenceSettings');
-
-    isRecurringCheckbox.addEventListener('change', function() {
-        recurrenceSettings.style.display = this.checked ? 'block' : 'none';
+    $('is_recurring')?.addEventListener('change', function() {
+        show($('recurrenceSettings'), this.checked ? 'block' : 'none');
     });
 
     // Handle recurrence pattern change
-    const recurrencePattern = document.getElementById('recurrence_pattern');
-    const intervalText = document.getElementById('intervalText');
-    const recurrenceInterval = document.getElementById('recurrence_interval');
+    const recurrencePattern = $('recurrence_pattern');
+    const intervalText = $('intervalText');
+    const recurrenceInterval = $('recurrence_interval');
 
-    recurrencePattern.addEventListener('change', function() {
+    recurrencePattern?.addEventListener('change', function() {
         const pattern = this.value;
         let text = 'day(s)';
 
@@ -482,21 +556,101 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Handle status change for cancel reason
-    const statusSelect = document.getElementById('status');
-    const cancelReasonRow = document.getElementById('cancelReasonRow');
-
-    statusSelect.addEventListener('change', function() {
+    $('status')?.addEventListener('change', function() {
         const showReason = ['postponed', 'cancelled'].includes(this.value);
-        cancelReasonRow.style.display = showReason ? 'block' : 'none';
+        show($('cancelReasonRow'), showReason ? 'block' : 'none');
+        show($('cancellationDocSection'), showReason ? 'block' : 'none');
     });
 
-    // Event Image Upload Handler
-    const imageInput = document.getElementById('imageInput');
-    const imagePreview = document.getElementById('imagePreview');
-    const previewImg = document.getElementById('previewImg');
-    const imageSizeInfo = document.getElementById('imageSizeInfo');
+    // Document Upload Handler
+    const fileUploadArea = $('fileUploadArea');
+    const docInput = $('cancellationDocInput');
+    const docPreview = $('docPreview');
 
-    imageInput.addEventListener('change', function(e) {
+    // Click to upload
+    fileUploadArea?.addEventListener('click', () => docInput.click());
+
+    // Drag and drop
+    fileUploadArea?.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        fileUploadArea.classList.add('dragover');
+    });
+
+    fileUploadArea?.addEventListener('dragleave', () => {
+        fileUploadArea.classList.remove('dragover');
+    });
+
+    fileUploadArea?.addEventListener('drop', (e) => {
+        e.preventDefault();
+        fileUploadArea.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            docInput.files = files;
+            handleDocumentUpload(files[0]);
+        }
+    });
+
+    docInput?.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            handleDocumentUpload(file);
+        }
+    });
+
+    function handleDocumentUpload(file) {
+        // Validate file type
+        const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+        const allowedExtensions = ['.pdf', '.docx'];
+        const fileName = file.name.toLowerCase();
+        const isValidType = allowedTypes.includes(file.type) || allowedExtensions.some(ext => fileName.endsWith(ext));
+        
+        if (!isValidType) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid File Type',
+                text: 'Please upload only PDF or DOCX files.',
+                confirmButtonColor: '#d33'
+            });
+            docInput.value = '';
+            return;
+        }
+
+        // Validate file size (5MB)
+        if (file.size > 5242880) {
+            Swal.fire({
+                icon: 'error',
+                title: 'File Too Large',
+                text: 'Document size must not exceed 5MB.',
+                confirmButtonColor: '#d33'
+            });
+            docInput.value = '';
+            return;
+        }
+
+        // Show preview
+        const ext = fileName.split('.').pop();
+        const iconClass = ext === 'pdf' ? 'fas fa-file-pdf text-danger' : 'fas fa-file-word text-primary';
+        const sizeInKB = (file.size / 1024).toFixed(2);
+        
+        $('docIcon').className = `${iconClass} doc-icon-large`;
+        $('docName').textContent = file.name;
+        $('docSize').innerHTML = `<i class="fas fa-check-circle me-1"></i>${sizeInKB} KB - Ready to upload`;
+        show(docPreview);
+    }
+
+    // Remove document
+    window.removeDocument = function() {
+        docInput.value = '';
+        hide(docPreview);
+    };
+
+    // Event Image Upload Handler
+    const imageInput = $('imageInput');
+    const imagePreview = $('imagePreview');
+    const previewImg = $('previewImg');
+    const imageSizeInfo = $('imageSizeInfo');
+
+    imageInput?.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
             // Validate file type
@@ -527,9 +681,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const reader = new FileReader();
             reader.onload = function(e) {
                 const base64String = e.target.result;
-                document.getElementById('imageBase64').value = base64String;
+                $('imageBase64').value = base64String;
                 previewImg.src = base64String;
-                imagePreview.style.display = 'block';
+                show(imagePreview);
                 
                 // Display file size
                 const sizeInKB = (file.size / 1024).toFixed(2);
@@ -540,12 +694,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Certificate Image Upload Handler
-    const certificateImageInput = document.getElementById('certificateImageInput');
-    const certificateImagePreview = document.getElementById('certificateImagePreview');
-    const certificatePreviewImg = document.getElementById('certificatePreviewImg');
-    const certificateSizeInfo = document.getElementById('certificateSizeInfo');
+    const certificateImageInput = $('certificateImageInput');
+    const certificateImagePreview = $('certificateImagePreview');
+    const certificatePreviewImg = $('certificatePreviewImg');
+    const certificateSizeInfo = $('certificateSizeInfo');
 
-    certificateImageInput.addEventListener('change', function(e) {
+    certificateImageInput?.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
             // Validate file type
@@ -576,9 +730,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const reader = new FileReader();
             reader.onload = function(e) {
                 const base64String = e.target.result;
-                document.getElementById('certificateImageBase64').value = base64String;
+                $('certificateImageBase64').value = base64String;
                 certificatePreviewImg.src = base64String;
-                certificateImagePreview.style.display = 'block';
+                show(certificateImagePreview);
                 
                 // Display file size
                 const sizeInKB = (file.size / 1024).toFixed(2);
@@ -589,8 +743,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Form submission handler
-    document.getElementById('eventForm').addEventListener('submit', function(e) {
-        const submitBtn = document.getElementById('submitBtn');
+    $('eventForm')?.addEventListener('submit', function(e) {
+        const submitBtn = $('submitBtn');
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating Event...';
     });

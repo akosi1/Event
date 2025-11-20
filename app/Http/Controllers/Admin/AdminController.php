@@ -116,6 +116,12 @@ class AdminController extends Controller
             ->limit(10)
             ->get();
 
+        // Active vs Cancelled Events Data (NEW)
+        $activeCancelledData = [
+            'active' => Event::where('status', 'active')->count(),
+            'cancelled' => Event::where('status', 'cancelled')->count(),
+        ];
+
         // Recent events with pagination
         $allEvents = Event::latest('date')->paginate($perPage);
         $allEvents->appends($request->query());
@@ -131,6 +137,7 @@ class AdminController extends Controller
             'eventJoinsStatusData',
             'monthlyEventJoins',
             'topEventsByJoins',
+            'activeCancelledData', // Add this line
             'allEvents',
             'perPage'
         ));
